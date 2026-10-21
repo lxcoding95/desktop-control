@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "project": "Desktop Control",
+  "snapshot_date": "2026-10-21",
+  "repository": "lxcoding95/desktop-control",
+  "default_branch": "main",
+  "license": "MIT",
+  "phase": "preflight",
+  "development_session_started_count": 0,
+  "total_development_sessions": 6,
+  "development_session_max_seconds": 1500,
+  "development_session_target_active_fraction": 0.94,
+  "active_development_session": null,
+  "work_admin": {
+    "owner_intends_resume_local_time": "2026-10-22T01:00:00+02:00",
+    "scheduled_by_assistant": false,
+    "state": "pending_external_work",
+    "notes": "Work paused while configuring GitHub Project; verify, do not assume complete."
+  },
+  "decisions": {
+    "product": "installable ChatGPT plugin and MCP tools, not new AI agent",
+    "platforms": [
+      "windows",
+      "linux"
+    ],
+    "licensing": "free open-source initially",
+    "distribution": [
+      "local first",
+      "self-hostable eventually",
+      "hosted later"
+    ],
+    "github_app_repository_access": "all (owner decision)"
+  },
+  "verified_baseline": {
+    "ruleset_url": "https://github.com/lxcoding95/desktop-control/rules/25569795",
+    "rule_status": "active",
+    "protection": [
+      "no deletion",
+      "no force pushes",
+      "pull request required",
+      "conversation resolution",
+      "squash only"
+    ],
+    "read_only_workflow_default": "verified via user screenshot, GitHub admin read unavailable in connector",
+    "preflight_documentation_pr": "https://github.com/lxcoding95/desktop-control/pull/11"
+  },
+  "tracked_gates": {
+    "sha_pinning": {
+      "issue": "https://github.com/lxcoding95/desktop-control/issues/1",
+      "status": "open",
+      "must_complete_before": "regular CI"
+    },
+    "ci": {
+      "issue": "https://github.com/lxcoding95/desktop-control/issues/2",
+      "status": "open"
+    },
+    "release": {
+      "issue": "https://github.com/lxcoding95/desktop-control/issues/3",
+      "status": "open"
+    },
+    "administration": {
+      "issue": "https://github.com/lxcoding95/desktop-control/issues/4",
+      "status": "open"
+    }
+  },
+  "session_issues": [
+    {
+      "id": "S01",
+      "url": "https://github.com/lxcoding95/desktop-control/issues/5",
+      "status": "not_started",
+      "started_at_utc": null,
+      "verified_elapsed_active_seconds": 0
+    },
+    {
+      "id": "S02",
+      "url": "https://github.com/lxcoding95/desktop-control/issues/6",
+      "status": "not_started",
+      "started_at_utc": null,
+      "verified_elapsed_active_seconds": 0
+    },
+    {
+      "id": "S03",
+      "url": "https://github.com/lxcoding95/desktop-control/issues/7",
+      "status": "not_started",
+      "started_at_utc": null,
+      "verified_elapsed_active_seconds": 0
+    },
+    {
+      "id": "S04",
+      "url": "https://github.com/lxcoding95/desktop-control/issues/8",
+      "status": "not_started",
+      "started_at_utc": null,
+      "verified_elapsed_active_seconds": 0
+    },
+    {
+      "id": "S05",
+      "url": "https://github.com/lxcoding95/desktop-control/issues/9",
+      "status": "not_started",
+      "started_at_utc": null,
+      "verified_elapsed_active_seconds": 0
+    },
+    {
+      "id": "S06",
+      "url": "https://github.com/lxcoding95/desktop-control/issues/10",
+      "status": "not_started",
+      "started_at_utc": null,
+      "verified_elapsed_active_seconds": 0
+    }
+  ],
+  "next_preflight_action": "Work: finish and verify GitHub Projects/labels/milestones/admin settings; document outcome in issue #4. Assistant: verify and reconcile actual GitHub state.",
+  "session_start_authorized": false,
+  "safety": {
+    "no_product_code_during_preflight": true,
+    "no_paid_services_without_new_permission": true,
+    "no_secrets_in_git_or_chat": true,
+    "do_not_bypass_branch_protection": true,
+    "do_not_claim_100_percent_bug_free": true
+  },
+  "documents": {
+    "master": "docs/master/PROJECT-MASTERPLAN.md",
+    "continuity": "docs/governance/CHAT-CONTINUITY.md",
+    "work_task": "docs/governance/WORK-ADMIN-FINAL.md",
+    "sources": "docs/research/SOURCES.md"
+  },
+  "warning": "Snapshot, not real-time state. Read GitHub issues, PRs, branch SHA and checks before each action."
+}
