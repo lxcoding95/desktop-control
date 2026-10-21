@@ -35,6 +35,18 @@ MCP-compatible AI client
 
 The gateway, local bridge, identity model and transports remain subject to design review and real tests. No cloud service or public registration is live. See [architecture overview](docs/architecture/OVERVIEW.md) and [threat model](docs/architecture/THREAT-MODEL.md).
 
+
+## Canonical project plan and cross-chat continuity
+
+- [German masterplan (scope, decisions, architecture, sources and six sessions)](docs/master/PROJECT-MASTERPLAN.md)
+- [Cross-chat recovery protocol](docs/governance/CHAT-CONTINUITY.md)
+- [Machine-readable project state snapshot](docs/governance/PROJECT-STATE.json)
+- [Research and authoritative sources](docs/research/SOURCES.md)
+- [29 Desktop Commander tool coverage plan](docs/research/DESKTOP-COMMANDER-COVERAGE.md)
+- [Final GitHub Work administration assignment](docs/governance/WORK-ADMIN-FINAL.md)
+
+The plan and state files **are not live execution results**. Before making changes, read GitHub's current branch SHA, open PRs, linked Issues #1–#10 and any session-specific branch handoff. Development sessions are still **0/6 started**.
+
 ## Security
 
 Computer control is a high-trust capability. An unrestricted shell is **not contained** by a command blocklist or an allowed-directory configuration. Production designs must use OS-enforced isolation where a strong boundary is required. See [SECURITY.md](SECURITY.md) before reporting a vulnerability or experimenting with privileged execution.
