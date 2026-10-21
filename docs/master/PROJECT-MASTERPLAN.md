@@ -6,11 +6,11 @@
 
 ## 0. Dokumenten-Hierarchie und Wahrheitsquellen
 
-1. **Ist-Zustand:** GitHub-API/Repository \`main\`, aktive PR-Branches, Commits, Issue-Status, echte Checks und Projektkonfiguration. Niemals auf Basis eines alten Chatverlaufs ungeprüft schreiben.
+1. **Ist-Zustand:** GitHub-API/Repository `main`, aktive PR-Branches, Commits, Issue-Status, echte Checks und Projektkonfiguration. Niemals auf Basis eines alten Chatverlaufs ungeprüft schreiben.
 2. **Anforderungen / Entscheidungen:** dieser Masterplan, [ROADMAP](../../ROADMAP.md), [ADR-0001](../architecture/ADR-0001.md), [OVERVIEW](../architecture/OVERVIEW.md), [THREAT-MODEL](../architecture/THREAT-MODEL.md).
 3. **Live-Handoff:** [PROJECT-STATE.json](../governance/PROJECT-STATE.json), [CHAT-CONTINUITY.md](../governance/CHAT-CONTINUITY.md), SESSION-Issues #5–#10 und PR-Kommentare. Bei Konflikten durch tatsächlichen GitHub-Ist-Zustand auflösen und dokumentieren.
 4. **Normative externe Quellen:** [SOURCES.md](../research/SOURCES.md) und offizielle Dokumentationen; vor Implementierung erneut Version/Datum überprüfen.
-5. **Quellmaterial der Nutzeranforderungen:** \`Projektbeschreibung.txt\` („Computer Worker“) und bereitgestellte Desktop-Commander-Werkzeugübersicht mit 29 Einträgen. In der Unterhaltung heißt das Produkt verbindlich **Desktop Control**; „Computer Worker“ ist ein früher Arbeitstitel, kein zusätzliches Agentenprodukt.
+5. **Quellmaterial der Nutzeranforderungen:** `Projektbeschreibung.txt` („Computer Worker“) und bereitgestellte Desktop-Commander-Werkzeugübersicht mit 29 Einträgen. In der Unterhaltung heißt das Produkt verbindlich **Desktop Control**; „Computer Worker“ ist ein früher Arbeitstitel, kein zusätzliches Agentenprodukt.
 
 ## 1. Fixierte Produktentscheidungen
 
@@ -26,7 +26,7 @@
 | DEC-008 | Zunächst **Open Source und kostenlos**, spätere optionale Bezahlangebote nur nach Stabilität und neuer Entscheidung | entschieden |
 | DEC-009 | Zunächst lokal entwickeln, später Domain, zentraler Dienst und Google-/E-Mail-Registrierung | entschieden |
 | DEC-010 | **GitHub ist Code- und Zustandsquelle**, ChatGPT Project Sources enthalten stabile Basisspezifikation | entschieden |
-| DEC-011 | GitHub-App **All repositories** bleibt auf Wunsch des Owners aktiv; Schreibaufträge strikt auf \`lxcoding95/desktop-control\` begrenzt | entschieden |
+| DEC-011 | GitHub-App **All repositories** bleibt auf Wunsch des Owners aktiv; Schreibaufträge strikt auf `lxcoding95/desktop-control` begrenzt | entschieden |
 | DEC-012 | 6 explizit gestartete, maximal 25-minütige Entwicklungssitzungen, jetzt **0/6**; pro Sitzung Ziel 94 % aktive Nutzzeit, kein erfundener Zeitnachweis | entschieden |
 | DEC-013 | Research und lizenzkonforme Wiederverwendung vorhandener OSS-Module priorisieren | entschieden |
 | DEC-014 | **SEC-GATE-001**: GitHub Actions auf verifizierte vollständige SHAs pinnen und Schutzregel vor regulärer CI-Nutzung aktivieren | verpflichtend/offen |
@@ -44,7 +44,7 @@ Unentschieden bis zu evidenzbasiertem Architekturreview: konkrete Bridge-Sprache
 5. Rückgabe: typisiertes Ergebnis, begrenzte Ausgabe, nachvollziehbare Fehler, Dauer, Cancellation-ID, Herkunft. Keine voreilige Erfolgsmeldung.
 6. Für Remote-Nutzung kann später ein HTTPS-Streamable-HTTP-Gateway plus ausgehender Gerätekanal verwendet werden. Die Bridge führt weiterhin lokal aus. Registrierung und Hosting erst nach lokalem End-to-End-Nachweis.
 
-**Referenz-UX:** Desktop Commander verwendet \`npx @wonderwhy-er/desktop-commander@latest remote\` und Device Authorization. Unser entsprechender zukünftiger CLI-Befehl ist **noch nicht festgelegt, nicht veröffentlicht und nicht ausführbar**. Sinnvolle Subkommandos zur Planung: \`remote\`, \`status\`, \`doctor\`, \`logout\`, \`revoke\`, \`update\`; bei Logout stets zwischen lokaler Credential-Löschung und serverseitigem Widerruf unterscheiden.
+**Referenz-UX:** Desktop Commander verwendet `npx @wonderwhy-er/desktop-commander@latest remote` und Device Authorization. Unser entsprechender zukünftiger CLI-Befehl ist **noch nicht festgelegt, nicht veröffentlicht und nicht ausführbar**. Sinnvolle Subkommandos zur Planung: `remote`, `status`, `doctor`, `logout`, `revoke`, `update`; bei Logout stets zwischen lokaler Credential-Löschung und serverseitigem Widerruf unterscheiden.
 
 ### 2.2 Rechtedimensionen
 
@@ -61,7 +61,7 @@ Für destruktives Löschen, externen Datentransfer sensibler Daten, Accountände
 
 ## 3. Architektur und Vertrauensgrenzen
 
-\`\`\`text
+```text
 AI client (ChatGPT / Codex / MCP client)
   -> Plugin package: plugin.json + mcp.json + optional skills
   -> MCP interface (typed versioned schemas; tools/list + tools/call)
@@ -71,14 +71,14 @@ AI client (ChatGPT / Codex / MCP client)
       -> permission engine / approval UI / audit / cancellation
       -> filesystem | terminal/process | OS UI | browser | diagnostics
   -> bounded typed result to AI client
-\`\`\`
+```
 
 **Sicherheitsprinzipien:** Deny-by-default für unkonfigurierte Fähigkeiten; lokale Nutzereinwilligung; getrennte Identität und Autorisierung; nur TLS für externen Remote-Zugriff; Replay-Schutz, Tokenscope/-ablauf/-Widerruf; keine Klartext-Credentials; datensparsame Telemetrie opt-in; Logs redigieren; Rate-/Zeit-/Ausgabelimits; Not-Aus. Terminal erlaubter Code umgeht command- und path-based Filters; bei Isolation OS-Sandbox/VM/container mit echtem Threat Model verwenden. Relevante Bedrohungen: Prompt Injection, bösartige Webseiten, Pfadtraversal/Symlink-Races, Cross-Tenant, Token-Diebstahl, privilegierte GUI, Supply Chain, Runaway-Prozesse. Siehe [THREAT-MODEL](../architecture/THREAT-MODEL.md).
 
 **Plattform:** Windows UI Automation, interaktive Sessions/UAC; Linux X11 vs. Wayland, AT-SPI/Portale, Distribution/Desktop-Rechte. Kein globales Versprechen universeller GUI-Steuerung. Jede Feature-Behauptung braucht getestete OS-Version/Desktop-Matrix.
 
 **Vorgeschlagene Repository-Zielstruktur, nicht erstellt:**
-\`\`\`text
+```text
 plugin/               # Portable manifest, skills, assets
 packages/mcp-server/  # SDK, transports, tool definitions
 packages/bridge/      # Local execution and policies
@@ -89,14 +89,14 @@ installers/           # Win/Linux install/uninstall
 infra/                # Future optional remote gateway
 docs/                 # architecture, ADRs, threat model, support
 .github/              # guarded CI + templates
-\`\`\`
+```
 Erste Implementierung nach Phase-1-Review: möglichst **kleinster funktionierender vertikaler Schnitt** (read-only Rechner-/Dateifunktion + MCP-Client + lokale Autorisierung + Test), statt den gesamten Zielstack vorab zu erzeugen. Bestehenden TypeScript-MCP/Node-Ansatz zuerst auf Wiederverwendung prüfen; Rust nur begründet nach Sicherheits-/Packaging-Trade-off.
 
 ## 4. Desktop-Commander-Funktionsreferenz: 29 Werkzeuge
 
-Aus der bereitgestellten Werkzeugübersicht: \`create_directory\`, \`edit_block\`, \`force_terminate\`, \`get_config\`, \`get_file_info\`, \`get_more_search_results\`, \`get_recent_tool_calls\`, \`get_tool_result\`, \`get_usage_stats\`, \`interact_with_process\`, \`kill_process\`, \`list_devices\`, \`list_directory\`, \`list_processes\`, \`list_remote_tool_calls\`, \`list_searches\`, \`list_sessions\`, \`move_file\`, \`read_file\`, \`read_multiple_files\`, \`read_process_output\`, \`set_config_value\`, \`shutdown\`, \`start_process\`, \`start_search\`, \`stop_search\`, \`who_am_i\`, \`write_file\`, \`write_pdf\`.
+Aus der bereitgestellten Werkzeugübersicht: `create_directory`, `edit_block`, `force_terminate`, `get_config`, `get_file_info`, `get_more_search_results`, `get_recent_tool_calls`, `get_tool_result`, `get_usage_stats`, `interact_with_process`, `kill_process`, `list_devices`, `list_directory`, `list_processes`, `list_remote_tool_calls`, `list_searches`, `list_sessions`, `move_file`, `read_file`, `read_multiple_files`, `read_process_output`, `set_config_value`, `shutdown`, `start_process`, `start_search`, `stop_search`, `who_am_i`, `write_file`, `write_pdf`.
 
-**Paritätsziel ≠ Identische API oder Kopie aller Implementierungen.** Jedes Tool erhält spezifische Schemas, Berechtigungsklasse, OS-Abdeckung, Idempotenz, typische Fehler und Tests. Besondere Semantik: \`edit_block\` erwartet eindeutige Match-Anzahl; \`start_process\`/REPL erfordert begrenzte Sessions und Cancellation; \`read_file\` darf private Pfade nicht ohne Scope öffnen; \`write_pdf\` besitzt Format-/Integritätsprüfung. Ergänzungen: Screenshots, Fokus/Fenster, Maus/Tastatur, Browser-DOM, Accessibility, Gerätewiderruf, Recovery, Audit und Permission-Dry-Run. Priorisierte Featuregruppen und Definition of Done in [DESKTOP-COMMANDER-COVERAGE](../research/DESKTOP-COMMANDER-COVERAGE.md).
+**Paritätsziel ≠ Identische API oder Kopie aller Implementierungen.** Jedes Tool erhält spezifische Schemas, Berechtigungsklasse, OS-Abdeckung, Idempotenz, typische Fehler und Tests. Besondere Semantik: `edit_block` erwartet eindeutige Match-Anzahl; `start_process`/REPL erfordert begrenzte Sessions und Cancellation; `read_file` darf private Pfade nicht ohne Scope öffnen; `write_pdf` besitzt Format-/Integritätsprüfung. Ergänzungen: Screenshots, Fokus/Fenster, Maus/Tastatur, Browser-DOM, Accessibility, Gerätewiderruf, Recovery, Audit und Permission-Dry-Run. Priorisierte Featuregruppen und Definition of Done in [DESKTOP-COMMANDER-COVERAGE](../research/DESKTOP-COMMANDER-COVERAGE.md).
 
 ## 5. Forschungs- und Wiederverwendungsstrategie
 
@@ -106,9 +106,9 @@ VOR jeder Modulimplementierung: 1) Quellcode und offizielle Dokumentation prüfe
 
 ## 6. GitHub Governance und Automatisierung
 
-Repository: https://github.com/lxcoding95/desktop-control; owner \`lxcoding95\`; public; MIT; \`main\` protected via [Protect main](https://github.com/lxcoding95/desktop-control/rules/25569795). Pull Requests erforderlich, Force Push/Deletion eingeschränkt, Review-Konversationen auflösen, nur Squash-Merge, 0 erzwungene unabhängige Approvals bis echte Reviewer existieren, kein Bypass. Auto-Merge aus, automatische Löschung gemergter Branches an. **GitHub-App All repositories** auf Owner-Wunsch, alle Aktionen dieses Projekts dennoch auf den genannten Repo-Pfad einschränken.
+Repository: https://github.com/lxcoding95/desktop-control; owner `lxcoding95`; public; MIT; `main` protected via [Protect main](https://github.com/lxcoding95/desktop-control/rules/25569795). Pull Requests erforderlich, Force Push/Deletion eingeschränkt, Review-Konversationen auflösen, nur Squash-Merge, 0 erzwungene unabhängige Approvals bis echte Reviewer existieren, kein Bypass. Auto-Merge aus, automatische Löschung gemergter Branches an. **GitHub-App All repositories** auf Owner-Wunsch, alle Aktionen dieses Projekts dennoch auf den genannten Repo-Pfad einschränken.
 
-**Issue-Labels:** \`type:*\`, \`priority:*\`, \`status:*\`, \`area:*\`; keine Duplikate. **Milestones:** sechs geordnete Sessions, siehe [ROADMAP](../../ROADMAP.md). **Projects:** \`Desktop Control Development\`, 6+ Statusansichten/Felder, Issues #1–#10 verknüpfen. Projects-Fertigstellung von Work später live verifizieren; Screenshots während des Editierens zählen nicht als Beweis.
+**Issue-Labels:** `type:*`, `priority:*`, `status:*`, `area:*`; keine Duplikate. **Milestones:** sechs geordnete Sessions, siehe [ROADMAP](../../ROADMAP.md). **Projects:** `Desktop Control Development`, 6+ Statusansichten/Felder, Issues #1–#10 verknüpfen. Projects-Fertigstellung von Work später live verifizieren; Screenshots während des Editierens zählen nicht als Beweis.
 
 **Change flow:** issue -> Akzeptanzkriterien/Risiko -> branch -> kleine Commits -> PR -> Code-/Sicherheits-/Dokumenten-Prüfung -> reale Testausgaben -> Squash unter Ruleset -> Verifikation auf main -> Issue-/Projektstatus aktualisieren. Entwickler dürfen keinen Merge-Blocker durch Deaktivieren des Rulesets umgehen.
 
@@ -137,14 +137,14 @@ Repository: https://github.com/lxcoding95/desktop-control; owner \`lxcoding95\`;
 
 1. Lade dieses Dokument, [CHAT-CONTINUITY](../governance/CHAT-CONTINUITY.md), [PROJECT-STATE.json](../governance/PROJECT-STATE.json) und GitHub-Issue der aktiven Sitzung.
 2. Prüfe GitHub live: default-Branch-SHA, offene PRs, Arbeitsbranch, CI-Gates, Work-Admin-Blocker. Korrigiere widersprüchliche/veraltete Daten per PR/Issue.
-3. Sichere Sitzungs-ID, explizite Startzeit Europe/Berlin plus UTC, Start-Commit, verfügbare Restzeit, konkrete Akzeptanzkriterien im Issue und \`SESSION-STATE.md\` des Arbeitsbranches.
+3. Sichere Sitzungs-ID, explizite Startzeit Europe/Berlin plus UTC, Start-Commit, verfügbare Restzeit, konkrete Akzeptanzkriterien im Issue und `SESSION-STATE.md` des Arbeitsbranches.
 4. Arbeite kurze überprüfbare Änderungen; Checkpoint nach jeder zusammenhängenden Änderung, spätestens ungefähr alle fünf Minuten sofern möglich.
 5. Am Ende (oder vor Kontext-/Quota-Wechsel) speichere mindestens Commit/Branch, Issue-Kommentar, nächsten Befehl, Teststatus, Blocker, Restzeit und eine klare Übergabenachricht.
 6. Merge nur, wenn die Regeln erfüllt sind; sonst offen lassen und von neuem Chat unter derselben Session-ID fortsetzen.
 
 ### Neuer Chat mitten in Session 2/3/etc.
 
-Ein neuer Chat startet niemals automatisch die nächste Sitzung. Er identifiziert aus GitHub-/Handoff-Daten die **laufende oder pausierte Sitzung** samt verbleibender Restzeit, öffnet deren Issue und Branch, und setzt **genau denselben Arbeitsauftrag** fort; kein zweites Startdatum, keine doppelten GitHub-Objekte. Falls letzter Commit nicht auf \`main\`: Branch direkt lesen. GitHub-Zeit und Chat-Zeit sind keine zuverlässige Stopuhr, wenn keine Start-/Stopdaten gespeichert wurden; in diesem Fall Restzeit als **unbestätigt** kennzeichnen und nachfragen, statt Zeit zu erfinden. Ausführliches Verfahren in [CHAT-CONTINUITY](../governance/CHAT-CONTINUITY.md).
+Ein neuer Chat startet niemals automatisch die nächste Sitzung. Er identifiziert aus GitHub-/Handoff-Daten die **laufende oder pausierte Sitzung** samt verbleibender Restzeit, öffnet deren Issue und Branch, und setzt **genau denselben Arbeitsauftrag** fort; kein zweites Startdatum, keine doppelten GitHub-Objekte. Falls letzter Commit nicht auf `main`: Branch direkt lesen. GitHub-Zeit und Chat-Zeit sind keine zuverlässige Stopuhr, wenn keine Start-/Stopdaten gespeichert wurden; in diesem Fall Restzeit als **unbestätigt** kennzeichnen und nachfragen, statt Zeit zu erfinden. Ausführliches Verfahren in [CHAT-CONTINUITY](../governance/CHAT-CONTINUITY.md).
 
 ## 8. Definition of Ready / Done / Blocked
 

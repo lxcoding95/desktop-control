@@ -4,14 +4,14 @@
 
 ## Primary user materials
 
-1. \`Projektbeschreibung.txt\`: "Computer Worker" concept, user-selectable LOW/MEDIUM/FULL/CUSTOM scopes, files/shell/UI/system/network, controlled development from prototype to 1.0; product name later fixed as **Desktop Control**.
+1. `Projektbeschreibung.txt`: "Computer Worker" concept, user-selectable LOW/MEDIUM/FULL/CUSTOM scopes, files/shell/UI/system/network, controlled development from prototype to 1.0; product name later fixed as **Desktop Control**.
 2. User-provided Desktop Commander tools inventory (29 tool names). Full coverage mapping: [DESKTOP-COMMANDER-COVERAGE.md](DESKTOP-COMMANDER-COVERAGE.md).
 3. Explicit project decisions in this conversation (scope, GitHub rights, free open source, Windows/Linux, no separate AI agent, no domain/account until tested, six sessions).
 4. Live repository / issues / PRs: https://github.com/lxcoding95/desktop-control and [PROJECT-STATE.json](../governance/PROJECT-STATE.json). Screenshots are provisional until GitHub API corroborates settings.
 
 ## Plugin packaging and public release — authoritative OpenAI docs
 
-- [Build plugins: portable package / manifest / MCP configuration](https://developers.openai.com/plugins/build/plugins) — root \`plugin.json\`, optional \`mcp.json\` and \`skills/\`; root portable schema; local marketplace distinct from public directory.
+- [Build plugins: portable package / manifest / MCP configuration](https://developers.openai.com/plugins/build/plugins) — root `plugin.json`, optional `mcp.json` and `skills/`; root portable schema; local marketplace distinct from public directory.
 - [Build MCP server / tool and skills requirements](https://developers.openai.com/plugins/build/mcp-server).
 - [Submit plugin ZIP and remote MCP integration](https://developers.openai.com/plugins/deploy/submission) — public HTTPS MCP server, scan/test/review, identity verification, package updates vs server updates.
 - [Desktop-only plugin submission limitations](https://developers.openai.com/plugins/deploy/desktop-only) — eligibility/allowlisting and local stdio requirements. **Do not assume an arbitrary local ZIP gives ChatGPT web access to the host computer.**
@@ -23,8 +23,8 @@
 ## Desktop Commander: reference, reuse boundaries
 
 - [Original open-source DesktopCommanderMCP](https://github.com/wonderwhy-er/DesktopCommanderMCP) — MIT, source for local file/terminal operations.
-- [Package manifest](https://github.com/wonderwhy-er/DesktopCommanderMCP/blob/main/package.json) — package \`@wonderwhy-er/desktop-commander\`; version changes often.
-- [Remote CLI source](https://github.com/wonderwhy-er/DesktopCommanderMCP/blob/main/src/npm-scripts/remote.ts) — \`npx @wonderwhy-er/desktop-commander@latest remote\`, status/report/logout flows.
+- [Package manifest](https://github.com/wonderwhy-er/DesktopCommanderMCP/blob/main/package.json) — package `@wonderwhy-er/desktop-commander`; version changes often.
+- [Remote CLI source](https://github.com/wonderwhy-er/DesktopCommanderMCP/blob/main/src/npm-scripts/remote.ts) — `npx @wonderwhy-er/desktop-commander@latest remote`, status/report/logout flows.
 - [Remote device onboarding and authorization](https://github.com/wonderwhy-er/DesktopCommanderMCP/blob/main/src/remote-device/README.md) — OAuth device authorization, browser pairing, local vs server revocation, troubleshooting.
 - [Upstream release guide](https://github.com/wonderwhy-er/DesktopCommanderMCP/blob/main/PUBLISH.md) — workflow and trusted npm publishing ideas, NOT ready-made configuration.
 - [Separate Remote Desktop Commander repo license](https://github.com/desktop-commander/remote-desktop-commander/blob/main/LICENSE) — **PROPRIETARY**, reference docs/manifests/assets only within its expressly stated limits. Do not copy or relicense the remote service.
