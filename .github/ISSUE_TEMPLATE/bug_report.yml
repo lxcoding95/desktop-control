@@ -1,0 +1,35 @@
+name: Bug report
+description: Report a reproducible issue in an implemented component (never public security vulnerabilities).
+title: "bug: "
+labels:
+  - "type: bug"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This project is still in pre-development. Please report security vulnerabilities privately through the Security tab.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Observed behavior
+      description: What happened? Remove credentials, tokens and private data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps and evidence
+      description: Supply a minimal, safe reproduction and redacted logs only.
+    validations:
+      required: true
+  - type: input
+    id: context
+    attributes:
+      label: Affected commit/version, OS and environment
+      placeholder: commit SHA, Windows/Linux variant, relevant configuration

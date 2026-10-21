@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private security vulnerability report
+    url: https://github.com/lxcoding95/desktop-control/security/advisories
+    about: Report exploitable security issues privately; never open a public issue.
+  - name: Read support information
+    url: https://github.com/lxcoding95/desktop-control/blob/main/SUPPORT.md
+    about: Check product status and supported communication channels.

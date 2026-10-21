@@ -1,0 +1,49 @@
+# Generated output and temporary files
+dist/
+build/
+target/
+coverage/
+.cache/
+.tmp/
+temp/
+*.tmp
+*.log
+*.pid
+*.tsbuildinfo
+
+# Node / package managers (keep lockfiles tracked)
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+
+# Python (if ever used for tooling)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# Local-only credentials and config (do NOT ignore public examples)
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.p12
+*.pfx
+*.key
+secrets/
+.credentials/
