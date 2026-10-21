@@ -37,3 +37,10 @@ No plugin code, installed desktop service, public registration, cloud endpoint, 
 ## Budget and safety
 
 No paid services were authorized. AI and GitHub administrative capabilities do not guarantee that every action is exposed through this connector. Security controls are incremental: do not claim zero vulnerabilities, full automation or production readiness from this report.
+
+## Follow-up documentation preflight (second PR)
+
+- Additional masterplan, evidence links, 29-tool coverage, structured state and chat-interruption protocol were prepared on `docs/operational-masterplan` and must be validated in a separate PR before being considered merged.
+- Work administration remains independent and pending: GitHub Project #3 and fields, label/milestone descriptions and administrative checks; see Issue #4 and `docs/governance/WORK-ADMIN-FINAL.md`.
+- **SHA-pinning issue #1 remains open**. No regular CI workflow has been built or certified.
+- Session budget stays at **0/6 started**; no runtime plugin code exists.
