@@ -21,7 +21,7 @@ Development sessions have **not started**. Work is currently limited to reposito
 
 ## Planned system boundary
 
-\`\`\`text
+```text
 MCP-compatible AI client
            |
      MCP gateway / protocol layer (planned)
@@ -31,7 +31,7 @@ MCP-compatible AI client
   local desktop bridge (planned)
            |
  Windows / Linux capabilities (planned)
-\`\`\`
+```
 
 The gateway, local bridge, identity model and transports remain subject to design review and real tests. No cloud service or public registration is live. See [architecture overview](docs/architecture/OVERVIEW.md) and [threat model](docs/architecture/THREAT-MODEL.md).
 

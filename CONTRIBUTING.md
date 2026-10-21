@@ -7,7 +7,7 @@ Thank you for considering a contribution. **The product is not implemented yet**
 1. Search existing issues and proposals. Link an issue or explain why a new one is needed.
 2. For security-sensitive changes, use [private vulnerability reporting](SECURITY.md), not public issues.
 3. Agree on scope, success criteria, trust boundaries and test strategy before implementation.
-4. Create a small topic branch from current \`main\`. Do not force-push shared branches.
+4. Create a small topic branch from current `main`. Do not force-push shared branches.
 5. Keep commits readable and include relevant documentation and tests.
 6. Fill out the PR template. Mark any checks that have not actually run as unchecked or N/A.
 7. Resolve review conversations before merging.
@@ -16,9 +16,9 @@ A PR is not "done" simply because it builds. Security-sensitive computer-control
 
 ## Git workflow
 
-- Branch pattern: \`docs/<topic>\`, \`feat/<topic>\`, \`fix/<topic>\`, or \`security/<topic>\`.
-- Prefer [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) titles (\`docs:\`, \`feat:\`, \`fix:\`, \`test:\`, \`chore:\`).
-- Target \`main\` through a pull request; squash merge is the configured method.
+- Branch pattern: `docs/<topic>`, `feat/<topic>`, `fix/<topic>`, or `security/<topic>`.
+- Prefer [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) titles (`docs:`, `feat:`, `fix:`, `test:`, `chore:`).
+- Target `main` through a pull request; squash merge is the configured method.
 - Never bypass repository protections or report tests as passing without evidence.
 - Automation is limited to least privilege; no secrets in PR logs, workflow outputs, or test fixtures.
 

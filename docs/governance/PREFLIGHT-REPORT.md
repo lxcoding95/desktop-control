@@ -1,14 +1,14 @@
 # GitHub Preflight Report
 
 **Date:** 2026-10-21
-**Scope:** preparation only for \`lxcoding95/desktop-control\`; sessions started: **0/6**.
+**Scope:** preparation only for `lxcoding95/desktop-control`; sessions started: **0/6**.
 **Status:** **PARTIAL — final verification and some administrative setup still pending**.
 
 ## Verified baseline before this documentation PR
 
-- Public repository with MIT LICENSE and \`main\` default branch.
-- Ruleset \`Protect main\` active, scoped to default branch, blocks deletions and force pushes, requires PRs with squash-only merges, resolves review threads, with zero required independent approvals and no bypass actors.
-- \`allow_auto_merge: false\`, \`allow_squash_merge: true\`, \`allow_merge_commit: false\`, \`allow_rebase_merge: false\`, \`allow_update_branch: true\`, \`delete_branch_on_merge: true\`.
+- Public repository with MIT LICENSE and `main` default branch.
+- Ruleset `Protect main` active, scoped to default branch, blocks deletions and force pushes, requires PRs with squash-only merges, resolves review threads, with zero required independent approvals and no bypass actors.
+- `allow_auto_merge: false`, `allow_squash_merge: true`, `allow_merge_commit: false`, `allow_rebase_merge: false`, `allow_update_branch: true`, `delete_branch_on_merge: true`.
 - GitHub issues [#1–#10](https://github.com/lxcoding95/desktop-control/issues) exist, including six session issues and four gates.
 - Session issues link six named milestones; project setup was in progress in the user's paused Work browser session.
 - Read-only connector access verifies the above; git-write capability is available but this report is not proof of a successful write until its PR is opened and merged.
@@ -23,7 +23,7 @@ This PR proposes: README, contributing/security/support/conduct/governance/roadm
 - [ ] Verify templates load in GitHub issue/PR creation.
 - [ ] Verify content and links, markdown quality and license language.
 - [ ] Confirm PR requirements are met; squash merge if safe.
-- [ ] Verify merged files on \`main\` and the absence of unintended changes.
+- [ ] Verify merged files on `main` and the absence of unintended changes.
 - [ ] Inspect GitHub Project name, status and custom fields, and link all 10 preparatory issues; screenshot alone is not sufficient.
 - [ ] Confirm all label definitions and milestone details; currently only issue assignments were verified.
 - [ ] Finish admin-rights matrix and decide an authorized route for operations unavailable via connector.

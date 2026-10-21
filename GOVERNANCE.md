@@ -2,12 +2,12 @@
 
 ## Ownership
 
-The GitHub repository owner \`lxcoding95\` currently serves as the primary maintainer. No independent review team or organization governance board has been established. Do not imply otherwise.
+The GitHub repository owner `lxcoding95` currently serves as the primary maintainer. No independent review team or organization governance board has been established. Do not imply otherwise.
 
 ## Decisions
 
 - Track substantial changes in issues and pull requests, linking requirements, risks, tests, and verification evidence.
-- Record major technical trade-offs as Architecture Decision Records (ADRs) in \`docs/architecture/\`.
+- Record major technical trade-offs as Architecture Decision Records (ADRs) in `docs/architecture/`.
 - Prefer narrow, reviewable PRs and a protected default branch.
 - Security policy, license changes, credential handling and release signing require explicit maintainer approval.
 - AI-generated contributions are not automatically trusted. Generated code follows the same tests, attribution, review and documentation rules as human-authored code.

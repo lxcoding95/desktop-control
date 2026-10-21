@@ -28,7 +28,7 @@ Status: **planned, not operational**. These requirements will be implemented and
 - **REL-GATE-001**: reproducible release process, signatures or attestations, checksums, SBOM, license inventory and rollback verification.
 - **ADMIN-GATE-001**: documented GitHub admin access with least privilege and accountable actions.
 
-No status badge, release label, issue closure or \`Done\` column is evidence by itself. The evidence must be traceable to successful executions and reviewed results. When a control cannot run, mark it **not verified** and block applicable release claims.
+No status badge, release label, issue closure or `Done` column is evidence by itself. The evidence must be traceable to successful executions and reviewed results. When a control cannot run, mark it **not verified** and block applicable release claims.
 
 ## Security posture
 

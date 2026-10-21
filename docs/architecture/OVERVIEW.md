@@ -20,7 +20,7 @@ Desktop Control provides a set of tools for MCP-compatible AI clients. It is **n
 - **Self-hosted:** gateway exposed only behind TLS and authenticated access.
 - **Hosted (later):** registration, identity federation, device pairing and multi-tenant isolation; domain and infrastructure deferred until the product works.
 
-A sample command modeled after modern \`npx <package> remote\` onboarding is only a **future UX goal**; there is no published npm package or working command.
+A sample command modeled after modern `npx <package> remote` onboarding is only a **future UX goal**; there is no published npm package or working command.
 
 ## Hard boundaries
 

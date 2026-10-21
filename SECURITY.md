@@ -26,6 +26,6 @@ Future protections must include:
 - OS-enforced sandboxes or VMs when protection from an arbitrary shell is required.
 - Negative security tests, dependency audits, secret scanning, and release provenance before shipping.
 
-**Important:** Path allowlists and shell command blocklists do not safely contain arbitrary code execution. A \`FULL\` permission mode is a deliberate high-trust choice and is never a replacement for OS isolation.
+**Important:** Path allowlists and shell command blocklists do not safely contain arbitrary code execution. A `FULL` permission mode is a deliberate high-trust choice and is never a replacement for OS isolation.
 
 See [threat model](docs/architecture/THREAT-MODEL.md) for planned mitigations and unresolved risks.

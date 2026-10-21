@@ -30,6 +30,6 @@ Actors: authorized user; AI client; MCP gateway; local bridge; external websites
 
 ## Important limitations
 
-No policy filtering of individual shell strings can make arbitrary code execution safe on a host. Even a read-only MCP tool can disclose sensitive information if its scope is too broad. \`LOW/MEDIUM/FULL/CUSTOM\` must be explicitly documented as user permission profiles, with OS-enforced limits described separately.
+No policy filtering of individual shell strings can make arbitrary code execution safe on a host. Even a read-only MCP tool can disclose sensitive information if its scope is too broad. `LOW/MEDIUM/FULL/CUSTOM` must be explicitly documented as user permission profiles, with OS-enforced limits described separately.
 
 No threat mitigation is implemented or validated yet. All risks remain open until tested.
