@@ -3,13 +3,18 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "workspaces": ["packages/*"],
-  "engines": { "node": ">=22.19.0" },
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
   "scripts": {
     "test": "node --experimental-strip-types --test packages/mcp-server/test/*.test.mts",
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "build": "tsc --project tsconfig.json",
-    "start:mcp": "node dist/packages/mcp-server/src/index.mjs"
+    "start:mcp": "node dist/packages/mcp-server/src/index.mjs",
+    "typecheck:bridge": "tsc --noEmit --project tsconfig.bridge.json"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "2.12.0",
