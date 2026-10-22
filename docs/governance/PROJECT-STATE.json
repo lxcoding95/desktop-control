@@ -91,7 +91,7 @@
       "test_result": "Actual Windows npm ci/full typed ESLint/typecheck/23 unit tests/build/9 modern stdio protocol tests PASS. Both deferred-entry regressions red before fix, green after; external compiled boundary5/5 and protocol8/8 PASS.",
       "environment_blocker": "Local tooling works. Native Windows SID, actual Linux/platform matrix, full redistribution license/provenance and independent semantic review remain unverified.",
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "In Work: prepare/check Linux Node >=22.19 npm registry connectivity and GitHub repo checkout; report exact tool logs and environment state. Do not start S03-S06 or CI. Once environment is verified and user wants S02 resume, read live issue #6/PR #22 and this pause checkpoint with conservatively remaining duration, then execute real Linux npm ci, lint, typecheck, test, build, protocol tests, Windows native SID validation, license/review gates.",
+      "next_exact_action": "On resumed S02 extension3 within preserved 1698s, use owner's Work Docker environment to run actual Linux npm run verify and native POSIX policy tests, then address Windows SID, OSS redistribution audit and independent review. Work must first re-fetch remote branch head; keep PR22 draft pending gates.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -151,11 +151,14 @@
           "scope": "S02-only remaining native Windows SID authority, real Linux matrix, license/provenance, independent semantic/security review; no main writes/CI/S03-S06",
           "paused_at_utc": "2026-10-22T19:52:31.939Z",
           "pause_reason": "Owner explicitly requested pause during ChatGPT Work environment remediation; no S02 development until return and verified status. Work must keep setup time distinct, do not silently reset or spend remaining development budget.",
-          "environment_status": "Current Chat Linux Node22.16, npm/GitHub DNS unavailable; no functional Linux clean-checkout/sdk verification. Owner will use Work to provision Node>=22.19, npm registry, checkout; only real Work command logs count.",
+          "environment_status": "Work/operator-provided log verified by current chat: Debian 12 WSL2 Docker Node24.22.1 npm11.19.1, npm ping PONG, npm ci exit0, clean git checkout SHA590439; headless runtime smoke exit0. Product suites NOT RUN in Linux.",
           "last_implementation_commits": [
             "155ec347fb8c7d1677b7fb0a7e03e14bc7c60db8",
             "43ecf91565d495ef2a6bb462dba559637aa72b67"
-          ]
+          ],
+          "environment_evidence": "docs/sessions/session-02/LINUX-ENVIRONMENT-READY-2026-10-22.md",
+          "setup_does_not_consume_paused_budget": true,
+          "test_execution_location": "Owner's Work/local Docker Desktop container; not accessible from current Chat-mode container"
         }
       ]
     },
@@ -188,7 +191,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Owner requested pause for Work environment setup. Do not resume S02 development clock until owner returns/authorizes resumption with verified remaining budget. No S03-S06.",
+  "next_preflight_action": "S02 extension3 paused at 1698 seconds remaining. Owner's Docker-based Linux environment ready, product test suites still NOT RUN. Resume same extension only when explicitly proceeding in Work with local Docker access; S03-S06 locked.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
