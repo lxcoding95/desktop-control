@@ -9,7 +9,7 @@ state: running
 authorization: "Owner expressly authorized only S01 on 2026-10-22."
 started_at_utc: null
 first_recorded_at_utc: "2026-10-22T16:44:06.576Z"
-last_checkpoint_at_utc: "2026-10-22T16:45:02.505Z"
+last_checkpoint_at_utc: "2026-10-22T16:51:43.886Z"
 elapsed_active_seconds_verified: null
 remaining_budget_seconds_verified: null
 session_budget_max_seconds: 1500
@@ -31,7 +31,7 @@ security_blockers:
   - "SEC-GATE-001 blocks regular GitHub Actions CI."
 environment_blockers:
   - "Work-mode handoff was declined; no repository-bound execution environment verified."
-next_exact_action: "Review current official MCP 2026-07-28 SDK/Inspector docs and commit S01 architecture decision, tool contract and reproducible S02 acceptance plan to this branch."
+next_exact_action: "Verify S01 design documents and security gates, update PROJECT-STATE.json on branch, then open reviewable PR to protected main."
 session_02_status: not_started
 ```
 
@@ -40,3 +40,12 @@ session_02_status: not_started
 - [Issue #5](https://github.com/lxcoding95/desktop-control/issues/5)
 - [SEC-GATE-001](https://github.com/lxcoding95/desktop-control/issues/1)
 - No open PRs at initial preflight; historic branches `docs/isolated-browser-decisions` and `docs/preflight-state-reconciliation` left unchanged.
+
+## Checkpoint 2 — 2026-10-22T16:51:43.886Z
+
+- Architecture ADR `docs/architecture/ADR-0004-MCP-FOUNDATION.md` committed at `25ed9368624d1a6a7d98fb18d5bfd3eb92a2e398`.
+- S02 minimal tool contract `docs/contracts/S02-LOCAL-MCP-CONTRACT.md` committed at `031ca6021aeae45cb4e8d9671fa81f474338f056`.
+- OSS/reuse evidence `docs/research/S01-COMPONENT-REVIEW.md` committed at `e2361cb615bb7df54d39d43820da2437afdf492e`.
+- S02 (Issue #6) remains unstarted; session count was 0 at preflight and is now 1 session authorized/started.
+- Test evidence: GitHub document reads and branch writes were successful. **No executable MCP tests, OS-platform tests or CI runs performed.**
+- Exact active elapsed time prior to first captured time is unknown; no verified remaining 25-minute balance claimed.
