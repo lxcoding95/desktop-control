@@ -20,9 +20,11 @@ export interface StatusDependencies {
   readonly grants?: ReadonlyGrantStore;
   readonly adapter: StatusAdapter;
   readonly audit?: (decision: 'allow' | 'deny' | 'cancel') => void;
+  /** Bounded adapter wait; this cannot forcibly terminate an uncooperative adapter. */
+  readonly timeoutMs?: number;
 }
 
-const failure = (code: 'PERMISSION_DENIED' | 'CANCELLED' | 'INTERNAL_ERROR'): StatusResult =>
+const failure = (code: 'PERMISSION_DENIED' | 'CANCELLED' | 'INTERNAL_ERROR' | 'TIMEOUT'): StatusResult =>
   ({ isError: true, content: [{ type: 'text', text: code }] });
 
 /** Gate immediately before the adapter; every failure is a redacted tool result. */
@@ -43,8 +45,25 @@ export function createStatusExecutor(deps: StatusDependencies) {
       return failure('CANCELLED');
     }
     deps.audit?.('allow');
+    const timeoutMs = Number.isSafeInteger(deps.timeoutMs) && (deps.timeoutMs ?? 0) > 0
+      ? Math.min(deps.timeoutMs!, 10_000) : 2_000;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let removeAbortListener: (() => void) | undefined;
+    let timedOut = false;
     try {
-      const payload = await deps.adapter.readStatus();
+      const timeout = new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => { timedOut = true; reject(new Error('adapter deadline')); }, timeoutMs);
+      });
+      const aborted = new Promise<never>((_resolve, reject) => {
+        if (!ctx.signal) return;
+        const onAbort = () => reject(new Error('adapter cancelled'));
+        ctx.signal.addEventListener('abort', onAbort, { once: true });
+        removeAbortListener = () => ctx.signal?.removeEventListener('abort', onAbort);
+        if (ctx.signal.aborted) onAbort();
+      });
+      const payload = await Promise.race([
+        Promise.resolve().then(() => deps.adapter.readStatus()), timeout, aborted
+      ]);
       if (ctx.signal?.aborted) return failure('CANCELLED');
       // Never forward untrusted adapter fields: produce exactly the public static schema.
       if (payload?.service !== 'desktop-control' || payload.ready !== true || payload.api_version !== 1)
@@ -52,7 +71,12 @@ export function createStatusExecutor(deps: StatusDependencies) {
       const status: StatusPayload = { service: 'desktop-control', ready: true, api_version: 1 };
       return { content: [{ type: 'text', text: JSON.stringify(status) }], structuredContent: status };
     } catch {
+      if (ctx.signal?.aborted) return failure('CANCELLED');
+      if (timedOut) return failure('TIMEOUT');
       return failure('INTERNAL_ERROR');
+    } finally {
+      if (timer) clearTimeout(timer);
+      removeAbortListener?.();
     }
   };
 }
