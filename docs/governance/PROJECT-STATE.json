@@ -5,12 +5,12 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_local_checks_pass_acceptance_pending",
+  "phase": "S02_extension_3_running",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
   "development_session_target_active_fraction": 0.94,
-  "active_development_session": null,
+  "active_development_session": "S02",
   "work_admin": {
     "owner_intends_resume_local_time": "2026-10-22T01:00:00+02:00",
     "scheduled_by_assistant": false,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "paused_remaining_acceptance_gates",
+      "status": "extension_3_running",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -91,7 +91,7 @@
       "test_result": "Actual Windows npm ci/full typed ESLint/typecheck/23 unit tests/build/9 modern stdio protocol tests PASS. Both deferred-entry regressions red before fix, green after; external compiled boundary5/5 and protocol8/8 PASS.",
       "environment_blocker": "Local tooling works. Native Windows SID, actual Linux/platform matrix, full redistribution license/provenance and independent semantic review remain unverified.",
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "Keep PR22 draft/unmerged. Review remaining native Windows SID/Linux, license/provenance and independent semantic acceptance gates. Use npm ci then npm run verify; do not invoke/reinstall Qodo or start another extension/S03-S06 automatically.",
+      "next_exact_action": "Independent S02 code and supply-chain review, collect real executable Linux tests if possible, preserve honest blockers; only merge PR22 after ALL acceptance gates verified, SEC-GATE-001 observed.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -135,6 +135,20 @@
           "publication_must_finish_by_utc": "2026-10-22T19:03:11.0574622+00:00",
           "unused_seconds_surrendered": 512,
           "verification_and_implementation_stopped_at_utc": "2026-10-22T19:00:11.0574622+00:00"
+        },
+        {
+          "id": 3,
+          "reason": "Explicit user: 'Starte Session-2-Verlängerung 3. Arbeite die verbleibenden Abnahmeprüfungen ab. Sessions 3–6 bleiben gesperrt.'",
+          "started_at_utc": "2026-10-22T19:45:49.389Z",
+          "deadline_at_utc": "2026-10-22T20:20:49.389Z",
+          "max_seconds": 2100,
+          "charged_wall_seconds": 58,
+          "remaining_seconds_conservative": 2042,
+          "active_seconds_verified": null,
+          "status": "running",
+          "base_head_sha": "610dc241b31906db0e8bcbb84333a1abe8242612",
+          "initial_environment": "Linux sandbox Node22.16/npm10.9/TS5.8.3; npm/github DNS resolution fails; no Codex registered environments",
+          "scope": "S02-only remaining native Windows SID authority, real Linux matrix, license/provenance, independent semantic/security review; no main writes/CI/S03-S06"
         }
       ]
     },
@@ -167,8 +181,8 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Keep PR22 draft/unmerged. Review remaining native Windows SID/Linux, license/provenance and independent semantic acceptance gates. Use npm ci then npm run verify; do not invoke/reinstall Qodo or start another extension/S03-S06 automatically.",
-  "session_start_authorized": false,
+  "next_preflight_action": "S02 extension3 work in progress; one 35-min max interval measured from 2026-10-22T19:45:49.389Z, no S03-S06.",
+  "session_start_authorized": true,
   "safety": {
     "no_product_code_during_preflight": true,
     "no_paid_services_without_new_permission": true,
