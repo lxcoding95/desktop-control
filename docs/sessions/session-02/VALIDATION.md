@@ -113,3 +113,11 @@ See [full fresh evidence, acceptance matrix and failures](EXTENSION-2-2026-10-22
 - Supplemental external executor checks: **3/5 pass, 2 fail**; revoke/cancel after initial gate and before deferred adapter callback each causes one forbidden adapter invocation. These tests were not added to the tracked unit suite and production code was not repaired in this verification run.
 
 S02 overall acceptance remains FAIL/PARTIAL; PR stays draft and unmerged. S03–S06 not started. Exact commands, harness scope, false-oracle correction and remaining gates are documented in extension #2.
+
+## Superseding owner steering and final local verification — extension #2
+
+The owner removed Qodo and authorized adapting/activating free OSS checks and continuing S02 inside the SAME clock. ESLint 10.13.0 / @eslint/js 10.0.1 / typescript-eslint 8.72.0 are pinned and active; Biome 2.6.2 was tested in scratch and not selected. Negative lint probe detects an unrelated floating Promise while allowing node:test registration calls.
+
+Both adapter-entry races are now repaired with tracked red→green regressions (before: 21/23 pass, 2 fail; after: **23/23 pass**). Initial no-source-change notes above are historical. `npm ci` and `npm run verify` both exit **0**; the latter runs typed lint, full typecheck, 23 unit tests, build and **9/9 tracked actual SDK stdio tests**. External compiled boundary 5/5 and protocol 8/8 also pass. Full `npm ls --all` and audit exit 0; no existing locked package version changed. Native Windows SID/Linux and full license/independent-review gates remain open. No merge, CI activation or S03–S06.
+
+Full evidence and tool-removal limitation: [extension #2](EXTENSION-2-2026-10-22.md).

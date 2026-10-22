@@ -1,6 +1,6 @@
 # Desktop Control — repository working agreement
 
-**Status: S02 full Windows build and modern stdio smoke verified (2026-10-22); acceptance blocked by adapter-entry races and platform gaps.** Two of six sessions started (S01 completed; S02 running or paused per its live checkpoint). S03-S06 require separate explicit owner authorization. See [S02 session record](docs/sessions/session-02/SESSION-STATE.md) and [draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22).
+**Status: S02 Windows typed lint/build, 23 unit and 9 stdio tests verified (2026-10-22); native platform/license/review gates remain.** Two of six sessions started (S01 completed; S02 running or paused per its live checkpoint). S03-S06 require separate explicit owner authorization. See [S02 session record](docs/sessions/session-02/SESSION-STATE.md) and [draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22).
 
 ## Authoritative context
 
@@ -28,3 +28,7 @@ Read current repository state before writing. If an active or paused session exi
 Follow: source review → small plan → risks and license → branch change → positive and negative tests → diff/CI review → authorized squash merge → update docs, issue and next exact action. Unverified work is blocked, not done.
 
 This file guides tooling that recognizes AGENTS.md; it cannot launch a new ChatGPT session or bypass usage limits.
+
+## Free local S02 quality checks
+
+Use `npm ci` then `npm run verify` (typed ESLint, full typecheck, unit tests, build, real protocol tests). The owner removed Qodo on this computer; do not invoke, reinstall or require Qodo/credit-based services. Local static checks do not establish independent semantic review. Keep ordinary CI disabled until SEC-GATE-001 is verified. See the [current S02 evidence](docs/sessions/session-02/EXTENSION-2-2026-10-22.md).

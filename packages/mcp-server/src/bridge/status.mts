@@ -50,6 +50,7 @@ export function createStatusExecutor(deps: StatusDependencies) {
     let timer: ReturnType<typeof setTimeout> | undefined;
     let removeAbortListener: (() => void) | undefined;
     let timedOut = false;
+    let deniedAtEntry = false;
     try {
       const timeout = new Promise<never>((_resolve, reject) => {
         timer = setTimeout(() => { timedOut = true; reject(new Error('adapter deadline')); }, timeoutMs);
@@ -62,7 +63,17 @@ export function createStatusExecutor(deps: StatusDependencies) {
         if (ctx.signal.aborted) onAbort();
       });
       const payload = await Promise.race([
-        Promise.resolve().then(() => deps.adapter.readStatus()), timeout, aborted
+        Promise.resolve().then(() => {
+          // Authorization may change between scheduling and actual adapter entry.
+          if (ctx.signal?.aborted) throw new Error('adapter cancelled');
+          if (!isAuthorized({ principal: ctx.principal, capability: STATUS_CAPABILITY, resource: STATUS_RESOURCE },
+              grants, ctx.now ?? Date.now())) {
+            deniedAtEntry = true;
+            throw new Error('adapter permission denied');
+          }
+          if (ctx.signal?.aborted) throw new Error('adapter cancelled');
+          return deps.adapter.readStatus();
+        }), timeout, aborted
       ]);
       if (ctx.signal?.aborted) return failure('CANCELLED');
       // Never forward untrusted adapter fields: produce exactly the public static schema.
@@ -72,6 +83,7 @@ export function createStatusExecutor(deps: StatusDependencies) {
       return { content: [{ type: 'text', text: JSON.stringify(status) }], structuredContent: status };
     } catch {
       if (ctx.signal?.aborted) return failure('CANCELLED');
+      if (deniedAtEntry) return failure('PERMISSION_DENIED');
       if (timedOut) return failure('TIMEOUT');
       return failure('INTERNAL_ERROR');
     } finally {

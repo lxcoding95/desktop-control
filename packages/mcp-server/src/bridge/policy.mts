@@ -37,13 +37,14 @@ export function isAuthorized(
   try {
     const grants = grantStore.getGrants();
     if (!Array.isArray(grants)) return false;
-    return grants.some(grant =>
-      grant !== null && typeof grant === 'object' &&
-      grant.principal === request.principal &&
-      grant.capability === STATUS_CAPABILITY && grant.resource === STATUS_RESOURCE &&
-      grant.revoked === false &&
-      Number.isSafeInteger(grant.expiresAt) && grant.expiresAt > now
-    );
+    return grants.some((candidate: unknown) => {
+      if (candidate === null || typeof candidate !== 'object') return false;
+      const grant = candidate as Record<string, unknown>;
+      return grant.principal === request.principal &&
+        grant.capability === STATUS_CAPABILITY && grant.resource === STATUS_RESOURCE &&
+        grant.revoked === false &&
+        typeof grant.expiresAt === 'number' && Number.isSafeInteger(grant.expiresAt) && grant.expiresAt > now;
+    });
   } catch {
     return false;
   }

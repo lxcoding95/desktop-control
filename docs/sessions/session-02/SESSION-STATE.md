@@ -2,7 +2,7 @@
 
 session_id: S02
 session_issue: https://github.com/lxcoding95/desktop-control/issues/6
-status: paused_validation_findings
+status: paused_remaining_acceptance_gates
 authorized_on: "2026-10-22, user explicitly approved S02 only"
 start_at_utc: "2026-10-22T17:03:07.548Z"
 checkpoint_at_utc: "2026-10-22T17:25:02.090Z"
@@ -73,3 +73,12 @@ Independent external verification additionally passes 8/8 actual SDK stdio fixtu
 Next action: review and authorize a minimal repair for the two reproduced adapter-entry races, then run the required suites and current-head independent review. Native Windows SID/current Linux integration and full redistribution license review remain open. No automatic additional time interval or next session.
 
 Closing checkpoint: 2026-10-22T18:46:48.7678362+00:00, extension #2 wall time charged 605/2100s at checkpoint; publishing time continues in the same interval. Independent Qodo review blocked after backend failure and one quota-exceeded retry; no approval. No additional interval is authorized. See extension #2 evidence.
+
+Owner steering in the SAME extension #2: uninstall Qodo on this computer, test/adapt/activate free OSS alternatives, then continue S02. No timer reset. At 2026-10-22T18:55:42.2400381+00:00 charged 1139/2100s. Official Qodo uninstall succeeded (CLI, credentials, configuration, six global skills); inert review metadata cleanup was rejected by automatic policy. ESLint typed lint is active; Biome tested as comparator. Two original red regression tests now pass after entry-time authorization/abort checks; 23 unit and 9 real stdio protocol tests pass. Final integrated verification/docs ongoing. No merge/S03-S06.
+
+
+## Final current S02 checkpoint after owner steering
+
+Status: **paused_remaining_acceptance_gates**. Both deferred-entry defects are now fixed and proved by tracked red-to-green regressions. Free local typed ESLint is active; Qodo CLI/config/credentials/global skills uninstalled per owner request (inert metadata cleanup rejected by automatic policy). Final `npm ci` and integrated `npm run verify` pass: lint, full typecheck, **23/23 unit**, build, **9/9 real SDK stdio protocol**. External compiled boundary **5/5**, protocol **8/8**. No source changes after final verification.
+
+Same extension #2 start 18:36:44Z; stop/checkpoint 2026-10-22T19:00:11.0574622+00:00; elapsed 1408 seconds, charged 1588 seconds including180s publication reserve, unused 512 seconds surrendered, remaining0. Original S02/extension1 unchanged. See full [results/accounting](EXTENSION-2-2026-10-22.md). Native Windows SID/Linux/license/independent semantic review remain open. Keep PR draft/unmerged. No new extension or S03–S06 authorized.

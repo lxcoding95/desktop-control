@@ -36,3 +36,9 @@ References:
 - https://www.npmjs.com/package/@modelcontextprotocol/server
 - https://www.mozilla.org/en-US/MPL/2.0/
 - [Reuse policy](../../governance/REUSE-LICENSES.md)
+
+## Extension #2 local OSS checks — owner-requested Qodo replacement
+
+Pinned development-only tooling: eslint 10.13.0, @eslint/js 10.0.1 and typescript-eslint 8.72.0 (MIT). Biome 2.6.2 (MIT OR Apache-2.0) was tested in scratch only, not added to the project. All chosen checks run locally without vendor accounts, model APIs or review credits.
+
+Actual lockfile comparison: 85 added package entries, **zero version changes to pre-existing entries**. Added license metadata: MIT 62; Apache-2.0 12; BSD-2-Clause 6; ISC 3; BSD-3-Clause 1; BlueOak-1.0.0 1. Clean `npm ci`, full dependency-tree validation and fresh audit exit 0 (zero reported advisories). Metadata is not a complete redistribution license/provenance review; no publication/release approved. See [current S02 evidence](EXTENSION-2-2026-10-22.md).

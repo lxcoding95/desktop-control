@@ -39,10 +39,65 @@ test('cancelled request never reaches adapter', async () => {
 });
 test('adapter exceptions and invalid shapes redact as INTERNAL_ERROR', async () => {
   const throws = createStatusExecutor({ grants: allowed, adapter: { readStatus: () => { throw Error('private system path'); } } });
-  const bad = createStatusExecutor({ grants: allowed, adapter: { readStatus: () => ({ ...staticStatusAdapter.readStatus(), ready: false as true }) } });
+  const bad = createStatusExecutor({ grants: allowed, adapter: { readStatus: () => ({ service: 'desktop-control', api_version: 1, ready: false as true }) } });
   for (const run of [throws, bad]) {
     const result = await run(ctx);
     assert.equal(result.content[0].text, 'INTERNAL_ERROR');
     assert.equal(JSON.stringify(result).includes('private system path'), false);
   }
+});
+
+test('revocation before deferred adapter entry prevents invocation', async () => {
+  let revoked = false, calls = 0;
+  const run = createStatusExecutor({
+    grants: { getGrants: () => [{ ...grant, revoked }] },
+    adapter: { readStatus: () => { calls++; return staticStatusAdapter.readStatus(); } }
+  });
+  const pending = run(ctx);
+  revoked = true;
+  const result = await pending;
+  assert.equal(calls, 0);
+  assert.equal(result.content[0].text, 'PERMISSION_DENIED');
+});
+
+test('cancellation before deferred adapter entry prevents invocation', async () => {
+  let calls = 0;
+  const controller = new AbortController();
+  const run = createStatusExecutor({ grants: allowed, adapter: {
+    readStatus: () => { calls++; return staticStatusAdapter.readStatus(); }
+  } });
+  const pending = run({ ...ctx, signal: controller.signal });
+  controller.abort();
+  const result = await pending;
+  assert.equal(calls, 0);
+  assert.equal(result.content[0].text, 'CANCELLED');
+});
+
+test('adapter timeout returns a bounded redacted failure', async () => {
+  const run = createStatusExecutor({ grants: allowed, timeoutMs: 25, adapter: {
+    readStatus: () => new Promise(() => {})
+  } });
+  assert.equal((await run(ctx)).content[0].text, 'TIMEOUT');
+});
+
+test('in-flight abort returns CANCELLED without waiting for adapter', async () => {
+  const controller = new AbortController();
+  const run = createStatusExecutor({ grants: allowed, adapter: {
+    readStatus: () => new Promise(() => {})
+  } });
+  const pending = run({ ...ctx, signal: controller.signal });
+  // Yield to let the adapter begin; the earlier test covers abort before entry.
+  await Promise.resolve();
+  controller.abort();
+  assert.equal((await pending).content[0].text, 'CANCELLED');
+});
+
+test('extra adapter fields are excluded from the public response', async () => {
+  const run = createStatusExecutor({ grants: allowed, adapter: {
+    readStatus: () => ({ service: 'desktop-control', ready: true, api_version: 1, extra: 'S02_TEST_MARKER' })
+  } });
+  const result = await run(ctx);
+  assert.doesNotMatch(JSON.stringify(result), /S02_TEST_MARKER/);
+  assert.deepEqual('structuredContent' in result && result.structuredContent,
+    { service: 'desktop-control', ready: true, api_version: 1 });
 });
