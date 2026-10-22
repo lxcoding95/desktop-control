@@ -86,6 +86,10 @@ npm run build
 
 No domain, remote tunnel, public server, tokens, elevated shell access or Desktop/Browser capability added.
 
+## Additional dependency-free compilation check
+
+On the same isolated Linux container, `tsc --noEmit --project tsconfig.bridge.json` completed with exit code **0** using global TypeScript 5.8.3. This checks the pure policy and status bridge only; **it does not compile the MCP SDK entrypoint or validate Node OS principal typings**. Full `npm run typecheck` remains blocked pending dependency install.
+
 ## Follow-up verification
 
 At 2026-10-22T17:20Z, the OS principal extraction was split into `src/bridge/principal.mts`, updated to reject UID/effective-UID mismatches, and four additional tests were added. Local Node test runner rerun: **18/18 passed, 0 failed**. No SDK, typecheck or Inspector success is claimed.
