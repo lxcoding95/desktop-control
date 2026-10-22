@@ -5,7 +5,7 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_extension_1_paused_environment_blocked",
+  "phase": "S02_extension_1_exhausted_environment_blocked",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "extension_1_paused_environment_blocked",
+      "status": "extension_1_exhausted_blocked",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -91,7 +91,7 @@
       "test_result": "Windows locked install and 18/18 tests PASS; full typecheck/build FAIL; legacy Inspector list/denial PASS; modern discovery unsupported",
       "environment_blocker": "Initial Node/npm/GitHub blockers resolved; test typing and modern/lifecycle validation remain",
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "Owner UI Project #3/Milestone descriptions sync via Admin #4; S02 needs Work Node>=22.19 npm-connected environment for clean npm ci, full tsc/build, real 2026-07-28 protocol tests; resume same extension with conservative remaining.",
+      "next_exact_action": "Owner has approved repeated S02-only extra intervals up to 35 minutes. Do not begin another if no usable Node>=22.19/npm-connected Work environment. First finish manual GitHub Project #3/Milestone metadata UI tasks in ADMIN-GATE-001 #4, then explicitly start extension #2 only for S02 with fresh UTC timer, clean checkout and real tests.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -99,8 +99,8 @@
           "reason": "User expressly authorized up to 35 additional minutes (repeatable solely for S02), other sessions forbidden",
           "started_at_utc": "2026-10-22T17:43:53.484Z",
           "max_seconds": 2100,
-          "charged_wall_seconds": 1844,
-          "remaining_seconds_conservative": 256,
+          "charged_wall_seconds": 2100,
+          "remaining_seconds_conservative": 0,
           "active_seconds_verified": null,
           "paused_at_utc": "2026-10-22T18:04:28.299Z",
           "environment_blocker": "Current Chat Linux Node 22.16.0 and npm registry DNS unavailable; no usable remote Codex environment. Working Windows Node24 Work environment from earlier separate run is not attached.",
@@ -108,7 +108,10 @@
           "last_continuation_started_at_utc": "2026-10-22T18:08:34.770Z",
           "last_continuation_checkpoint_at_utc": "2026-10-22T18:18:45.736Z",
           "last_continuation_wall_seconds_charged": 610,
-          "git_tracking": "Public docs-only PR #23 squash merged on main; S02 branch merged new main commit as secondary parent (not release); Project v2/Milestone UI description awaiting owner action."
+          "git_tracking": "Public docs-only PR #23 squash merged on main; S02 branch merged new main commit as secondary parent (not release); Project v2/Milestone UI description awaiting owner action.",
+          "completed_at_utc": "2026-10-22T18:22:59.489Z",
+          "billing_basis": "Previous 1234s + latest conservatively charged work interval; remaining few seconds surrendered for documentation/publication reserve; active seconds not independently metered.",
+          "validation_status": "blocked: current Chat container Node22.16 cannot reach npm registry; remote Codex environment unavailable; no clean full SDK build/modern protocol test after latest head"
         }
       ]
     },
@@ -141,7 +144,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "After UI/Admin #4 sync and Work SDK env available, resume SAME S02 extension only, no other sessions; check live PR #22 and conservative remainder; do not merge until gates pass.",
+  "next_preflight_action": "S02 only: owner authorized up to 35-minute repeated extensions. First extension exhausted (0s). Need a usable Work Node >=22.19/npm/Inspector environment. Do not reset extension1 or start S03–S06. GitHub repo public docs on main sync via PR23; owner GitHub Projects/Milestone UI tasks in issue4.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
