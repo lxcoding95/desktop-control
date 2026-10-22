@@ -1,6 +1,6 @@
 # Desktop Control — Verbindlicher Projekt-Masterplan
 
-**Stand:** 2026-10-22 | **Status:** S01 Architektur dokumentiert, Implementierung noch nicht begonnen | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
+**Stand:** 2026-10-22 | **Status:** S02 MCP-Grundgerüst implementiert, SDK-Integration und End-to-End-Tests noch blockiert | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
 
 > Dieses Dokument beschreibt Ziele, Entscheidungen und Gates. Es ist keine Behauptung, dass das Produkt bereits implementiert ist. Vorhandene GitHub-Daten (Commits, PRs, Issues und aktuelle Branches) haben Vorrang vor statischen Statusangaben. Für neue ChatGPT-Chats zwingend auch [CHAT-CONTINUITY.md](../governance/CHAT-CONTINUITY.md) lesen.
 
@@ -27,7 +27,7 @@
 | DEC-009 | Zunächst lokal entwickeln, später Domain, zentraler Dienst und Google-/E-Mail-Registrierung | entschieden |
 | DEC-010 | **GitHub ist Code- und Zustandsquelle**, ChatGPT Project Sources enthalten stabile Basisspezifikation | entschieden |
 | DEC-011 | GitHub-App **All repositories** bleibt auf Wunsch des Owners aktiv; Schreibaufträge strikt auf `lxcoding95/desktop-control` begrenzt | entschieden |
-| DEC-012 | 6 explizit gestartete, maximal 25-minütige Entwicklungssitzungen, jetzt **1/6**; pro Sitzung Ziel 94 % aktive Nutzzeit, kein erfundener Zeitnachweis | entschieden |
+| DEC-012 | 6 explizit gestartete, maximal 25-minütige Entwicklungssitzungen, jetzt **2/6**; pro Sitzung Ziel 94 % aktive Nutzzeit, kein erfundener Zeitnachweis | entschieden |
 | DEC-013 | Research und lizenzkonforme Wiederverwendung vorhandener OSS-Module priorisieren | entschieden |
 | DEC-014 | **SEC-GATE-001**: GitHub Actions auf verifizierte vollständige SHAs pinnen und Schutzregel vor regulärer CI-Nutzung aktivieren | verpflichtend/offen |
 
@@ -66,11 +66,11 @@ Für destruktives Löschen, externen Datentransfer sensibler Daten, Accountände
 - **Kritische Kontoaktionen bleiben bestätigungspflichtig**, auch wenn der Browser bereits angemeldet ist.
 - **Browserfenster während KI-Aktionen immer sichtbar als headed-Fenster**, kein versteckter Headless-Browser. Sichtbarkeit bedeutet nicht Always-on-top oder Fokus-Stealing.
 - Schwarzer KI-Cursor nur bei Mausaktionen; KI-Browser darf unabhängig von menschlichem OS-Cursor arbeiten, solange keine gemeinsame OS-Eingabe nötig ist. Gemeinsamer Desktop erfordert getrennte Übernahme-/Stoppregeln.
-- Verbindliche vollständige Planung und Tests: [KI-Browser-Spezifikation](../architecture/AI-BROWSER-PROFILE.md), [ADR-0002](../architecture/ADR-0002-AI-BROWSER.md), [Issue #14](https://github.com/lxcoding95/desktop-control/issues/14). **1/6 Entwicklungssitzungen gestartet.**
+- Verbindliche vollständige Planung und Tests: [KI-Browser-Spezifikation](../architecture/AI-BROWSER-PROFILE.md), [ADR-0002](../architecture/ADR-0002-AI-BROWSER.md), [Issue #14](https://github.com/lxcoding95/desktop-control/issues/14). **2/6 Entwicklungssitzungen gestartet.**
 
 ## 2.4 Auslieferung und Verbindung – verbindliche Ownerentscheidung vom 22.10.2026
 
-**Option 1 — Local-first bestätigt.** Zuerst einen lokalen MCP-Kern entwickeln und mit lokalem MCP-Testclient beziehungsweise MCP Inspector prüfen; danach ChatGPT anbinden. Zielprodukt ist eine lokal installierbare Windows-/Linux-App mit Tray, lokalem Dashboard und eigenem sichtbarem KI-Browser. Ein versionierter `npx`-Start ist ein zusätzlicher Entwickler-/Expertenweg. In der ersten Entwicklungsphase keine Domain, kein eigener öffentlicher Server und keine kostenpflichtige Cloud-Infrastruktur. Transport, App-Shell und Installer benötigen später reale technische Prüfung; Tunnel-Zugang/Kosten sind keine Voraussetzung für den ersten lokalen Nachweis. [ADR-0003](../architecture/ADR-0003-PRODUCT-DELIVERY.md), [Issue #17](https://github.com/lxcoding95/desktop-control/issues/17). **Keine Entwicklungsfreigabe, Sessions 1/6.**
+**Option 1 — Local-first bestätigt.** Zuerst einen lokalen MCP-Kern entwickeln und mit lokalem MCP-Testclient beziehungsweise MCP Inspector prüfen; danach ChatGPT anbinden. Zielprodukt ist eine lokal installierbare Windows-/Linux-App mit Tray, lokalem Dashboard und eigenem sichtbarem KI-Browser. Ein versionierter `npx`-Start ist ein zusätzlicher Entwickler-/Expertenweg. In der ersten Entwicklungsphase keine Domain, kein eigener öffentlicher Server und keine kostenpflichtige Cloud-Infrastruktur. Transport, App-Shell und Installer benötigen später reale technische Prüfung; Tunnel-Zugang/Kosten sind keine Voraussetzung für den ersten lokalen Nachweis. [ADR-0003](../architecture/ADR-0003-PRODUCT-DELIVERY.md), [Issue #17](https://github.com/lxcoding95/desktop-control/issues/17). **Keine Entwicklungsfreigabe, Sessions 2/6.**
 
 ## 3. Architektur und Vertrauensgrenzen
 
@@ -115,6 +115,14 @@ Der Owner hat **ausschließlich S01** freigegeben. In S01 wurden die Architektur
 - [S01-Checkpoint](../sessions/session-01/SESSION-STATE.md): Branch/Commit/Issue/PR und präzise bekannte bzw. unbekannte Zeit- und Testdaten.
 
 **Grenzen:** Es existiert dadurch noch **kein ausführbarer MCP-Server, keine OS-Freigabeimplementierung, kein lokaler Inspector-End-to-End-Test, keine Windows/Linux-Testmatrix und kein CI-Lauf**. Eine registrierte Codex-Testumgebung wurde nicht gefunden; der Work-Handoff wurde nicht angenommen. Die nächste Implementierungssitzung S02 benötigt weiterhin einen neuen ausdrücklichen Nutzerbefehl und eine geeignete Ausführungsumgebung. SEC-GATE-001 bleibt offen.
+
+## 3b. Session 2 – MCP Core & Connectivity (22.10.2026)
+
+Nur S02 wurde zusätzlich ausdrücklich freigegeben. Der aktive Arbeitsbranch `feat/s02-local-mcp-core` und [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22) enthalten den ersten MCP-v2-`serveStdio`-Einstiegspunkt, ein strukturiertes `desktop_control.status`-Tool und eine hostseitige `diagnostics.read`-Berechtigungsprüfung. Die Berechtigung ist **standardmäßig verweigert**; nur Testcode injiziert zeitlich begrenzte synthetische Grants. POSIX UID/EUID-Abweichungen und Windows ohne geprüfte SID-Unterstützung verweigern die Erlaubnis.
+
+**Echte technische Belege:** In einer isolierten Linux-Umgebung mit Node 22.16 wurden **18 Unit-Tests** erfolgreich ausgeführt; eine eingeschränkte TypeScript-Kompilierungsprüfung der reinen Bridge-Komponenten war erfolgreich. **Nicht erfolgreich/nicht ausgeführt:** npm-Paketinstallation (ENOTCACHED), vollständiger Typcheck (fehlende `@types/node`), offizieller MCP Inspector, SDK-Protokolltests, Windows/Linux-Hosttests und CI. Es existiert noch kein überprüft funktionsfähiger MCP-End-to-End-Server; für reguläre CI bleibt SEC-GATE-001 offen.
+
+Verbindliche Quelle für den aktuellen Zustand und die nicht zurückgesetzte Restzeit: [S02 Checkpoint](../sessions/session-02/SESSION-STATE.md) und [Validierung](../sessions/session-02/VALIDATION.md). **Session 3 ist nicht gestartet oder autorisiert.**
 
 ## 4. Desktop-Commander-Funktionsreferenz: 29 Werkzeuge
 
