@@ -2,7 +2,7 @@
 
 Open-source desktop control tooling for MCP-compatible AI clients on Windows and Linux.
 
-> **Status: pre-development.** No working desktop bridge, MCP server, installer, hosted service, or ChatGPT plugin package has been released. Do not install or rely on this repository for computer control yet.
+> **Status: early development (S01 complete; S02 experimental, not accepted).** A local MCP stdio status-tool prototype exists only on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **not on `main`**. The main branch contains architecture, governance and documentation; no installable desktop app, public service, published plugin or production-ready MCP server has been released. Do not install or rely on this repository for computer control yet.
 
 ## Intended capabilities
 
@@ -17,7 +17,7 @@ An AI client makes decisions; this project will provide **tools and a local exec
 
 ## Status and roadmap
 
-Development sessions have **not started**. Work is currently limited to repository governance and planning. See [ROADMAP.md](ROADMAP.md), [session plan](docs/governance/SESSION-PLAN.md), and [issues](https://github.com/lxcoding95/desktop-control/issues). A six-session timebox is a planning constraint, **not a promise that full feature parity or a production release will fit inside it**.
+**Two of six reserved sessions have started.** S01 [Foundation & Architecture](https://github.com/lxcoding95/desktop-control/issues/5) is **completed** and [PR #21](https://github.com/lxcoding95/desktop-control/pull/21) was squash-merged. S02 [MCP Core & Connectivity](https://github.com/lxcoding95/desktop-control/issues/6) is **in development, currently paused pending a usable SDK validation environment**, with an owner-authorized additional time allowance and [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22). S03–S06 remain **not started and not authorized**. See [ROADMAP.md](ROADMAP.md), [session plan](docs/governance/SESSION-PLAN.md), and [issues](https://github.com/lxcoding95/desktop-control/issues). A six-session timebox is a planning constraint, **not a promise that full feature parity or a production release will fit inside it**.
 
 ## Planned system boundary
 
@@ -45,11 +45,11 @@ The gateway, local bridge, identity model and transports remain subject to desig
 - [29 Desktop Commander tool coverage plan](docs/research/DESKTOP-COMMANDER-COVERAGE.md)
 - [Final GitHub Work administration assignment](docs/governance/WORK-ADMIN-FINAL.md)
 
-The plan and state files **are not live execution results**. Before making changes, read GitHub's current branch SHA, open PRs, linked Issues #1–#10 and any session-specific branch handoff. Development sessions are still **0/6 started**.
+The plan and state files **are not live execution results**. Before making changes, read GitHub's current branch SHA, open PRs, linked Issues #1–#10 and any session-specific branch handoff. Sessions started: **2/6** (S01 completed; S02 incomplete). Authoritative S02 progress, tests and time accounting are on [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6), [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22) and [S02 extension checkpoint](https://github.com/lxcoding95/desktop-control/blob/feat/s02-local-mcp-core/docs/sessions/session-02/EXTENSION-2026-10-22.md). GitHub Projects and milestone descriptions may lag until separately updated; do not interpret labels or progress bars as execution evidence.
 
 ## Dedicated AI browser profile (planned)
 
-The AI will use its **own persistent browser profile**, separate from the user's existing browser. The specification covers history, bookmarks, cookies/login state, session restoration, downloaded files, site permissions and a password manager or OS-backed credential vault subject to security validation. Browser automation will use Playwright where practical, with a visible black virtual cursor only during mouse actions. Sensitive browser credentials must not be exposed to AI tools. See [browser profile specification](docs/architecture/AI-BROWSER-PROFILE.md), [proposed ADR](docs/architecture/ADR-0002-AI-BROWSER.md), and [feature tracking issue #14](https://github.com/lxcoding95/desktop-control/issues/14). Nothing is implemented or approved for a development session yet.
+The AI will use its **own persistent browser profile**, separate from the user's existing browser. The specification covers history, bookmarks, cookies/login state, session restoration, downloaded files, site permissions and a password manager or OS-backed credential vault subject to security validation. Browser automation will use Playwright where practical, with a visible black virtual cursor only during mouse actions. Sensitive browser credentials must not be exposed to AI tools. See [browser profile specification](docs/architecture/AI-BROWSER-PROFILE.md), [proposed ADR](docs/architecture/ADR-0002-AI-BROWSER.md), and [feature tracking issue #14](https://github.com/lxcoding95/desktop-control/issues/14). The browser is **not implemented**. Its reserved development session S04 remains unstarted and unauthorised.
 
 ## Security
 

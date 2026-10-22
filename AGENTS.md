@@ -1,6 +1,6 @@
 # Desktop Control — repository working agreement
 
-**Status: S01 architecture documented (2026-10-22), runnable MCP product not yet implemented.** The owner has reserved six sessions; **1/6 started (S01 only)**. S02-S06 still require their own explicit owner authorization. See [S01 session record](docs/sessions/session-01/SESSION-STATE.md).
+**Status (2026-10-22): S01 completed and merged (PR #21); S02 experimental MCP stdio prototype on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), not merged/fully validated.** **2/6 sessions started.** S02 original budget exhausted, owner expressly authorized separately timed up-to-35-minute extensions for S02 only; current extension paused pending a usable SDK/npm test environment. [S02 checkpoint](https://github.com/lxcoding95/desktop-control/blob/feat/s02-local-mcp-core/docs/sessions/session-02/EXTENSION-2026-10-22.md). **S03–S06 remain locked.** `main` has no runtime product code.
 
 ## Authoritative context
 

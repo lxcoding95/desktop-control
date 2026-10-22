@@ -1,6 +1,6 @@
 # Desktop Control — Verbindlicher Projekt-Masterplan
 
-**Stand:** 2026-10-22 | **Status:** S01 Architektur dokumentiert, Implementierung noch nicht begonnen | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
+**Stand:** 2026-10-22 | **Status:** S01 Dokumentation gemergt; S02 experimenteller lokaler MCP-Kern auf Draft PR #22, Build/Integration noch nicht abgenommen | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
 
 > Dieses Dokument beschreibt Ziele, Entscheidungen und Gates. Es ist keine Behauptung, dass das Produkt bereits implementiert ist. Vorhandene GitHub-Daten (Commits, PRs, Issues und aktuelle Branches) haben Vorrang vor statischen Statusangaben. Für neue ChatGPT-Chats zwingend auch [CHAT-CONTINUITY.md](../governance/CHAT-CONTINUITY.md) lesen.
 
@@ -27,7 +27,7 @@
 | DEC-009 | Zunächst lokal entwickeln, später Domain, zentraler Dienst und Google-/E-Mail-Registrierung | entschieden |
 | DEC-010 | **GitHub ist Code- und Zustandsquelle**, ChatGPT Project Sources enthalten stabile Basisspezifikation | entschieden |
 | DEC-011 | GitHub-App **All repositories** bleibt auf Wunsch des Owners aktiv; Schreibaufträge strikt auf `lxcoding95/desktop-control` begrenzt | entschieden |
-| DEC-012 | 6 explizit gestartete, maximal 25-minütige Entwicklungssitzungen, jetzt **1/6**; pro Sitzung Ziel 94 % aktive Nutzzeit, kein erfundener Zeitnachweis | entschieden |
+| DEC-012 | 6 explizit gestartete, maximal 25-minütige Entwicklungssitzungen, jetzt **2/6** (S01 abgeschlossen; S02 mit separat genehmigter Verlängerung noch offen; S03–S06 nicht gestartet); pro Sitzung Ziel 94 % aktive Nutzzeit, kein erfundener Zeitnachweis | entschieden |
 | DEC-013 | Research und lizenzkonforme Wiederverwendung vorhandener OSS-Module priorisieren | entschieden |
 | DEC-014 | **SEC-GATE-001**: GitHub Actions auf verifizierte vollständige SHAs pinnen und Schutzregel vor regulärer CI-Nutzung aktivieren | verpflichtend/offen |
 
@@ -191,3 +191,11 @@ Owner plant selbst eine spätere Work-Fortsetzung für GitHub Projects und Admin
 ## 11. Änderungen / Dokumentstatus
 
 Masterplan v1.0: aus Userentscheidungen, Projektbeschreibung, 29-Tool-Übersicht und aktueller offizieller Dokumentation erstellt. Architektur- und Codeentscheidungen bleiben bis realer Prüfung „proposed“. Der Zweck ist verlässliche Fortsetzbarkeit und Sicherheit, nicht Marketing oder eine fingierte Entwicklerorganisation.
+
+## Laufender Entwicklungsnachweis (2026-10-22)
+
+- **S01:** [Issue #5](https://github.com/lxcoding95/desktop-control/issues/5) erledigt, [PR #21](https://github.com/lxcoding95/desktop-control/pull/21) Squash-Merge, Architektur/Dokumentation; keine Runtime-Tests behauptet.
+- **S02:** [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6) offen, [PR #22](https://github.com/lxcoding95/desktop-control/pull/22) Draft/unmerged. Der lokale TypeScript/MCP-v2-Statusprototyp ist auf dem Featurebranch; ältere Windows-Tests: npm-Install und 18/18 Unit-Tests erfolgreich, Inspector-Initialisierung mit Protocol 2025-11-25, Denial erfolgreich; Voll-Build zuvor fehlgeschlagen. Neuere Testcode-Typkorrekturen und ein moderner Smoke-Test sind committed, aber ohne verfügbares SDK-Testsystem nicht end-to-end verifiziert. Kein releasedes MCP-Paket.
+- **Budget:** Ursprüngliche S02 25 min ausgeschöpft. Owner hat wiederholbare **bis zu 35 Minuten zusätzlich, ausschließlich für S02** freigegeben. Erste Verlängerung nach [Checkpoint](https://github.com/lxcoding95/desktop-control/blob/feat/s02-local-mcp-core/docs/sessions/session-02/EXTENSION-2026-10-22.md) pausiert mit konservativ 866 s Rest am letzten dokumentierten Stopp; vor Fortsetzung live prüfen, keine Rücksetzung.
+- **S03–S06:** nicht gestartet und ausdrücklich gesperrt.
+- **SEC-GATE-001:** [Issue #1](https://github.com/lxcoding95/desktop-control/issues/1) offen, keine reguläre GitHub Actions CI. GitHub-Projektansicht/Milestone-Beschreibungen können separat aktualisiert werden und sind kein Nachweis technischer Fertigstellung.
