@@ -34,6 +34,10 @@ A sample command modeled after modern `npx <package> remote` onboarding is only 
 
 Windows UI Automation normally needs an interactive user session. Linux UI capabilities vary by X11, Wayland, desktop environment, portals and accessibility support. A capability probe and coverage matrix precede feature claims.
 
+## Local-first delivery clarification (proposed, not implemented)
+
+The recommended initial product is **a local user-session app/bridge**, with a local HTTP dashboard/tray, a local stdio MCP server and a versioned CLI path; public website/cloud hosting is a future phase. For ChatGPT web, the official **Secure MCP Tunnel** is a potential private testing route without owned domain/server, subject to eligibility and costs. It is not a public plugin distribution mechanism. Desktop-only local MCP plugin publication has approval restrictions. Details: [delivery plan](DELIVERY-LOCAL-FIRST.md), [ADR-0003](ADR-0003-PRODUCT-DELIVERY.md).
+
 ## Open design decisions
 
 Transport and backend languages; terminal sandbox model; remote relay infrastructure; identity and device pairing; plugin distribution channels; accessibility implementations; event logs and retention; document editing; upgrade strategy. Record choices and tests in ADRs rather than locking in technology prematurely.

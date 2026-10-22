@@ -58,3 +58,15 @@
 4. Re-run original and adapted tests; add permission-abuse/cancellation/path-race tests.
 5. Document source/revision/modifications and security decisions in the PR.
 6. Avoid brand, website design, visual assets or developer identity imitation. Present work transparently as one owner plus any real contributors.
+
+## Deployment / public packaging / no-domain private ChatGPT connectivity (researched 2026-10-22)
+
+- [OpenAI Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels): Outbound-only local client to OpenAI-hosted tunnel endpoint; needs Platform org and ChatGPT workspace permissions/runtime API key; private custom MCP only, **not** public plugin submission.
+- [OpenAI tunnel-client source](https://github.com/openai/tunnel-client): Apache-2.0, maintained upstream. Integration requires verified license and revision; do not embed credentials.
+- [OpenAI local Desktop-only plugin](https://developers.openai.com/plugins/deploy/desktop-only): local stdio public plugin submission requires allowlisted/approved partner eligibility.
+- [OpenAI public plugin submission](https://developers.openai.com/plugins/deploy/submission): stable public HTTPS MCP, verified domain and publishing review.
+- [OpenAI MCP/Plugin quickstart](https://developers.openai.com/plugins/build/app-quickstart): dev tunnel/localhost MCP Inspector; *public test tunnel is not by itself a safe desktop production bridge*.
+- [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk): v2 server/client package split; confirm exact release and API at implementation time.
+- [Electron Tray](https://www.electronjs.org/docs/latest/api/tray): potential native app shell, Linux/Windows platform differences.
+- [Tauri v2](https://v2.tauri.app/): alternative smaller application shell, sidecar/runtime integration needs tests.
+- [Remote Desktop Commander local/remote comparison](https://github.com/wonderwhy-er/DesktopCommanderMCP/blob/main/src/remote-device/README.md): public UX reference; do not copy proprietary remote implementation.

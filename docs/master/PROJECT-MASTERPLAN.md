@@ -68,6 +68,10 @@ Für destruktives Löschen, externen Datentransfer sensibler Daten, Accountände
 - Schwarzer KI-Cursor nur bei Mausaktionen; KI-Browser darf unabhängig von menschlichem OS-Cursor arbeiten, solange keine gemeinsame OS-Eingabe nötig ist. Gemeinsamer Desktop erfordert getrennte Übernahme-/Stoppregeln.
 - Verbindliche vollständige Planung und Tests: [KI-Browser-Spezifikation](../architecture/AI-BROWSER-PROFILE.md), [ADR-0002](../architecture/ADR-0002-AI-BROWSER.md), [Issue #14](https://github.com/lxcoding95/desktop-control/issues/14). **0/6 Entwicklungssitzungen gestartet.**
 
+## 2.4 Auslieferung und Verbindung – Architektur-Empfehlung vom 22.10.2026
+
+**Noch keine finale Owner-Entscheidung:** Für den Start schlagen wir ein lokal ausführbares Desktop-Control-System vor: **MCP/Bridge + eigenes sichtbares KI-Browserfenster + lokale Permission Engine + lokales Dashboard**, später Tray/Installer als einfacher Endnutzerzugang und **versioniertes `npx` als optionaler Expertenmodus**. Das lokale Dashboard benötigt **keine Domain** und ist kein Ersatz für eine lokale Desktop-App. ChatGPT auf dem Web benötigt für Zugriff auf lokale Tools einen geeigneten Transport: offizielle **Secure MCP Tunnel** können private MCP-Server ohne eigenen öffentlichen Endpunkt anbinden, jedoch nur bei nachgewiesenen OpenAI-Tunnelberechtigungen/ggf. Kosten. Öffentliche Plugin-Publikation braucht später einen stabilen externen HTTPS-Endpunkt oder besondere Genehmigung für Desktop-only-Plugins. **Keine Infrastruktur oder Kosten freigegeben.** Genaues Konzept: [DELIVERY-LOCAL-FIRST](../architecture/DELIVERY-LOCAL-FIRST.md), [ADR-0003](../architecture/ADR-0003-PRODUCT-DELIVERY.md), [Issue #17](https://github.com/lxcoding95/desktop-control/issues/17). **0/6 Sessions**.
+
 ## 3. Architektur und Vertrauensgrenzen
 
 ```text
