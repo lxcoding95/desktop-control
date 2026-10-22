@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "build": "tsc --project tsconfig.json",
     "start:mcp": "node dist/packages/mcp-server/src/index.mjs",
-    "typecheck:bridge": "tsc --noEmit --project tsconfig.bridge.json"
+    "typecheck:bridge": "tsc --noEmit --project tsconfig.bridge.json",
+    "test:protocol": "node --test packages/mcp-server/test/protocol.test.mjs"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "2.12.0",
