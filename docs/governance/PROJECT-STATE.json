@@ -5,12 +5,12 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S01_architecture_review",
-  "development_session_started_count": 1,
+  "phase": "S02_mcp_core_in_progress",
+  "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
   "development_session_target_active_fraction": 0.94,
-  "active_development_session": null,
+  "active_development_session": "S02",
   "work_admin": {
     "owner_intends_resume_local_time": "2026-10-22T01:00:00+02:00",
     "scheduled_by_assistant": false,
@@ -81,9 +81,15 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "not_started",
-      "started_at_utc": null,
-      "verified_elapsed_active_seconds": 0
+      "status": "running",
+      "started_at_utc": "2026-10-22T17:03:07.548Z",
+      "verified_elapsed_active_seconds": null,
+      "elapsed_budget_seconds_charged_conservative": 871,
+      "remaining_budget_seconds_conservative": 629,
+      "work_branch": "feat/s02-local-mcp-core",
+      "pr_url": "https://github.com/lxcoding95/desktop-control/pull/22",
+      "test_result": "14/14 pure local policy tests passed; SDK end-to-end blocked npm dependency cache",
+      "environment_blocker": "npm ENOTCACHED and Node 22.16 below target 22.19; no registered Codex environment"
     },
     {
       "id": "S03",
@@ -114,8 +120,8 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Review S01 PR #21/merge evidence and secure an authorized execution environment; S02 (#6) requires separate explicit owner command, SEC-GATE-001 before regular CI.",
-  "session_start_authorized": false,
+  "next_preflight_action": "S02 only: review existing draft PR #22, obtain Node >=22.19 plus package downloads, regenerate and verify npm lock, run typecheck/build and Inspector. S03 not started.",
+  "session_start_authorized": true,
   "safety": {
     "no_product_code_during_preflight": true,
     "no_paid_services_without_new_permission": true,
