@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "Desktop Control",
-  "snapshot_date": "2026-10-21",
+  "snapshot_date": "2026-10-22",
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
@@ -14,8 +14,8 @@
   "work_admin": {
     "owner_intends_resume_local_time": "2026-10-22T01:00:00+02:00",
     "scheduled_by_assistant": false,
-    "state": "pending_external_work",
-    "notes": "Work paused while configuring GitHub Project; verify, do not assume complete."
+    "state": "ready_for_owner_review",
+    "notes": "Admin API and signed-in UI verified; Project root loading/API aggregate inconsistency remains, direct views and issue-level project memberships verified. See #4 and PREFLIGHT-REPORT.md."
   },
   "decisions": {
     "product": "installable ChatGPT plugin and MCP tools, not new AI agent",
@@ -29,7 +29,8 @@
       "self-hostable eventually",
       "hosted later"
     ],
-    "github_app_repository_access": "all (owner decision)"
+    "github_app_repository_access": "all (owner decision)",
+    "delivery_order": "Owner selected Option 1: local MCP core + local client/Inspector first; ChatGPT afterwards; Windows/Linux app with tray/dashboard/AI browser; version-pinned npx optional; no domain/public server/paid cloud in phase one."
   },
   "verified_baseline": {
     "ruleset_url": "https://github.com/lxcoding95/desktop-control/rules/25569795",
@@ -41,7 +42,7 @@
       "conversation resolution",
       "squash only"
     ],
-    "read_only_workflow_default": "verified via user screenshot, GitHub admin read unavailable in connector",
+    "read_only_workflow_default": "API verified: read, PR approval false; all external contributors require approval; logs/artifacts 30 days",
     "preflight_documentation_pr": "https://github.com/lxcoding95/desktop-control/pull/11"
   },
   "tracked_gates": {
@@ -107,7 +108,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Work: finish and verify GitHub Projects/labels/milestones/admin settings; document outcome in issue #4. Assistant: verify and reconcile actual GitHub state.",
+  "next_preflight_action": "Verify merged admin documentation; owner explicitly authorizes Session 1 separately. SEC-GATE-001 remains mandatory before regular CI.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,

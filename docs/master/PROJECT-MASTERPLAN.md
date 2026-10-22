@@ -68,9 +68,9 @@ Für destruktives Löschen, externen Datentransfer sensibler Daten, Accountände
 - Schwarzer KI-Cursor nur bei Mausaktionen; KI-Browser darf unabhängig von menschlichem OS-Cursor arbeiten, solange keine gemeinsame OS-Eingabe nötig ist. Gemeinsamer Desktop erfordert getrennte Übernahme-/Stoppregeln.
 - Verbindliche vollständige Planung und Tests: [KI-Browser-Spezifikation](../architecture/AI-BROWSER-PROFILE.md), [ADR-0002](../architecture/ADR-0002-AI-BROWSER.md), [Issue #14](https://github.com/lxcoding95/desktop-control/issues/14). **0/6 Entwicklungssitzungen gestartet.**
 
-## 2.4 Auslieferung und Verbindung – Architektur-Empfehlung vom 22.10.2026
+## 2.4 Auslieferung und Verbindung – verbindliche Ownerentscheidung vom 22.10.2026
 
-**Noch keine finale Owner-Entscheidung:** Für den Start schlagen wir ein lokal ausführbares Desktop-Control-System vor: **MCP/Bridge + eigenes sichtbares KI-Browserfenster + lokale Permission Engine + lokales Dashboard**, später Tray/Installer als einfacher Endnutzerzugang und **versioniertes `npx` als optionaler Expertenmodus**. Das lokale Dashboard benötigt **keine Domain** und ist kein Ersatz für eine lokale Desktop-App. ChatGPT auf dem Web benötigt für Zugriff auf lokale Tools einen geeigneten Transport: offizielle **Secure MCP Tunnel** können private MCP-Server ohne eigenen öffentlichen Endpunkt anbinden, jedoch nur bei nachgewiesenen OpenAI-Tunnelberechtigungen/ggf. Kosten. Öffentliche Plugin-Publikation braucht später einen stabilen externen HTTPS-Endpunkt oder besondere Genehmigung für Desktop-only-Plugins. **Keine Infrastruktur oder Kosten freigegeben.** Genaues Konzept: [DELIVERY-LOCAL-FIRST](../architecture/DELIVERY-LOCAL-FIRST.md), [ADR-0003](../architecture/ADR-0003-PRODUCT-DELIVERY.md), [Issue #17](https://github.com/lxcoding95/desktop-control/issues/17). **0/6 Sessions**.
+**Option 1 — Local-first bestätigt.** Zuerst einen lokalen MCP-Kern entwickeln und mit lokalem MCP-Testclient beziehungsweise MCP Inspector prüfen; danach ChatGPT anbinden. Zielprodukt ist eine lokal installierbare Windows-/Linux-App mit Tray, lokalem Dashboard und eigenem sichtbarem KI-Browser. Ein versionierter `npx`-Start ist ein zusätzlicher Entwickler-/Expertenweg. In der ersten Entwicklungsphase keine Domain, kein eigener öffentlicher Server und keine kostenpflichtige Cloud-Infrastruktur. Transport, App-Shell und Installer benötigen später reale technische Prüfung; Tunnel-Zugang/Kosten sind keine Voraussetzung für den ersten lokalen Nachweis. [ADR-0003](../architecture/ADR-0003-PRODUCT-DELIVERY.md), [Issue #17](https://github.com/lxcoding95/desktop-control/issues/17). **Keine Entwicklungsfreigabe, Sessions 0/6.**
 
 ## 3. Architektur und Vertrauensgrenzen
 
@@ -121,7 +121,7 @@ VOR jeder Modulimplementierung: 1) Quellcode und offizielle Dokumentation prüfe
 
 Repository: https://github.com/lxcoding95/desktop-control; owner `lxcoding95`; public; MIT; `main` protected via [Protect main](https://github.com/lxcoding95/desktop-control/rules/25569795). Pull Requests erforderlich, Force Push/Deletion eingeschränkt, Review-Konversationen auflösen, nur Squash-Merge, 0 erzwungene unabhängige Approvals bis echte Reviewer existieren, kein Bypass. Auto-Merge aus, automatische Löschung gemergter Branches an. **GitHub-App All repositories** auf Owner-Wunsch, alle Aktionen dieses Projekts dennoch auf den genannten Repo-Pfad einschränken.
 
-**Issue-Labels:** `type:*`, `priority:*`, `status:*`, `area:*`; keine Duplikate. **Milestones:** sechs geordnete Sessions, siehe [ROADMAP](../../ROADMAP.md). **Projects:** `Desktop Control Development`, 6+ Statusansichten/Felder, Issues #1–#10 verknüpfen. Projects-Fertigstellung von Work später live verifizieren; Screenshots während des Editierens zählen nicht als Beweis.
+**Issue-Labels:** `type:*`, `priority:*`, `status:*`, `area:*`; keine Duplikate. **Milestones:** sechs geordnete Sessions, siehe [ROADMAP](../../ROADMAP.md). **Projects:** `Desktop Control Development`, 6+ Statusansichten/Felder, Issues #1–#10 verknüpfen. Project #3: Titel, private Sichtbarkeit, Repository-Link, sechs Statuswerte, Priority/Area und Board/Table/Roadmap am 22.10.2026 verifiziert; Audit und Automationsnachweise in Issue #4.
 
 **Change flow:** issue -> Akzeptanzkriterien/Risiko -> branch -> kleine Commits -> PR -> Code-/Sicherheits-/Dokumenten-Prüfung -> reale Testausgaben -> Squash unter Ruleset -> Verifikation auf main -> Issue-/Projektstatus aktualisieren. Entwickler dürfen keinen Merge-Blocker durch Deaktivieren des Rulesets umgehen.
 
@@ -129,7 +129,7 @@ Repository: https://github.com/lxcoding95/desktop-control; owner `lxcoding95`; p
 
 **Release:** [REL-GATE-001](https://github.com/lxcoding95/desktop-control/issues/3): SemVer, changelog, reproduzierbare Builds wo möglich, Checksummen, Signaturen/Attestations, SBOM, Third-Party Notices, package/install/uninstall Tests, downgrade/rollback, Windows/Linux Smoke, Security Review, explizites Release Go/No-Go. Keine erfundenen grünen Badges.
 
-**Admin-Zugang:** [ADMIN-GATE-001](https://github.com/lxcoding95/desktop-control/issues/4) enthält Restarbeiten. Dieser Chat kann Code/PR/Issues verwalten, aber keine GitHub-Project-Felder oder Settings mutieren. Work-Auftrag auf Admin-UI beschränken; keine Doppelanlage und keine zusätzlichen Gebühren.
+**Admin-Zugang:** [ADMIN-GATE-001](https://github.com/lxcoding95/desktop-control/issues/4) enthält Restarbeiten. Die bestehende lokale GitHub-CLI-Anmeldung ermöglicht administrative API-Zugriffe; Project-Workflows wurden zusätzlich in der angemeldeten UI geprüft. Keine neuen Tokens oder zusätzlichen Gebühren.
 
 ## 7. Sechs Entwicklungssitzungen – festes Zeitbudget
 
