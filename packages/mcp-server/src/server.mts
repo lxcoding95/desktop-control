@@ -10,7 +10,9 @@ export function localPrincipal(): string | null {
   try {
     if (typeof process.getuid === 'function') {
       const uid = process.getuid();
-      return Number.isSafeInteger(uid) && uid >= 0 ? `posix:${uid}` : null;
+      const effectiveUid = typeof process.geteuid === 'function' ? process.geteuid() : uid;
+      // A setuid/elevated mismatch must not inherit a grant for the invoking UID.
+      return Number.isSafeInteger(uid) && uid >= 0 && uid === effectiveUid ? `posix:${uid}` : null;
     }
     // Windows requires an independently checked SID-based local principal resolver.
     // Until that exists, fail closed rather than assume a username is unique enough.
