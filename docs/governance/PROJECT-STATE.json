@@ -91,7 +91,7 @@
       "test_result": "Windows locked install and 18/18 tests PASS; full typecheck/build FAIL; legacy Inspector list/denial PASS; modern discovery unsupported",
       "environment_blocker": "Initial Node/npm/GitHub blockers resolved; test typing and modern/lifecycle validation remain",
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "Same S02 extension #1, do not reset charged time; use working Node>=22.19 npm registry environment to run npm ci/typecheck/test/build/protocol; keep PR draft until results verified.",
+      "next_exact_action": "Owner UI Project #3/Milestone descriptions sync via Admin #4; S02 needs Work Node>=22.19 npm-connected environment for clean npm ci, full tsc/build, real 2026-07-28 protocol tests; resume same extension with conservative remaining.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -99,12 +99,16 @@
           "reason": "User expressly authorized up to 35 additional minutes (repeatable solely for S02), other sessions forbidden",
           "started_at_utc": "2026-10-22T17:43:53.484Z",
           "max_seconds": 2100,
-          "charged_wall_seconds": 1234,
-          "remaining_seconds_conservative": 866,
+          "charged_wall_seconds": 1844,
+          "remaining_seconds_conservative": 256,
           "active_seconds_verified": null,
           "paused_at_utc": "2026-10-22T18:04:28.299Z",
-          "environment_blocker": "Linux container cannot resolve npm registry; read-only Codex execution unavailable. Earlier Windows Work env not attached.",
-          "test_evidence": "Local prepared Linux copy 20/20 tests and subset TS pass, 18 versioned tests; SDK protocol NOT run; clean npm/SDK build NOT run at latest head"
+          "environment_blocker": "Current Chat Linux Node 22.16.0 and npm registry DNS unavailable; no usable remote Codex environment. Working Windows Node24 Work environment from earlier separate run is not attached.",
+          "test_evidence": "Local prepared Linux source copy npm test 20/20 pass, subset tsc pass, protocol syntax check pass; not a clean checkout/SDK test. Earlier Windows 18/18 SDK Inspector 2025-11-25 only.",
+          "last_continuation_started_at_utc": "2026-10-22T18:08:34.770Z",
+          "last_continuation_checkpoint_at_utc": "2026-10-22T18:18:45.736Z",
+          "last_continuation_wall_seconds_charged": 610,
+          "git_tracking": "Public docs-only PR #23 squash merged on main; S02 branch merged new main commit as secondary parent (not release); Project v2/Milestone UI description awaiting owner action."
         }
       ]
     },
@@ -137,7 +141,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Resume S02 extension #1 only after live GitHub state check and usable execution environment; next sessions remain locked.",
+  "next_preflight_action": "After UI/Admin #4 sync and Work SDK env available, resume SAME S02 extension only, no other sessions; check live PR #22 and conservative remainder; do not merge until gates pass.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
