@@ -5,12 +5,12 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_mcp_core_in_progress",
+  "phase": "S02_paused_environment_blocked",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
   "development_session_target_active_fraction": 0.94,
-  "active_development_session": "S02",
+  "active_development_session": null,
   "work_admin": {
     "owner_intends_resume_local_time": "2026-10-22T01:00:00+02:00",
     "scheduled_by_assistant": false,
@@ -81,15 +81,17 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "running",
+      "status": "paused",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
-      "elapsed_budget_seconds_charged_conservative": 871,
-      "remaining_budget_seconds_conservative": 629,
+      "elapsed_budget_seconds_charged_conservative": 1314,
+      "remaining_budget_seconds_conservative": 186,
       "work_branch": "feat/s02-local-mcp-core",
       "pr_url": "https://github.com/lxcoding95/desktop-control/pull/22",
-      "test_result": "14/14 pure local policy tests passed; SDK end-to-end blocked npm dependency cache",
-      "environment_blocker": "npm ENOTCACHED and Node 22.16 below target 22.19; no registered Codex environment"
+      "test_result": "18/18 local bridge/principal/status tests pass; bridge-only tsc passes; full SDK/Inspector not run",
+      "environment_blocker": "Offline npm ENOTCACHED/no @types/node; Node 22.16<22.19; no registered Codex environments",
+      "paused_at_utc": "2026-10-22T17:25:02.090Z",
+      "next_exact_action": "After explicit S02 continuation, check branch head and time budget, then obtain Node>=22.19 with npm registry access; create reviewed lockfile and run npm ci/typecheck/Inspector modern-tools/list."
     },
     {
       "id": "S03",
@@ -120,8 +122,8 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "S02 only: review existing draft PR #22, obtain Node >=22.19 plus package downloads, regenerate and verify npm lock, run typecheck/build and Inspector. S03 not started.",
-  "session_start_authorized": true,
+  "next_preflight_action": "S02 paused, not completed: resume only same S02 with verified charged-time remainder and existing draft PR #22, do not start S03; keep SEC-GATE-001 active.",
+  "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
     "no_paid_services_without_new_permission": true,
