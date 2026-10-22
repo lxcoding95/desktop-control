@@ -199,3 +199,9 @@ Owner plant selbst eine spätere Work-Fortsetzung für GitHub Projects und Admin
 ## 11. Änderungen / Dokumentstatus
 
 Masterplan v1.0: aus Userentscheidungen, Projektbeschreibung, 29-Tool-Übersicht und aktueller offizieller Dokumentation erstellt. Architektur- und Codeentscheidungen bleiben bis realer Prüfung „proposed“. Der Zweck ist verlässliche Fortsetzbarkeit und Sicherheit, nicht Marketing oder eine fingierte Entwicklerorganisation.
+
+### S02 Live-Nachweis — neue separate Verlängerung #2 am 22.10.2026
+
+Dieser Nachtrag ersetzt ältere Aussagen zu fehlender SDK-Umgebung und fehlgeschlagenem Vollbuild: Am Quellstand `8f5333297f47d2969894d03a5f433ac672c6e4f3` bestehen im echten Windows-Checkout `npm ci`, vollständiger Typecheck, 18/18 versionierte Unit-Tests, Build und moderner MCP-stdio-Test (2026-07-28). Zusätzliche Protokollprüfungen bestehen 8/8; positive Aufrufe verwenden eine ausdrücklich synthetische Testidentität und belegen keine native Windows-SID-Integration.
+
+S02 bleibt unvollständig: Zwei zusätzliche Ausführungsgrenztests reproduzieren Adapteraufrufe nach Widerruf bzw. Abbruch vor dem verzögerten Adapterstart (3/5 bestanden, 2 fehlgeschlagen). Keine Produktkorrektur, kein Merge und keine reguläre CI-Aktivierung in diesem Prüfauftrag. Native Plattformmatrix/Lizenzfreigabe bleiben offen. Nur **eine** neue separat erfasste Verlängerung mit maximal 35 Minuten ist für diesen Chat freigegeben; Session 3–6 bleiben gesperrt. [Aktuelle Belege, Uhr und nächster Schritt](../sessions/session-02/EXTENSION-2-2026-10-22.md).

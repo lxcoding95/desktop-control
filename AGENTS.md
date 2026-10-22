@@ -1,6 +1,6 @@
 # Desktop Control — repository working agreement
 
-**Status: S02 local MCP core under development (2026-10-22), SDK/Inspector runtime unverified.** Two of six sessions started (S01 completed; S02 running or paused per its live checkpoint). S03-S06 require separate explicit owner authorization. See [S02 session record](docs/sessions/session-02/SESSION-STATE.md) and [draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22).
+**Status: S02 full Windows build and modern stdio smoke verified (2026-10-22); acceptance blocked by adapter-entry races and platform gaps.** Two of six sessions started (S01 completed; S02 running or paused per its live checkpoint). S03-S06 require separate explicit owner authorization. See [S02 session record](docs/sessions/session-02/SESSION-STATE.md) and [draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22).
 
 ## Authoritative context
 

@@ -2,7 +2,7 @@
 
 session_id: S02
 session_issue: https://github.com/lxcoding95/desktop-control/issues/6
-status: blocked_budget_exhausted
+status: paused_validation_findings
 authorized_on: "2026-10-22, user explicitly approved S02 only"
 start_at_utc: "2026-10-22T17:03:07.548Z"
 checkpoint_at_utc: "2026-10-22T17:25:02.090Z"
@@ -61,3 +61,15 @@ next_exact_action: "On explicit continuation of S02, verify live draft PR #22 br
 
 ## Superseding continuation checkpoint
 S02 remaining budget is ZERO (full 186s conservatively charged including checkpoint reserve and surrendered unused seconds). Historical 186s references above are superseded. See [continuation evidence](CONTINUATION-2026-10-22.md). No S03 and no automatic further development.
+
+## Superseding extension #2 verification checkpoint — 2026-10-22
+
+Current status: **paused_validation_findings**, S02 remains incomplete and PR #22 stays draft. The current owner authorized **one new maximum 2100-second interval**, recorded separately in [extension #2](EXTENSION-2-2026-10-22.md), from 18:36:44Z with hard deadline 19:11:44Z. Original 1500-second budget and extension #1 remain unchanged. S03–S06 remain not started/not authorized.
+
+At initial head `8f5333297f47d2969894d03a5f433ac672c6e4f3`, an actual Windows checkout now passes `npm ci`, full `npm run typecheck`, 18/18 `npm test`, `npm run build`, and `npm run test:protocol` (modern 2026-07-28 discovery/list/denial/strict input/EOF). The earlier environment blocker and full compile failures are superseded by this fresh evidence.
+
+Independent external verification additionally passes 8/8 actual SDK stdio fixture/lifecycle tests. Synthetic fixture identity does **not** establish Windows SID integration. Two additional deterministic executor checks fail: grant revocation and cancellation between authorization and the deferred adapter invocation each still allow one adapter call. Three other boundary checks pass (timeout, in-flight cancellation result, field redaction). No production/test source changed. No merge or ordinary CI activation.
+
+Next action: review and authorize a minimal repair for the two reproduced adapter-entry races, then run the required suites and current-head independent review. Native Windows SID/current Linux integration and full redistribution license review remain open. No automatic additional time interval or next session.
+
+Closing checkpoint: 2026-10-22T18:46:48.7678362+00:00, extension #2 wall time charged 605/2100s at checkpoint; publishing time continues in the same interval. Independent Qodo review blocked after backend failure and one quota-exceeded retry; no approval. No additional interval is authorized. See extension #2 evidence.

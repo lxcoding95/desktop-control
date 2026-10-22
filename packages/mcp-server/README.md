@@ -37,3 +37,9 @@ The `npm test` script runs the pure policy/executor unit tests against source Ty
 After the SDK build succeeds, an authorized S02 continuation must verify the 2026-07-28 `server/discover` flow, `tools/list`, denied `tools/call`, strict schema validation, EOF shutdown, and positive tests with a harness-injected scoped grant, using an actual client or MCP Inspector.
 
 **Security:** Production defaults to deny-all; STDOUT reserved strictly for MCP; STDERR contains redacted capability decision entries. SEC-GATE-001 still blocks ordinary GitHub Actions CI. This project does not claim OS sandboxing from a command allowlist.
+
+## Latest verified S02 checkpoint — extension #2 (2026-10-22)
+
+This section supersedes the earlier build/environment status above. At source head `8f5333297f47d2969894d03a5f433ac672c6e4f3`, actual Windows Node24/npm12 `npm ci`, full typecheck, 18/18 tracked unit tests, build and modern 2026-07-28 stdio protocol smoke **all pass**. npm automatically blocked Inspector postinstall under its existing allowScripts policy; Inspector CLI tools/list still succeeded. Supplemental actual stdio verification passed 8/8, with the positive path using an explicitly synthetic test identity (no native Windows SID claim).
+
+**Acceptance remains blocked:** two deterministic external executor checks show an adapter call after revocation/cancellation before deferred adapter entry (3/5 boundary checks pass, 2 fail). Native Windows SID/current Linux matrix, full redistribution-license review and applicable independent gates remain open. No product/test code repaired, no merge/CI activation, S03–S06 locked. See [fresh evidence and limitations](../../docs/sessions/session-02/EXTENSION-2-2026-10-22.md).

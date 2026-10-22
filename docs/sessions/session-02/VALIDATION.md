@@ -96,3 +96,20 @@ At 2026-10-22T17:20Z, the OS principal extraction was split into `src/bridge/pri
 
 ## Continuation superseding environment blockers
 See [actual Windows continuation evidence](CONTINUATION-2026-10-22.md). Locked install and 18 tests pass; full typecheck/build FAIL; legacy Inspector list/denial pass; modern discovery remains unverified. S02 budget conservatively exhausted; no S03.
+
+## Superseding Windows extension #2 — 2026-10-22
+
+See [full fresh evidence, acceptance matrix and failures](EXTENSION-2-2026-10-22.md). Initial tested source head: `8f5333297f47d2969894d03a5f433ac672c6e4f3`.
+
+- `npm ci`: exit 0, 125 installed; npm12 automatically blocked Inspector postinstall under its current allowScripts policy. No approval/config change made.
+- `npm run typecheck`: exit 0 (full project, TypeScript 5.9.3).
+- `npm test`: exit 0, 18/18 tracked unit tests.
+- `npm run build`: exit 0.
+- `npm run test:protocol`: exit 0, 1/1 real SDK stdio smoke test, modern 2026-07-28.
+- `npm run typecheck:bridge`: exit 0.
+- `npm exec --no -- mcp-inspector --cli node dist/packages/mcp-server/src/index.mjs --method tools/list`: exit 0, exactly desktop_control.status (no modern-version claim from this legacy Inspector command).
+- `npm audit --json`: exit 0, zero reported vulnerabilities; not full source/provenance/license assurance.
+- Supplemental external actual stdio verification: 8/8 pass, including synthetic grant positive/negative/error fixtures, redaction, malformed input recovery, no TCP listener snapshot, oversized unterminated input (>10 MiB, no EOF required), cancellation/liveness and EOF.
+- Supplemental external executor checks: **3/5 pass, 2 fail**; revoke/cancel after initial gate and before deferred adapter callback each causes one forbidden adapter invocation. These tests were not added to the tracked unit suite and production code was not repaired in this verification run.
+
+S02 overall acceptance remains FAIL/PARTIAL; PR stays draft and unmerged. S03–S06 not started. Exact commands, harness scope, false-oracle correction and remaining gates are documented in extension #2.
