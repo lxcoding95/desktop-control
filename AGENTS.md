@@ -10,6 +10,10 @@
 - Security: [SECURITY.md](SECURITY.md), [threat model](docs/architecture/THREAT-MODEL.md), [quality gates](docs/governance/QUALITY-GATES.md).
 - Open-source reuse: [sources](docs/research/SOURCES.md) and [license requirements](docs/governance/REUSE-LICENSES.md).
 
+## Binding GitHub autonomy standard
+
+The owner requires a **showcase-quality, automation-first, secure and consistently synchronized repository**. Follow [GITHUB-OPERATIONS-STANDARD](docs/governance/GITHUB-OPERATIONS-STANDARD.md) for issues, milestones, Projects v2, labels, PRs, branches, reviews, dependency/security posture, release gates and mandatory cross-chat handoffs. Perform available authorized operations autonomously; if a surface is owner-only, supply Alex a direct link and exact steps, record the blocker and verify afterwards. Automation must not bypass consent, branch protection, test evidence, the active session scope or SEC-GATE-001. Do **not** reactivate Qodo automatically. Latest S02 evidence is on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), not yet merged.
+
 ## Hard boundaries
 
 1. Change only lxcoding95/desktop-control. Other repositories connected via All repositories are off limits.

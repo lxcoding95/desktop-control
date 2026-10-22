@@ -27,3 +27,7 @@ There is no public release yet. Version tags, changelog, artifact provenance, up
 ## Changes to governance
 
 Changes must go through a PR with rationale and potential impact. Avoid bypassing branch protection for convenience.
+
+## GitHub operations automation standard
+
+The repository's owner requires an exemplary Open Source / DevSecOps administration model: maximum permitted automation, reproducible evidence, secure PR-only merges, synchronized Issues/PRs/Labels/Milestones/Projects/Docs, and explicit, accountable owner-only UI steps for unavailable actions. The binding runbook is [GitHub Operations Standard](docs/governance/GITHUB-OPERATIONS-STANDARD.md). This ambition does not supersede approval gates, security isolation, contributor attribution, repository rulesets or the six-session reservation.
