@@ -16,16 +16,16 @@
 ```sh
 cd /mnt/data/desktop-control-s02
 npm test
-# TAP: 14 tests, 14 passed, 0 failed; Node --experimental-strip-types.
+# TAP: 18 tests, 18 passed, 0 failed; Node --experimental-strip-types.
 npm install --package-lock-only --offline --ignore-scripts --no-audit --no-fund
 # FAILED: ENOTCACHED: @modelcontextprotocol/inspector metadata not in local npm cache.
 tsc --noEmit --project tsconfig.json
 # FAILED: TS2688: cannot find type definition file for 'node'.
 ```
 
-Earlier initial test attempt: 9 policy cases passed, but status test suite failed resolving `./policy.mjs` from raw `.mts` source in Node's strip-types mode. Rewrote source imports to `.mts` plus `rewriteRelativeImportExtensions: true`, then reran both suites: **all 14 cases pass**. The initial failure is not hidden.
+Earlier initial test attempt: 9 policy cases passed, but status test suite failed resolving `./policy.mjs` from raw `.mts` source in Node's strip-types mode. Rewrote source imports to `.mts` plus `rewriteRelativeImportExtensions: true`, then reran both suites: **all 18 cases pass**. The initial failure is not hidden.
 
-## Verified unit cases
+## Verified unit cases (18)
 
 1. Default-deny for diagnostics.
 2. Exact positive time-limited grant in synthetic test store.
@@ -41,6 +41,10 @@ Earlier initial test attempt: 9 policy cases passed, but status test suite faile
 12. Revocation between calls blocks next execution.
 13. Already-aborted signal blocks adapter.
 14. Adapter exceptions/wrong shape return redacted `INTERNAL_ERROR`.
+15. Non-elevated POSIX principal resolves to expected UID.
+16. UID/effective-UID mismatch fails closed.
+17. Invalid POSIX identity fails closed.
+18. Actual process principal is OS-derived without MCP user input.
 
 **Important limitation:** These results are from a locally prepared copy, not a fresh `git checkout` plus `npm ci` from GitHub. No tested dependency lockfile was generated. Source/test files were separately committed to the GitHub branch via the connected GitHub API. Re-run clean-checkout tests when dependency installation becomes possible before merging as verified executable implementation.
 
@@ -81,3 +85,7 @@ npm run build
 ```
 
 No domain, remote tunnel, public server, tokens, elevated shell access or Desktop/Browser capability added.
+
+## Follow-up verification
+
+At 2026-10-22T17:20Z, the OS principal extraction was split into `src/bridge/principal.mts`, updated to reject UID/effective-UID mismatches, and four additional tests were added. Local Node test runner rerun: **18/18 passed, 0 failed**. No SDK, typecheck or Inspector success is claimed.
