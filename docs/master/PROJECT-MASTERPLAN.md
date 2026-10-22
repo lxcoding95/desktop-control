@@ -167,3 +167,16 @@ Owner plant selbst eine spätere Work-Fortsetzung für GitHub Projects und Admin
 ## 11. Änderungen / Dokumentstatus
 
 Masterplan v1.0: aus Userentscheidungen, Projektbeschreibung, 29-Tool-Übersicht und aktueller offizieller Dokumentation erstellt. Architektur- und Codeentscheidungen bleiben bis realer Prüfung „proposed“. Der Zweck ist verlässliche Fortsetzbarkeit und Sicherheit, nicht Marketing oder eine fingierte Entwicklerorganisation.
+
+## 12. Ergänzung 2026-10-22 – eigener KI-Browser und schwarze visuelle Maus
+
+**Entscheidungen verbindlich, technische Umsetzung noch ungetestet:** Nur getrennter, von Desktop Control verwalteter KI-Browser; sichtbarer schwarzer virtueller Pointer nur bei Mausaktionen; parallele Autonomie ausschließlich im KI-Browser; menschliche Eingaben haben Vorrang bei gemeinsamem Desktop und im KI-Browserfenster; Freigaben entweder pro Website/Anwendung oder als begrenzte Sitzungsprofile.
+
+Die schwarze KI-Maus ist im eigenen Browser eine Visualisierung von Playwright-Aktionen **ohne physische Systemmausbewegung**. Bei gemeinsamen Desktopaktionen ist sie ein Overlay mit geregelter zeitlich begrenzter Übernahme, **kein** echter zweiter Systemcursor. Native Dialoge und Wayland-Spezialfälle sind zu testen.
+
+- Verbindliche Details, Ablauf, Permission Matrix, Testkatalog und genau zwei offene Produktfragen: [SPEC-BC-001](../specs/ISOLATED-BROWSER-AND-VIRTUAL-CURSOR.md).
+- Begründung: [ADR-0002](../architecture/ADR-0002.md).
+- Quellen und Code-Reuse: [Browser-Recherche](../research/ISOLATED-BROWSER-RESEARCH.md).
+- GitHub-Verfolgung: [Issue #14](https://github.com/lxcoding95/desktop-control/issues/14), Bezug zu [Session 4 / Issue #8](https://github.com/lxcoding95/desktop-control/issues/8).
+
+**Offen:** Standard für Login-/Cookie-Persistenz und Frage, ob der eigene KI-Browser stets sichtbar oder optional im Hintergrund ist. Keine Browser- oder Desktopimplementierung begonnen. **0/6 Entwicklungssitzungen gestartet.**

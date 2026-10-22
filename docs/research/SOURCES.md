@@ -58,3 +58,9 @@
 4. Re-run original and adapted tests; add permission-abuse/cancellation/path-race tests.
 5. Document source/revision/modifications and security decisions in the PR.
 6. Avoid brand, website design, visual assets or developer identity imitation. Present work transparently as one owner plus any real contributors.
+
+## Zusatzquellen 2026-10-22 – isolierter KI-Browser
+
+- [SPEC-BC-001](../specs/ISOLATED-BROWSER-AND-VIRTUAL-CURSOR.md) enthält die 5 Nutzerentscheidungen und explizit offene Login-/Anzeige-Fragen.
+- [Browser-Recherche](ISOLATED-BROWSER-RESEARCH.md) mit Playwright-Profil-, Capability-, Redirect-/Origin- und Overlay-/Windows-/Wayland-Nachweisen.
+- [ADR-0002](../architecture/ADR-0002.md): eigene Browserinstanz, virtueller schwarzer Pointer, geregelte gemeinsame Desktopübernahme.
