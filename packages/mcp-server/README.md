@@ -1,7 +1,7 @@
 # Local MCP server prototype (S02)
 
 **State: source implemented; SDK runtime and MCP Inspector integration NOT verified.**  
-[Session #6](https://github.com/lxcoding95/desktop-control/issues/6) · [Architecture ADR-0004](../../../docs/architecture/ADR-0004-MCP-FOUNDATION.md) · [S02 validation](../../../docs/sessions/session-02/VALIDATION.md)
+[Session #6](https://github.com/lxcoding95/desktop-control/issues/6) · [Architecture ADR-0004](../../docs/architecture/ADR-0004-MCP-FOUNDATION.md) · [S02 validation](../../docs/sessions/session-02/VALIDATION.md)
 
 ## Purpose and trust boundary
 
@@ -33,7 +33,7 @@ npm run build
 npm run start:mcp
 ```
 
-The `npm test` script runs the pure policy/executor unit tests against source TypeScript using Node's type-stripping and does not load the MCP SDK. **14 tests passed on an isolated Linux container**; this does not demonstrate a functioning MCP connection. `npm ci`, typecheck and real Inspector were blocked, not passed. See [full evidence](../../../docs/sessions/session-02/VALIDATION.md).
+The `npm test` script runs the pure policy/executor unit tests against source TypeScript using Node's type-stripping and does not load the MCP SDK. **14 tests passed on an isolated Linux container**; this does not demonstrate a functioning MCP connection. `npm ci`, typecheck and real Inspector were blocked, not passed. See [full evidence](../../docs/sessions/session-02/VALIDATION.md).
 
 After the SDK build succeeds, an authorized S02 continuation must verify the 2026-07-28 `server/discover` flow, `tools/list`, denied `tools/call`, strict schema validation, EOF shutdown, and positive tests with a harness-injected scoped grant, using an actual client or MCP Inspector.
 
