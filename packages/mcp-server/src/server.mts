@@ -4,21 +4,7 @@ import { createStatusExecutor, staticStatusAdapter } from './bridge/status.mts';
 import { DENY_ALL_GRANTS } from './bridge/policy.mts';
 import type { ReadonlyGrantStore } from './bridge/policy.mts';
 import type { StatusAdapter } from './bridge/status.mts';
-
-/** Local authority derives from the OS process, never MCP-supplied caller IDs. */
-export function localPrincipal(): string | null {
-  try {
-    if (typeof process.getuid === 'function') {
-      const uid = process.getuid();
-      const effectiveUid = typeof process.geteuid === 'function' ? process.geteuid() : uid;
-      // A setuid/elevated mismatch must not inherit a grant for the invoking UID.
-      return Number.isSafeInteger(uid) && uid >= 0 && uid === effectiveUid ? `posix:${uid}` : null;
-    }
-    // Windows requires an independently checked SID-based local principal resolver.
-    // Until that exists, fail closed rather than assume a username is unique enough.
-    return null;
-  } catch { return null; }
-}
+import { localPrincipal } from './bridge/principal.mts';
 
 /** Production defaults to DENY ALL; fixture stores must be passed explicitly in tests. */
 export function createServer(deps: { grants?: ReadonlyGrantStore; adapter?: StatusAdapter } = {}): McpServer {
