@@ -41,6 +41,7 @@ The gateway, local bridge, identity model and transports remain subject to desig
 - [German masterplan (scope, decisions, architecture, sources and six sessions)](docs/master/PROJECT-MASTERPLAN.md)
 - [Cross-chat recovery protocol](docs/governance/CHAT-CONTINUITY.md)
 - [Machine-readable project state snapshot](docs/governance/PROJECT-STATE.json)
+- [GitHub automation, security and DevSecOps operating standard](docs/governance/GITHUB-OPERATIONS-STANDARD.md)
 - [Research and authoritative sources](docs/research/SOURCES.md)
 - [29 Desktop Commander tool coverage plan](docs/research/DESKTOP-COMMANDER-COVERAGE.md)
 - [Final GitHub Work administration assignment](docs/governance/WORK-ADMIN-FINAL.md)
