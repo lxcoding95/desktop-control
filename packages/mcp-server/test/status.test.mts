@@ -2,16 +2,17 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createStatusExecutor, staticStatusAdapter } from '../src/bridge/status.mts';
 import { STATUS_CAPABILITY, STATUS_RESOURCE } from '../src/bridge/policy.mts';
+import type { DiagnosticGrant, ReadonlyGrantStore } from '../src/bridge/policy.mts';
 const now = 1_700_000_000_000;
-const grant = { principal: 'posix:1000', capability: STATUS_CAPABILITY, resource: STATUS_RESOURCE, expiresAt: now + 10000, revoked: false };
-const allowed = { getGrants: () => [grant] };
+const grant: DiagnosticGrant = { principal: 'posix:1000', capability: STATUS_CAPABILITY, resource: STATUS_RESOURCE, expiresAt: now + 10000, revoked: false };
+const allowed: ReadonlyGrantStore = { getGrants: () => [grant] };
 const ctx = { principal: 'posix:1000', now };
 
 test('denied request never invokes adapter', async () => {
   let calls = 0;
   const run = createStatusExecutor({ adapter: { readStatus: () => { calls++; return staticStatusAdapter.readStatus(); } } });
   const result = await run(ctx);
-  assert.equal(result.isError, true);
+  assert.equal('isError' in result && result.isError, true);
   assert.equal(result.content[0].text, 'PERMISSION_DENIED');
   assert.equal(calls, 0);
 });
