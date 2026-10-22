@@ -93,3 +93,6 @@ On the same isolated Linux container, `tsc --noEmit --project tsconfig.bridge.js
 ## Follow-up verification
 
 At 2026-10-22T17:20Z, the OS principal extraction was split into `src/bridge/principal.mts`, updated to reject UID/effective-UID mismatches, and four additional tests were added. Local Node test runner rerun: **18/18 passed, 0 failed**. No SDK, typecheck or Inspector success is claimed.
+
+## Continuation superseding environment blockers
+See [actual Windows continuation evidence](CONTINUATION-2026-10-22.md). Locked install and 18 tests pass; full typecheck/build FAIL; legacy Inspector list/denial pass; modern discovery remains unverified. S02 budget conservatively exhausted; no S03.

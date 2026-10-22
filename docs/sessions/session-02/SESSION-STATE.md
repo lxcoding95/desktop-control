@@ -2,15 +2,15 @@
 
 session_id: S02
 session_issue: https://github.com/lxcoding95/desktop-control/issues/6
-status: paused
+status: blocked_budget_exhausted
 authorized_on: "2026-10-22, user explicitly approved S02 only"
 start_at_utc: "2026-10-22T17:03:07.548Z"
 checkpoint_at_utc: "2026-10-22T17:25:02.090Z"
 max_budget_seconds: 1500
 elapsed_active_seconds_verified: null
 remaining_budget_seconds_verified: null
-elapsed_budget_seconds_charged_conservative: 1314
-remaining_budget_seconds_conservative: 186
+elapsed_budget_seconds_charged_conservative: 1500
+remaining_budget_seconds_conservative: 0
 paused_at_utc: "2026-10-22T17:25:02.090Z"
 time_accounting: "UTC clock-based upper-bound window from first recorded preflight to checkpoints; continuous work is not independently metered; never reset budget on another chat."
 main_base_sha: "91f1715acb1b240c0fb63d9d9568876fda1764f1"
@@ -58,3 +58,6 @@ next_exact_action: "On explicit continuation of S02, verify live draft PR #22 br
 - **Environment blockers:** No registered Codex environment; container npm/GitHub DNS unavailable; container Node 22.16 below target 22.19. Previous Work handoff was not accepted; do not represent connector as a full OS test environment.
 - **Next exact action:** In a future **explicit continuation of S02**, first compare the live PR #22 branch head, Issue #6 and this checkpoint; continue with at most the conservatively recorded **186s**. Obtain an environment with Node >=22.19 and npm registry access, generate reviewed `package-lock.json`, run `npm ci && npm run typecheck && npm test && npm run build` and then MCP Inspector modern handshake. Keep PR draft if any gate cannot be tested.
 - **S03:** NOT STARTED, NOT AUTHORIZED.
+
+## Superseding continuation checkpoint
+S02 remaining budget is ZERO (full 186s conservatively charged including checkpoint reserve and surrendered unused seconds). Historical 186s references above are superseded. See [continuation evidence](CONTINUATION-2026-10-22.md). No S03 and no automatic further development.
