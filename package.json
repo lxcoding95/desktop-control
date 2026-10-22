@@ -1,0 +1,30 @@
+{
+  "name": "desktop-control",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test packages/mcp-server/test/*.test.mts",
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "build": "tsc --project tsconfig.json",
+    "start:mcp": "node dist/packages/mcp-server/src/index.mjs",
+    "typecheck:bridge": "tsc --noEmit --project tsconfig.bridge.json",
+    "test:protocol": "node --test packages/mcp-server/test/*.test.mjs",
+    "lint": "eslint --max-warnings 0 packages eslint.config.mjs",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run build && npm run test:protocol"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@modelcontextprotocol/inspector": "2.12.0",
+    "@types/node": "22.15.30",
+    "eslint": "10.13.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.0"
+  }
+}
