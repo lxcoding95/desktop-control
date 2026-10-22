@@ -5,12 +5,12 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_blocked_budget_exhausted",
+  "phase": "S02_authorized_extension_1_in_progress",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
   "development_session_target_active_fraction": 0.94,
-  "active_development_session": null,
+  "active_development_session": "S02",
   "work_admin": {
     "owner_intends_resume_local_time": "2026-10-22T01:00:00+02:00",
     "scheduled_by_assistant": false,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "blocked_budget_exhausted",
+      "status": "extension_1_running",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -91,7 +91,19 @@
       "test_result": "Windows locked install and 18/18 tests PASS; full typecheck/build FAIL; legacy Inspector list/denial PASS; modern discovery unsupported",
       "environment_blocker": "Initial Node/npm/GitHub blockers resolved; test typing and modern/lifecycle validation remain",
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "STOP: S02 budget exhausted. Owner decision required; no S03 authorization."
+      "next_exact_action": "Run full SDK and modern protocol tests in a suitable Node/npm-enabled environment; current container cannot resolve registry; before any merge ensure full typecheck, build, positive/negative calls, lifecycle and reviews pass.",
+      "extension_authorized_on": "2026-10-22",
+      "extensions": [
+        {
+          "id": 1,
+          "reason": "User expressly authorized up to 35 additional minutes (repeatable solely for S02), other sessions forbidden",
+          "started_at_utc": "2026-10-22T17:43:53.484Z",
+          "max_seconds": 2100,
+          "charged_wall_seconds": 698,
+          "remaining_seconds_conservative": 1402,
+          "active_seconds_verified": null
+        }
+      ]
     },
     {
       "id": "S03",
@@ -122,8 +134,8 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "STOP: S02 budget exhausted. Owner decision required; no S03 authorization.",
-  "session_start_authorized": false,
+  "next_preflight_action": "Continue S02 extension 1 only, up to its timestamped 2100s cap, keep S03-S06 not_started and SEC-GATE-001 open. PR #22 remains draft.",
+  "session_start_authorized": true,
   "safety": {
     "no_product_code_during_preflight": true,
     "no_paid_services_without_new_permission": true,
