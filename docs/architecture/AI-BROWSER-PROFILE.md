@@ -51,17 +51,31 @@ Never attach to or point remote debugging to the user's default Chrome profile. 
 
 ## 4. Password manager, passkeys and credential threat model
 
+### Verbindliche Owner-Entscheidungen – Freigabegebundene Anmeldung und sichtbarer Browser
+
+**Automatisches Login (ausdrücklich entschieden):** Nur für lokal vom Nutzer vorab freigegebene **exakte Website-Origin + Kontoidentität** darf die KI im *eigenen* Browser bereits vorhandene authentifizierte Sitzungen wiederverwenden oder sicher gespeicherte Zugangsdaten für die routinemäßige Anmeldung verwenden. Freigaben müssen Zweck, Website/Konto, erlaubte Aktionen, Gültigkeit und Widerruf zeigen. Eine Webseitenanweisung, Phishing-Domain, Cross-Origin-Weiterleitung, anderer Account oder Session-Wiederaufnahme erweitert diese Freigabe nicht. Nach Widerruf werden neue Logins/Aktionen verweigert; bestehende Remote-Sessions müssen nach dem Sicherheitsmodell separat invalidiert werden, statt eine sofortige serverseitige Abmeldung zu behaupten.
+
+**Kritische Aktionen (weiterhin gesondert freizugeben):** Zahlung/Kauf, Nachricht/Posting, Kontolöschung, Passwort-/Recovery-/2FA-/Passkey-Änderung, neue Website-Berechtigungen, sensible Uploads und Datenexport. Site-Autologin allein autorisiert keine dieser Aktionen. Lokale Bestätigung ist an die konkrete Aktion, Domain, Konto und Risikoklasse gebunden. Menschlich erforderliche 2FA-/Passkey-/OS-Prompts nicht automatisch umgehen.
+
+**Passwortgeheimnis:** Speicherung weiterhin nur opt-in und mit nachgewiesenem OS-backed Verschlüsselungsweg. Gegenüber ChatGPT/MCP standardmäßig kein Klartext, keine Cookie-/Storage-State-Exporte, kein generisches JavaScript/CDP mit Secret-Zugriff. Playwright MCP stellt optional Storage-Tools bereit; diese müssen im Desktop-Control-Tool-Gateway für normale Profile deaktiviert/abgegrenzt werden. Wichtig: Auch ohne Kenntnis eines Passworts kann die KI über eingeloggte Seiten missbräuchlich handeln; deshalb prüfen Host-Policy und Benutzerfreigaben **jede** sensitive Aktion.
+
+**Immer sichtbares KI-Browserfenster (ausdrücklich entschieden):** Während KI-Browseraktionen läuft ein eigenes normales Browserfenster im **headed-Modus**; kein stiller Wechsel zu Headless-/verstecktem Betrieb, keine automatisch minimierte Oberfläche. "Sichtbar" ist nicht "ständig ganz vorn": Kein erzwungenes Always-on-top oder Fokus-Stealing, damit der Nutzer andere Fenster bedienen kann. Wenn die Anzeige nicht zuverlässig verfügbar ist, Zustand melden und pausieren statt heimlich im Hintergrund ohne Browserfenster weiterzuarbeiten. Ein KI-Browser darf weiterarbeiten, wenn andere menschliche Fenster im Vordergrund sind und keine geteilte physische Eingabe benötigt wird. Native OS-Datei-/Passwort-Dialoge → explizite Übernahme und lokale Bestätigung.
+
+**Zusätzliche ungetestete Abnahmetests:** AUT-01: nur freigegebenes exaktes Konto/Origin darf Routine-Login nach Neustart automatisch verwenden; AUT-02: Subdomain, Redirect, Homograph, fremdes Konto und Widerruf blockieren; AUT-03: Kauf/Nachricht/Kontosicherheit erfordern trotz Login eine neue Bestätigung; AUT-04: keine Geheimnisse in MCP-Ergebnissen, Traces oder Logs; VIS-01: eigenes Browserfenster bleibt headed und zugänglich über Neustart, Tabwechsel, DPI, X11/Wayland/Windows; VIS-02: keine unfreiwillige Always-on-top-/Fokusübernahme. Alle Tests **not run** bis zu explizit genehmigter Implementierung.
+
+
+
 **Desired UX:** user can choose "Save password?" for the AI profile; next visit can offer autofill. Passwords stay local, use encryption tied to OS-user and OS secret store when practical. This requires a real test on **every supported browser channel and OS**, because Playwright's persistent-context API itself provides no password manager or credential vault.
 
 **Supported-store principle:** Windows Credential Manager / applicable browser encryption; Linux Secret Service/libsecret or KWallet. Chromium on Linux can fall back to a **basic plaintext** store if no service exists; Desktop Control must refuse **secure saved-password mode** when suitable secret storage is unavailable. A custom local vault is permissible if the native browser password manager is insufficient, but it must be narrowly designed, audited and never expose a "show all passwords" MCP tool.
 
 **Critical limitation:** Password-field values, cookies and authenticated sessions can potentially be accessed by unrestricted script/DevTools. No claim of mathematically guaranteeing secrecy when a model controls arbitrary browser script is credible. Restrict generic `evaluate`, extension/script installation, direct cookie export, raw network headers and profile file tools by default. Never send passwords, OTP recovery codes, passkeys, bearer tokens or entire authenticated storageState exports to an LLM or hosted relay. Authenticated browsing still grants the AI indirect powers of the logged-in account; important transactions require separate host-side approval.
 
-**Consent policy (proposed pending owner selection):**
+**Consent policy (owner decisions established; implementation/testing pending):**
 - Default: human enters password/2FA/passkey locally; optional consent to securely save it in AI profile.
 - AI can subsequently navigate authenticated pages **within per-site/per-action authorizations** without receiving raw credentials.
 - New account registration, password changes, money transfers, exporting account data and security settings require explicit approval.
-- If user requests true autonomous credential filling, this needs a separate, clearly described higher-trust mode and focused threat review. No silent activation.
+- **Previously approved sites/accounts** may reuse secure local credentials or persisted sessions for routine login without repeated human confirmation; never expand that privilege to another site/account or critical account action.
 - No cross-profile browser sync or importing passwords from the user's everyday browser by default.
 
 Passkeys/WebAuthn, OS biometric prompts, SSO and password managers must be tested with mock accounts. A browser prompt can require human participation; do not automatically bypass security challenges.
@@ -114,6 +128,8 @@ If a browser operation necessarily invokes OS-level input, system dialogs, share
 | CRED-01 | Password-saving prompt + secure local storage works per OS/channel; fails closed if no Linux secret store |
 | CRED-02 | AI tools cannot dump raw passwords/tokens through allowed APIs; test unauthorized script/cookie access |
 | CRED-03 | Human login/2FA/passkey and permission revocation behave correctly |
+| AUT-01–04 | Exact-origin/account automatic login works only with a valid local grant; redirect/foreign-account/revocation denied; critical actions reconfirmed; no secret leakage |
+| VIS-01–02 | Always-visible headed browser, no silent headless fallback, no forced always-on-top/focus stealing on tested desktops |
 | INPUT-01 | Two on-screen indicators; Playwright clicks do not move the physical white OS pointer |
 | INPUT-02 | User can operate personal browser; AI browser works independently with no unintended focus stealing |
 | INPUT-03 | Shared OS input falls back to explicit takeover, pause and cancellation |
@@ -129,7 +145,7 @@ All entries are **unverified** until real execution in permitted test environmen
 
 ## 10. Deferred decisions and current state
 
-**Decided**: durable isolated AI browser, history/bookmarks/logins/downloads, opt-in password storage goal, ephemeral black cursor, independent in-browser actions, profile/scoped permissions. **Pending owner clarification**: whether the AI may autonomously use previously saved credentials on trusted sites or whether user must approve each login. Additional choices (Google sync, number of AI profiles, extensions, private browsing) can default conservatively until needed.
+**Decided**: durable isolated AI browser, history/bookmarks/logins/downloads, opt-in password storage goal, ephemeral black cursor, independent in-browser actions, profile/scoped permissions. **Owner decision confirmed**: automatic routine login only on sites/accounts explicitly preapproved locally; critical account changes require separate confirmation; browser always runs visibly headed, never silently headless or hidden. Additional choices (Google sync, number of AI profiles, extensions, private browsing) can default conservatively until needed.
 
 **No session started.** This document is a specification for Session 1 architecture and Session 4 browser work, not an implementation authorization.
 

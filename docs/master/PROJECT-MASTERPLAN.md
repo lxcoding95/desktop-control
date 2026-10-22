@@ -59,6 +59,15 @@ Unabhängige Policies: Gerät, Konto, Toolgruppe, Pfade, Netzwerk-Egress, Termin
 
 Für destruktives Löschen, externen Datentransfer sensibler Daten, Accountänderungen, OS-Security, Paketinstallation und Admin/Root gilt eine eigenständige Risiko- und Freigabeprüfung. Technisch nicht rücknehmbare Aktionen als solche kennzeichnen; Backups niemals als universelle Rollback-Garantie verkaufen.
 
+## 2.3 KI-Browser: bestätigte Produktvorgaben (2026-10-22)
+
+- Getrennter **dauerhafter** KI-Browser mit Verlauf, Lesezeichen, Tabs, Downloads, Login-Sessions sowie optional sicher gespeicherten Passwörtern. Keine Übernahme privater Standard-Browserprofile.
+- **Automatische Anmeldung** nur für **vorher lokal ausdrücklich freigegebene Website-Origin und Kontoidentität**. Revokation, Konto-/Domain-Wechsel und Umleitungen müssen hostseitig überprüft werden; 2FA/Passkeys werden nicht umgangen.
+- **Kritische Kontoaktionen bleiben bestätigungspflichtig**, auch wenn der Browser bereits angemeldet ist.
+- **Browserfenster während KI-Aktionen immer sichtbar als headed-Fenster**, kein versteckter Headless-Browser. Sichtbarkeit bedeutet nicht Always-on-top oder Fokus-Stealing.
+- Schwarzer KI-Cursor nur bei Mausaktionen; KI-Browser darf unabhängig von menschlichem OS-Cursor arbeiten, solange keine gemeinsame OS-Eingabe nötig ist. Gemeinsamer Desktop erfordert getrennte Übernahme-/Stoppregeln.
+- Verbindliche vollständige Planung und Tests: [KI-Browser-Spezifikation](../architecture/AI-BROWSER-PROFILE.md), [ADR-0002](../architecture/ADR-0002-AI-BROWSER.md), [Issue #14](https://github.com/lxcoding95/desktop-control/issues/14). **0/6 Entwicklungssitzungen gestartet.**
+
 ## 3. Architektur und Vertrauensgrenzen
 
 ```text

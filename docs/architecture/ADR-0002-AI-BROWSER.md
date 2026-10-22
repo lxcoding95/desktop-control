@@ -23,8 +23,13 @@ Launch a **separate, persistent, visible Chromium-based browser profile** using 
 
 Need profile lifecycle, backup/erase/import/export, OS keystore compatibility, browser update cadence, download persistence, UI activity indicators, credential redaction and host-side authorization; Windows/Linux support must be tested by platform and channel. Isolated profiles do **not** enforce OS-level security boundaries. Browser login sessions confer indirect account access even when raw passwords are hidden.
 
-## Outstanding decision
+## Resolved user decisions (2026-10-22)
 
-Does the owner want **local human confirmation before every login with saved credentials**, or allow **pre-authorized automatic login per trusted site/session**? Until decided, safest default is human-confirmed credential use.
+1. **Routine automatic login is allowed only for locally preapproved exact websites/accounts** using the AI browser's existing signed-in session or secure opt-in saved credentials. Grant requires expiration/revocation, cannot be inherited by unapproved origins, redirects or other accounts.
+2. **Sensitive account actions always require an independent confirmation**, including payments, sending messages, account/security/password changes, sensitive uploads, data exports and destructive actions. An authenticated browser does not imply action authorization. Human-controlled 2FA/passkeys are not bypassed.
+3. **Always-visible headed browser window:** no hidden/headless background browser as a product mode; not forced always-on-top or allowed to steal the user's focus. If a visible window cannot be maintained, suspend and report; normal browser-native actions may continue without sharing the white OS cursor.
+4. **Implementation not validated:** Test Windows/Linux browser channel, password vault, policy enforcement, exact-origin redirects, prompt-injection, visibility/focus and revocation; see the acceptance matrix in [AI-BROWSER-PROFILE](AI-BROWSER-PROFILE.md).
+
+These are owner requirements, not implemented features.
 
 No software or workflow is implemented and all quality criteria remain open.
