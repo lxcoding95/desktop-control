@@ -1,6 +1,6 @@
 # Local MCP server prototype (S02)
 
-**State: source implemented; SDK runtime and MCP Inspector integration NOT verified.**  
+**State: experimental source implemented; legacy MCP Inspector integration partially verified on prior Windows checkout; latest GitHub head's modern SDK protocol/build not verified.**  
 [Session #6](https://github.com/lxcoding95/desktop-control/issues/6) · [Architecture ADR-0004](../../docs/architecture/ADR-0004-MCP-FOUNDATION.md) · [S02 validation](../../docs/sessions/session-02/VALIDATION.md)
 
 ## Purpose and trust boundary
@@ -18,22 +18,21 @@ POSIX principal derives from the user ID of the current process (and must not be
 - `zod@4.6.5` for strict input/structured output.
 - TypeScript 5.9.3; MCP Inspector 2.12.0 for later local smoke tests.
 
-Versions listed above are package manifest **requests only**; no `package-lock.json` could be generated in the S02 environment (npm cache empty and network DNS unavailable). Do not claim reproducible dependency resolution until a clean lockfile is generated and checked. Do not publish this prototype as a distributable application.
+Versions are pinned in the committed `package-lock.json` (v3, generated on Windows, 163 package entries). In the **earlier Windows Work checkout**, `npm ci --ignore-scripts` succeeded with 125 packages and `npm audit` reported zero known advisories; no complete license/security certification is claimed. The isolated Linux Chat container still lacks registry DNS; latest GitHub head has not been rebuilt with these dependencies. Do not publish this prototype as a distributable application. Do not publish this prototype as a distributable application.
 
 ## Development / actual status
 
 ```sh
 # From repository root, only in a suitable development environment:
 node --version
-npm install --package-lock-only --ignore-scripts   # generate lockfile for review
-npm ci --ignore-scripts
+npm ci --ignore-scripts   # use committed package-lock.json; do not regenerate unreviewed
 npm test
 npm run typecheck
 npm run build
 npm run start:mcp
 ```
 
-The `npm test` script runs the pure policy/executor unit tests against source TypeScript using Node's type-stripping and does not load the MCP SDK. **18 tests passed on an isolated Linux container**; this does not demonstrate a functioning MCP connection. `npm ci`, typecheck and real Inspector were blocked, not passed. See [full evidence](../../docs/sessions/session-02/VALIDATION.md).
+The `npm test` script runs the pure policy/executor unit tests against source TypeScript using Node's type-stripping and does not load the MCP SDK. **18 versioned source tests passed on an earlier real Windows checkout, and 20 tests passed in a later prepared Linux source copy** (two newer tests not versioned); neither result verifies the latest full SDK build. Previous Windows `npm ci` and MCP Inspector `initialize`, `tools/list` and denied `tools/call` passed at protocol **2025-11-25**; full `npm run typecheck` and `npm run build` **failed** on test typing (subsequently edited, not fully rerun). Modern 2026-07-28 discovery, clean latest-head build, positive grant and lifecycle checks remain unverified. See [Windows continuation](../../docs/sessions/session-02/CONTINUATION-2026-10-22.md) and [extension checkpoints](../../docs/sessions/session-02/EXTENSION-2026-10-22.md). See [full evidence](../../docs/sessions/session-02/VALIDATION.md).
 
 After the SDK build succeeds, an authorized S02 continuation must verify the 2026-07-28 `server/discover` flow, `tools/list`, denied `tools/call`, strict schema validation, EOF shutdown, and positive tests with a harness-injected scoped grant, using an actual client or MCP Inspector.
 
