@@ -1,6 +1,7 @@
 /** Host-derived principal. This is a prototype OS identity, not transport authentication. */
+/** Never confer a grant to a root/setuid process, even in explicit test injection. */
 export function posixPrincipal(uid: number, effectiveUid: number): string | null {
-  return Number.isSafeInteger(uid) && uid >= 0 && Number.isSafeInteger(effectiveUid) &&
+  return Number.isSafeInteger(uid) && uid > 0 && Number.isSafeInteger(effectiveUid) &&
     uid === effectiveUid ? `posix:${uid}` : null;
 }
 
