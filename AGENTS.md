@@ -1,6 +1,6 @@
 # Desktop Control — repository working agreement
 
-**Status: pre-development.** Product implementation is not authorized by this file. The owner has reserved six sessions; **0/6 started**. An explicit owner command starts a development session.
+**Status: S01 architecture documented (2026-10-22), runnable MCP product not yet implemented.** The owner has reserved six sessions; **1/6 started (S01 only)**. S02-S06 still require their own explicit owner authorization. See [S01 session record](docs/sessions/session-01/SESSION-STATE.md).
 
 ## Authoritative context
 
@@ -19,7 +19,7 @@
 5. Never invent tests, reviewer identities, audits, green badges or Windows/Linux capability evidence.
 6. [SEC-GATE-001](https://github.com/lxcoding95/desktop-control/issues/1): verify full commit-SHA references for GitHub Actions and enforce pinning before regular CI activation.
 7. Actual shell execution cannot be safely contained by a command or path allowlist alone; use on-host authorization and OS-enforced isolation where needed.
-8. Keep zero sessions until explicit owner authorization; a paused session resumes with the same session ID.
+8. Start a session only on explicit owner authorization; a paused session resumes with the same session ID and verified remaining budget.
 
 ## New chat/continuation
 
