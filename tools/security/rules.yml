@@ -1,0 +1,24 @@
+rules:
+  - id: desktop-control-no-dynamic-eval
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Dynamic code evaluation is forbidden at the Desktop Control MCP trust boundary."
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+      - pattern: Function(...)
+  - id: desktop-control-no-remote-listener
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "A TCP/HTTP listener must not be introduced in S02 without explicit new security review."
+    pattern-either:
+      - pattern: http.createServer(...)
+      - pattern: https.createServer(...)
+      - pattern: net.createServer(...)
+  - id: desktop-control-no-shell-execution
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Unrestricted shell execution is outside S02 and requires separate authorization."
+    pattern-either:
+      - pattern: child_process.exec(...)
+      - pattern: require('child_process').exec(...)
