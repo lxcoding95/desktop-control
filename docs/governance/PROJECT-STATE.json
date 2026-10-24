@@ -5,7 +5,7 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_linux_oss_scan_passed_regression_windows_review_pending",
+  "phase": "S02_linux_sast_sca_regression_pass_windows_semantic_review_pending",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "completion_linux_oss_scan_passed_regression_windows_review_pending",
+      "status": "completion_linux_scanners_regression_passed_windows_review_pending",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -91,7 +91,7 @@
       "test_result": "Actual Windows npm ci/full typed ESLint/typecheck/23 unit tests/build/9 modern stdio protocol tests PASS. Both deferred-entry regressions red before fix, green after; external compiled boundary5/5 and protocol8/8 PASS.",
       "environment_blocker": null,
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "In existing unprivileged Linux Docker checkout, fast-forward latest S02 feature HEAD, run npm ci --ignore-scripts, npm run verify, npm audit and git diff --check; capture exit codes. Inspect local OSV report JSON and reviewdog output, then run Windows toolchain and independent semantic review. No main merge.",
+      "next_exact_action": "Inspect owner-local .reports/osv.json and reviewdog.rdjson on Linux (untracked ignored, never upload sensitive full reports blindly); then run checksum-pinned OSS scanner install/selftest/scan and npm verify on native Windows. Obtain independent semantic review. PR22 Draft, no Actions.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -205,7 +205,7 @@
         "osv_dependency_scan_executed": true,
         "reviewdog_formatting_executed": true,
         "independent_semantic_review_completed": false,
-        "status": "linux_install_positive_control_and_local_sast_sca_scan_passed_linux_regression_and_windows_pending",
+        "status": "linux_local_security_scan_and_full_regression_passed_osv_report_windows_and_independent_review_pending",
         "report_location": "tools/security/README.md",
         "reason": "User rejected Work handoff and this Chat container has no DNS/local Windows Docker access; cannot claim local scanner execution. No GitHub Actions, no credentials, no Qodo/CodeRabbit.",
         "linux_attempt_2026_10_24": {
@@ -294,6 +294,38 @@
             },
             "report_location": "tools/security/.reports (ignored local)",
             "limits": "Only 3 custom SAST rules/5 source files; OSV JSON uninspected; independent semantic audit/Windows not completed"
+          },
+          "regression": {
+            "evidence": "Owner-supplied Windows PowerShell invoking Debian Docker uid1000, full npm output 2026-10-24; final S02_LINUX_REGRESSION=PASS displayed after exiting npm audit pager",
+            "tested_head": "386f99608f8d8988056ebdf967d9990250261dbe",
+            "npm_ci_ignore_scripts": {
+              "result": "PASS",
+              "added_packages": 209,
+              "audited_packages": 211,
+              "reported_vulnerabilities": 0
+            },
+            "lint": "PASS",
+            "typecheck": "PASS",
+            "unit_tests": {
+              "passed": 29,
+              "failed": 0,
+              "skipped": 0
+            },
+            "build": "PASS",
+            "protocol_tests": {
+              "passed": 10,
+              "failed": 0,
+              "skipped": 1,
+              "skipped_test": "Windows-specific production entry"
+            },
+            "npm_audit": {
+              "result": "PASS",
+              "reported_vulnerabilities": 0
+            },
+            "git_diff_check": "PASS",
+            "final_marker": "S02_LINUX_REGRESSION=PASS",
+            "worktree": "clean per `git status --short --branch`",
+            "limitations": "Owner terminal evidence rather than direct Chat execution; security tools for Windows and independent semantic review not yet run"
           }
         }
       }
@@ -327,7 +359,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "User Docker scan at HEAD 328ae3e passed: Opengrep 5 source/3 rules/0 findings, coverage exit0, OSV245 packages exit0, reviewdog exit0, overall exit0. Full Linux regression on updated docs head and Windows OSS scanner tests pending, OSV report needs inspection and independent security review pending. S03-S06 locked.",
+  "next_preflight_action": "Owner's Docker Debian Linux regression PASS for source HEAD 386f996 (29/29 units, 10 protocol+1 Windows-only skip, npm audit0, clean git). Inspect OSV JSON/rdjson; Windows 3 scanners and independent semantic review pending. SEC-GATE-001 open, S03-S06 not started.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
