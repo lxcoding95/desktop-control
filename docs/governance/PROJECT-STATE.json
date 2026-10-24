@@ -5,7 +5,7 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_linux_full_regression_windows_oss_scans_passed_native_regression_review_pending",
+  "phase": "S02_cross_platform_scans_regressions_passed_independent_review_pending",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "completion_windows_oss_scan_passed_windows_regression_independent_review_pending",
+      "status": "completion_cross_platform_toolchain_tests_passed_final_independent_semantic_review_pending",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -91,7 +91,7 @@
       "test_result": "Actual Windows npm ci/full typed ESLint/typecheck/23 unit tests/build/9 modern stdio protocol tests PASS. Both deferred-entry regressions red before fix, green after; external compiled boundary5/5 and protocol8/8 PASS.",
       "environment_blocker": null,
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "Run clean native Windows npm ci --ignore-scripts, npm run verify, npm audit --audit-level=moderate, git diff --check on S02 branch, inspect Windows osv.json and reviewdog.rdjson without exposing tokens. Obtain independent semantic/security review; PR22 Draft. S03-S06 remain not_started.",
+      "next_exact_action": "Inspect owner-local Windows tools/security/.reports/osv.json and reviewdog.rdjson, then obtain independent semantic review of final S02 code and security boundaries; all warnings/findings must be triaged; validate PR gating before final merge. No S03-S06.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -205,7 +205,7 @@
         "osv_dependency_scan_executed": true,
         "reviewdog_formatting_executed": true,
         "independent_semantic_review_completed": false,
-        "status": "linux_regression_scans_and_windows_install_selftest_sast_sca_pass_windows_regression_independent_review_pending",
+        "status": "windows_linux_install_selftest_scans_and_full_regression_passed_semantic_review_pending",
         "report_location": "tools/security/README.md",
         "reason": "Evidence from owner's real Linux Docker and Windows PowerShell transcripts. Chat did not execute on owner's host; scanner findings limited to 3 custom rules; manual security review still required. No Actions or external remote bridge used.",
         "linux_attempt_2026_10_24": {
@@ -394,7 +394,42 @@
             },
             "wrapper_marker": "S02_WINDOWS_SECURITY_SCAN=PASS"
           },
-          "remaining": "Review Windows osv.json/rdjson summaries; run npm ci --ignore-scripts, npm run verify, npm audit --json, git diff --check at current head, and independent semantic/security review."
+          "remaining": "Review Windows osv.json/rdjson summaries; run npm ci --ignore-scripts, npm run verify, npm audit --json, git diff --check at current head, and independent semantic/security review.",
+          "regression": {
+            "provenance": "Owner provided native Windows 11 PowerShell transcript. This Chat did not execute commands on owner device.",
+            "tested_head": "5f4aa15c7b797c775f1c5615f7ce041bdd0020aa",
+            "node_version": "24.21.0",
+            "npm_version": "12.2.0",
+            "npm_ci_ignore_scripts": {
+              "status": "PASS",
+              "packages_installed": 209,
+              "packages_audited": 211,
+              "reported_vulnerabilities": 0,
+              "transient_warnings": "Three npm tarball integrity/retry warnings for on-exit-leak-free 2.1.2, cli-cursor 4.0.0, @typescript-eslint/tsconfig-utils 8.72.0; npm recovered, final command exit0; do not represent as independently investigated."
+            },
+            "lint": "PASS",
+            "typecheck": "PASS",
+            "unit_tests": {
+              "passed": 29,
+              "failed": 0,
+              "skipped": 0
+            },
+            "build": "PASS",
+            "protocol_tests": {
+              "passed": 9,
+              "failed": 0,
+              "skipped": 2,
+              "skipped_tests": "Linux /proc-specific network/socket tests"
+            },
+            "npm_audit": {
+              "status": "PASS",
+              "reported_vulnerabilities": 0
+            },
+            "git_diff_check": "PASS",
+            "final_marker": "S02_WINDOWS_REGRESSION=PASS",
+            "worktree": "clean branch per git status --short --branch",
+            "limits": "Windows JSON OSV and RDJSON summaries were not inspected; independent semantic security review remains OPEN. User-supplied terminal evidence, not direct assistant execution."
+          }
         }
       }
     },
@@ -427,7 +462,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Windows non-admin pinned OSS install/selftest/scans PASS at 47723e6; Linux full regression and OSS scan PASS. Windows npm verify on latest branch, OSV report inspection and independent semantic review pending. Main protected, PR22 draft, SEC-GATE-001 open, S03-S06 locked.",
+  "next_preflight_action": "Windows/Linux local pinned OSS install, positive controls, real SAST/SCA and native npm regression PASS. Windows source tested at 5f4aa15, Linux at 386f996. Windows OSV/RDJSON summaries and INDEPENDENT semantic review pending; PR #22 draft; main protected, SEC-GATE-001 open, S03-06 locked.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
