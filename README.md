@@ -2,7 +2,7 @@
 
 Open-source desktop control tooling for MCP-compatible AI clients on Windows and Linux.
 
-> **Status: early development (S01 complete; S02 experimental, not accepted).** A local MCP stdio status-tool prototype exists only on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **not on `main`**. The main branch contains architecture, governance and documentation; no installable desktop app, public service, published plugin or production-ready MCP server has been released. Do not install or rely on this repository for computer control yet.
+> **Status reviewed 2026-10-24:** no production release, installer or published plugin. The only local MCP status-core source is on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **not on `main`**; owner-run Windows/Linux regression and local security scanners passed, but **independent semantic review and private ChatGPT desktop connection are still pending**. Do not rely on this repository for production computer control.
 
 ## Intended capabilities
 
@@ -15,9 +15,11 @@ Open-source desktop control tooling for MCP-compatible AI clients on Windows and
 
 An AI client makes decisions; this project will provide **tools and a local execution bridge**, not another AI agent.
 
-## Status and roadmap
+## Product roadmap and verified delivery
 
-**Two of six reserved sessions have started.** S01 [Foundation & Architecture](https://github.com/lxcoding95/desktop-control/issues/5) is **completed** and [PR #21](https://github.com/lxcoding95/desktop-control/pull/21) was squash-merged. S02 [MCP Core & Connectivity](https://github.com/lxcoding95/desktop-control/issues/6) is **in development, currently paused pending a usable SDK validation environment**, with an owner-authorized additional time allowance and [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22). S03–S06 remain **not started and not authorized**. See [ROADMAP.md](ROADMAP.md), [session plan](docs/governance/SESSION-PLAN.md), and [issues](https://github.com/lxcoding95/desktop-control/issues). A six-session timebox is a planning constraint, **not a promise that full feature parity or a production release will fit inside it**.
+Desktop Control uses **product-outcome milestones M01–M06 and M07+** (unbounded) to present real user-visible progress, dependencies and evidence; they are **not** the six timeboxed development sessions. See the [product roadmap](ROADMAP.md) and [milestone/evidence register](docs/governance/PRODUCT-MILESTONES.md). GitHub's existing session-oriented milestone objects are **not yet migrated**: the [non-destructive migration issue #25](https://github.com/lxcoding95/desktop-control/issues/25) tracks verified owner/UI follow-up.
+
+**Actual work:** S01 architecture [#5](https://github.com/lxcoding95/desktop-control/issues/5) and [PR #21](https://github.com/lxcoding95/desktop-control/pull/21) completed/merged; S02 [#6](https://github.com/lxcoding95/desktop-control/issues/6) read-only MCP status-core was tested on Windows/Linux on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **not accepted or merged**. Windows: 29 unit/9 platform-applicable protocol tests passed, 2 Linux-only tests skipped; Linux: 29 unit/10 protocol passed, 1 Windows-only test skipped; local OSS security scan checks passed. **There is still no private ChatGPT end-to-end connection or installer.** The independent semantic security review remains an outstanding gate. S03–S06 remain **not started, not authorized**; [session history](docs/governance/SESSION-PLAN.md) is preserved separately.
 
 ## Planned system boundary
 
@@ -38,6 +40,8 @@ The gateway, local bridge, identity model and transports remain subject to desig
 
 ## Canonical project plan and cross-chat continuity
 
+- [Product milestones M01–M06, migration and evidence semantics](docs/governance/PRODUCT-MILESTONES.md)
+- [Public information classification and repository freshness](docs/governance/PUBLIC-INFORMATION-POLICY.md)
 - [German masterplan (scope, decisions, architecture, sources and six sessions)](docs/master/PROJECT-MASTERPLAN.md)
 - [Cross-chat recovery protocol](docs/governance/CHAT-CONTINUITY.md)
 - [Machine-readable project state snapshot](docs/governance/PROJECT-STATE.json)
@@ -46,7 +50,7 @@ The gateway, local bridge, identity model and transports remain subject to desig
 - [29 Desktop Commander tool coverage plan](docs/research/DESKTOP-COMMANDER-COVERAGE.md)
 - [Final GitHub Work administration assignment](docs/governance/WORK-ADMIN-FINAL.md)
 
-The plan and state files **are not live execution results**. Before making changes, read GitHub's current branch SHA, open PRs, linked Issues #1–#10 and any session-specific branch handoff. Sessions started: **2/6** (S01 completed; S02 incomplete). Authoritative S02 progress, tests and time accounting are on [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6), [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22) and [S02 extension checkpoint](https://github.com/lxcoding95/desktop-control/blob/feat/s02-local-mcp-core/docs/sessions/session-02/EXTENSION-2026-10-22.md). GitHub Projects and milestone descriptions may lag until separately updated; do not interpret labels or progress bars as execution evidence.
+Plans and snapshots **are not live execution results**. Read actual GitHub `main`, open PR branches and issues before any write. S02's current evidence is on [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6), [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22) and the [feature-branch state snapshot](https://github.com/lxcoding95/desktop-control/blob/feat/s02-local-mcp-core/docs/governance/PROJECT-STATE.json). GitHub milestone descriptions and private Project metadata may lag; do not interpret completion percentages as proof of tests or independent review.
 
 ## Dedicated AI browser profile (planned)
 
