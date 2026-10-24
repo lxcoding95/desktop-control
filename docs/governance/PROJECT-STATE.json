@@ -261,9 +261,10 @@
     "owner_explicit": true,
     "scope": "S02 only",
     "time_policy": "required_time_no_new_fixed_extension",
-    "started_at_utc": "10/24/2026 19:45:07",
+    "started_at_utc": "2026-10-24T17:45:07.9371848+00:00",
     "baseline_head": "ddff6d439b2795c2c54f292827bb1ca02b9e1322",
-    "status": "active_preflight",
-    "historical_time_accounts_preserved": true
+    "status": "socket_zod_windows_native_implemented_verification_in_progress",
+    "historical_time_accounts_preserved": true,
+    "last_checkpoint_at_utc": "2026-10-24T17:52:09.974Z"
   }
 }

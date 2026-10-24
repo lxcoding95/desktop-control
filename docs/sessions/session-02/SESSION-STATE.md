@@ -96,3 +96,8 @@ See [execution evidence and timing](EXTENSION-3-LINUX-VERIFICATION.md). Actual r
 
 See [new authorization and preflight](COMPLETION-AUTHORIZATION-2026-10-24.md). Work started 10/24/2026 19:45:07. Same S02, no new fixed deadline/session. Old time accounts preserved. Baseline ddff6d4/main963024f9. All native/license/review gates remain open until evidenced; S03–S06 locked.
 
+
+## Completion checkpoint 2026-10-24T17:52:09.9869657+00:00
+
+Socket regression reproduced red on Linux, corrected detector and deliberate TCP/UDP positive controls pass2/2. Zod4.6.7 locked without major/force upgrade. Native Windows read-only access-token helper implemented; first Windows ci/verify pass27 units,9 protocols+2 Linuxskips. Identity native-boundary tests, full Linux matrix, license/SBOM and independent review still pending. Production default-deny unchanged. No S03–S06/CI/merge. Actual authorization start2026-10-24T17:45:07.9371848Z; earlier locale-formatted start in initial document is superseded by this precise UTC value. Next: native privilege probes and clean Linux run.
+

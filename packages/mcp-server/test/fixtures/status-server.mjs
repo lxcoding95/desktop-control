@@ -1,12 +1,12 @@
 // Isolated test fixture. Do not package or use as a production entrypoint.
 const { createServer } = await import(new URL('../../../../dist/packages/mcp-server/src/server.mjs', import.meta.url));
+const { localPrincipal } = await import(new URL('../../../../dist/packages/mcp-server/src/bridge/principal.mjs', import.meta.url));
 import { serveStdio } from '@modelcontextprotocol/server/stdio';
-// Synthetic POSIX identity ONLY inside this test subprocess: no Windows SID claim.
-Object.defineProperty(process, 'getuid', { value: () => 424242, configurable: true });
-Object.defineProperty(process, 'geteuid', { value: () => 424242, configurable: true });
+// Native process identity; grants are test-only and never enrolled through MCP.
+const principal = localPrincipal();
 const mode = process.argv[2];
 let calls = 0;
-const grant = { principal: 'posix:424242', capability: 'diagnostics.read', resource: 'local:desktop-control', expiresAt: Date.now() + 60_000, revoked: mode === 'revoked' };
+const grant = { principal: principal ?? 'unavailable', capability: 'diagnostics.read', resource: 'local:desktop-control', expiresAt: Date.now() + 60_000, revoked: mode === 'revoked' };
 if (mode === 'expired') grant.expiresAt = 0;
 const grants = { getGrants: () => mode === 'denied' ? [] : [grant] };
 const adapter = { readStatus: () => {
