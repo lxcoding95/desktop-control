@@ -61,3 +61,16 @@ test('fails with code 2 outside Git rather than reporting all-clear', () => {
   const root = mkdtempSync(join(tmpdir(), 'dc-public-guard-no-git-'));
   try { const p = run(root); assert.equal(p.status, 2); } finally { dispose(root); }
 });
+
+
+test('sensitive filenames are detected but never printed verbatim', () => {
+  const root = repo();
+  try {
+    const name = ['private', 'example.invalid'].join('@') + '.txt';
+    writeFileSync(join(root, name), 'safe content');
+    const p = run(root); assert.equal(p.status, 1);
+    const d = JSON.parse(p.stdout);
+    assert.ok(d.findings.some(x => x.rule === 'sensitive-filename'));
+    assert.ok(!p.stdout.includes(name));
+  } finally { dispose(root); }
+});
