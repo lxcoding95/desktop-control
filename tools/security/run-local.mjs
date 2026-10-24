@@ -113,9 +113,19 @@ function output(name, data) {
   mkdirSync(reports, { recursive: true });
   writeFileSync(join(reports, name), data);
 }
+function sourceTargets(folder) {
+  const targets = [];
+  for (const item of readdirSync(folder, { withFileTypes: true })) {
+    const p = join(folder, item.name);
+    if (item.isDirectory()) targets.push(...sourceTargets(p));
+    else if (item.isFile() && (p.endsWith('.mts') || p.endsWith('.ts') || p.endsWith('.mjs')))
+      targets.push(p);
+  }
+  return targets;
+}
 function opengrepArgs(fmt, path) {
   return [
-    'scan', '--config', join(here, 'rules.yml'),
+    'scan', '--scan-unknown-extensions', '--config', join(here, 'rules.yml'),
     fmt === 'sarif' ? '--sarif' : '--json',
     '-o', path,
     '--error'
@@ -126,9 +136,11 @@ async function scan() {
   mkdirSync(reports, { recursive: true });
   // Target only S02 product source. Never silently scan or execute the fixtures.
   const sarif = join(reports, 'opengrep.sarif');
+  const targets = sourceTargets(join(root, 'packages', 'mcp-server', 'src'));
+  demand(targets.length >= 4, 'Source target discovery found too few files; refusing empty SAST scan');
   const og = run(toolBin('opengrep'), [
     ...opengrepArgs('sarif', sarif),
-    join(root, 'packages', 'mcp-server', 'src')
+    ...targets
   ]);
   output('opengrep.stderr.txt', og.stderr);
   const osv = run(toolBin('osv-scanner'), [
