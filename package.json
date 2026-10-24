@@ -2,6 +2,7 @@
   "name": "desktop-control",
   "private": true,
   "version": "0.0.0",
+  "author": "Anon Allman",
   "type": "module",
   "workspaces": [
     "packages/*"
@@ -17,7 +18,8 @@
     "typecheck:bridge": "tsc --noEmit --project tsconfig.bridge.json",
     "test:protocol": "node --test packages/mcp-server/test/*.test.mjs",
     "lint": "eslint --max-warnings 0 packages eslint.config.mjs",
-    "verify": "npm run lint && npm run typecheck && npm test && npm run build && npm run test:protocol"
+    "test:private-files": "node --test packages/private-files/test/*.test.mjs",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run test:private-files && npm run build && npm run test:protocol"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

@@ -1,0 +1,9 @@
+{
+  "name": "@desktop-control/private-files",
+  "version": "0.0.1",
+  "author": "Anon Allman",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test test/*.test.mjs" },
+  "dependencies": { "pdf-lib": "1.17.1" }
+}

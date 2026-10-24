@@ -9,12 +9,34 @@ using System.Security.Principal;
 internal static class WindowsPrivatePolicy {
     const int Limit = 16384;
     static readonly byte[] Entropy = Encoding.UTF8.GetBytes("desktop-control/private-diagnostics/policy/v1");
+    static readonly byte[] WorkspaceEntropy = Encoding.UTF8.GetBytes("desktop-control/private-workspace/policy/v1");
     static readonly SecurityIdentifier SystemSid = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null);
     static SecurityIdentifier UserSid;
+    static bool TrustedAncestorIdentity(IdentityReference identity) {
+        SecurityIdentifier sid = identity as SecurityIdentifier;
+        return sid != null && (sid.Equals(UserSid) || sid.Equals(SystemSid) ||
+            sid.IsWellKnown(WellKnownSidType.BuiltinAdministratorsSid) ||
+            sid.Value == "S-1-5-80-956008885-3418522649-1831038044-1853292631-2271478464"); // TrustedInstaller
+    }
+    static void CheckAncestorAcl(string path) {
+        DirectorySecurity acl = Directory.GetAccessControl(path);
+        if (!TrustedAncestorIdentity(acl.GetOwner(typeof(SecurityIdentifier)))) throw new InvalidOperationException();
+        FileSystemRights mutation = FileSystemRights.DeleteSubdirectoriesAndFiles | FileSystemRights.Delete |
+            FileSystemRights.ChangePermissions | FileSystemRights.TakeOwnership | (FileSystemRights)0x10000000; // GENERIC_ALL
+        foreach (FileSystemAccessRule rule in acl.GetAccessRules(true, true, typeof(SecurityIdentifier))) {
+            // An inherit-only ACE is not effective on this directory. Protected private
+            // store ACLs also prevent it becoming effective on policy children.
+            if (rule.AccessControlType == AccessControlType.Allow &&
+                (rule.PropagationFlags & PropagationFlags.InheritOnly) == 0 &&
+                (rule.FileSystemRights & mutation) != 0 && !TrustedAncestorIdentity(rule.IdentityReference))
+                throw new InvalidOperationException();
+        }
+    }
     static void CheckAncestors(string path) {
         string current = Path.GetFullPath(path);
         while (!String.IsNullOrEmpty(current)) {
             CheckPath(current);
+            CheckAncestorAcl(current);
             DirectoryInfo parent = Directory.GetParent(current);
             if (parent == null) break;
             current = parent.FullName;
@@ -64,7 +86,9 @@ internal static class WindowsPrivatePolicy {
         try {
             if (args.Length == 1 && args[0] == "probe") { Console.WriteLine("PRIVATE_POLICY_V1"); return 0; }
             if (args.Length != 1 && args.Length != 3) throw new InvalidOperationException();
-            if (args[0] != "read" && args[0] != "write") throw new InvalidOperationException();
+            bool workspace = args[0] == "read-workspace" || args[0] == "write-workspace" || args[0] == "prepare-workspace";
+            bool writing = args[0] == "write" || args[0] == "write-workspace" || args[0] == "prepare-workspace";
+            if (!workspace && args[0] != "read" && args[0] != "write") throw new InvalidOperationException();
             using (WindowsIdentity identity = WindowsIdentity.GetCurrent()) { UserSid = identity.User; }
             string profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             if (String.IsNullOrEmpty(profile)) throw new InvalidOperationException();
@@ -74,34 +98,47 @@ internal static class WindowsPrivatePolicy {
             if (test) {
                 if (args[1] != "--test-directory") throw new InvalidOperationException();
                 directory = Path.GetFullPath(args[2]);
-                string parent = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar);
-                if (!String.Equals(Path.GetDirectoryName(directory), parent, StringComparison.OrdinalIgnoreCase) ||
-                    !System.Text.RegularExpressions.Regex.IsMatch(Path.GetFileName(directory), "^DesktopControl-private-test-[A-Za-z0-9]+$")) throw new InvalidOperationException();
-                CheckAncestors(parent);
+                string parent = Path.GetFullPath(profile).TrimEnd(Path.DirectorySeparatorChar);
+                string testRoot = Path.GetFileName(directory) == "policy-store" ? Path.GetDirectoryName(directory) : directory;
+                if (!String.Equals(Path.GetDirectoryName(testRoot), parent, StringComparison.OrdinalIgnoreCase) ||
+                    !System.Text.RegularExpressions.Regex.IsMatch(Path.GetFileName(testRoot), "^DesktopControl-private-test-[A-Za-z0-9]+$")) throw new InvalidOperationException();
+                CheckAncestors(Path.GetDirectoryName(directory));
+                if (directory != testRoot && writing && Directory.GetFileSystemEntries(testRoot).Length == 0)
+                    Directory.SetAccessControl(testRoot, DirectoryAcl());
             }
             // The explicit test directory starts as a fresh mkdtemp directory; protect it
             // on first write only. Production existing directories are never repaired.
             if (!Directory.Exists(directory)) {
-                if (args[0] != "write") throw new InvalidOperationException();
+                if (!writing) throw new InvalidOperationException();
                 Directory.CreateDirectory(directory, DirectoryAcl());
-            } else if (test && args[0] == "write" && Directory.GetFileSystemEntries(directory).Length == 0) {
+            } else if (test && writing && Directory.GetFileSystemEntries(directory).Length == 0) {
                 CheckPath(directory); Directory.SetAccessControl(directory, DirectoryAcl());
             }
             CheckPath(directory); CheckAcl(Directory.GetAccessControl(directory));
-            string file = Path.Combine(directory, "policy");
+            if (args[0] == "prepare-workspace" || args[0] == "read-workspace") {
+                string workArea = Path.Combine(directory, "workspace");
+                if (!Directory.Exists(workArea)) {
+                    if (args[0] != "prepare-workspace") throw new InvalidOperationException();
+                    Directory.CreateDirectory(workArea, DirectoryAcl());
+                }
+                CheckPath(workArea); CheckAcl(Directory.GetAccessControl(workArea));
+                if (args[0] == "prepare-workspace") return 0;
+            }
+            byte[] entropy = workspace ? WorkspaceEntropy : Entropy;
+            string file = Path.Combine(directory, workspace ? "workspace-policy" : "policy");
             if (File.Exists(file)) { CheckPath(file); CheckAcl(File.GetAccessControl(file)); }
-            if (args[0] == "read") {
+            if (!writing) {
                 using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read)) {
                     if (stream.Length <= 0 || stream.Length > 32768) throw new InvalidOperationException();
                     byte[] cipher = new byte[(int)stream.Length];
                     int offset = 0;
                     while (offset < cipher.Length) { int n = stream.Read(cipher, offset, cipher.Length - offset); if (n <= 0) throw new InvalidOperationException(); offset += n; }
-                    byte[] plain = ProtectedData.Unprotect(cipher, Entropy, DataProtectionScope.CurrentUser);
+                    byte[] plain = ProtectedData.Unprotect(cipher, entropy, DataProtectionScope.CurrentUser);
                     if (plain.Length > Limit) throw new InvalidOperationException();
                     Console.Write(Encoding.UTF8.GetString(plain));
                 }
             } else {
-                byte[] cipher = ProtectedData.Protect(Encoding.UTF8.GetBytes(Input()), Entropy, DataProtectionScope.CurrentUser);
+                byte[] cipher = ProtectedData.Protect(Encoding.UTF8.GetBytes(Input()), entropy, DataProtectionScope.CurrentUser);
                 string temporary = Path.Combine(directory, ".policy-" + Guid.NewGuid().ToString("N"));
                 try {
                     using (FileStream stream = new FileStream(temporary, FileMode.CreateNew, FileSystemRights.Write, FileShare.None, 4096, FileOptions.WriteThrough, FileAcl())) {

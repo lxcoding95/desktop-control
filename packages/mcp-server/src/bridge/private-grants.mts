@@ -16,7 +16,7 @@ const helper = fileURLToPath(new URL('dist/native/windows-private-policy.exe', r
 const productionDirectory = () => path.join(userInfo().homedir, '.desktop-control-private');
 interface Storage { read(): string; write(value: string): void; }
 
-function native(mode: 'read' | 'write', input?: string, testDirectory?: string): string {
+function native(mode: 'read' | 'write' | 'read-workspace' | 'write-workspace' | 'prepare-workspace', input?: string, testDirectory?: string): string {
   return execFileSync(helper, testDirectory ? [mode, '--test-directory', testDirectory] : [mode], {
     ...(input === undefined ? {} : { input }), encoding: 'utf8', timeout: 2_000,
     maxBuffer: 32_768, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe']
@@ -45,13 +45,13 @@ function assertParentTrust(directory: string): void {
   }
 }
 
-function storage(testDirectory?: string): Storage {
+function storage(testDirectory?: string, kind: 'diagnostic' | 'workspace' = 'diagnostic'): Storage {
   if (process.platform === 'win32') return {
-    read: () => native('read', undefined, testDirectory),
-    write: value => { native('write', value, testDirectory); }
+    read: () => native(kind === 'workspace' ? 'read-workspace' : 'read', undefined, testDirectory),
+    write: value => { native(kind === 'workspace' ? 'write-workspace' : 'write', value, testDirectory); }
   };
   const directory = testDirectory ?? productionDirectory();
-  const file = path.join(directory, 'policy');
+  const file = path.join(directory, kind === 'workspace' ? 'workspace-policy' : 'policy');
   return {
     read() {
       assertParentTrust(directory);
@@ -85,6 +85,76 @@ function storage(testDirectory?: string): Storage {
       finally { try { unlinkSync(temporary); } catch { /* rename consumed it */ } }
     }
   };
+}
+
+export type PrivateWorkspaceCapability = 'files.read' | 'files.write' | 'files.remove' | 'pdf.create';
+const WORKSPACE_CAPABILITIES: readonly PrivateWorkspaceCapability[] = ['files.read', 'files.write', 'files.remove', 'pdf.create'];
+const WORKSPACE_RESOURCE = 'local:desktop-control:workspace';
+interface WorkspaceAccess { workspace: string; expiresAt: number; }
+interface WorkspacePolicy { capabilities: PrivateWorkspaceCapability[]; expiresAt: number; }
+
+function workspacePath(testDirectory?: string): string { return path.join(testDirectory ?? productionDirectory(), 'workspace'); }
+function prepareWorkspace(testDirectory?: string): void {
+  if (process.platform === 'win32') { native('prepare-workspace', undefined, testDirectory); return; }
+  const directory = testDirectory ?? productionDirectory();
+  assertParentTrust(directory);
+  for (const target of [directory, workspacePath(testDirectory)]) {
+    try { mkdirSync(target, { mode: 0o700 }); }
+    catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
+    assertPosixDirectory(target);
+  }
+}
+function validCapabilities(value: unknown): value is PrivateWorkspaceCapability[] {
+  return Array.isArray(value) && value.length > 0 && value.length <= WORKSPACE_CAPABILITIES.length &&
+    new Set(value).size === value.length && value.every(v => WORKSPACE_CAPABILITIES.includes(v as PrivateWorkspaceCapability));
+}
+function readWorkspacePolicy(source: Storage, testDirectory?: string): WorkspacePolicy | null {
+  try {
+    const principal = localPrincipal();
+    if (!principal) return null;
+    if (process.platform !== 'win32') {
+      assertParentTrust(workspacePath(testDirectory));
+      assertPosixDirectory(workspacePath(testDirectory));
+    }
+    const raw = source.read();
+    if (Buffer.byteLength(raw) > LIMIT) return null;
+    const value: unknown = JSON.parse(raw);
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    const p = value as Record<string, unknown>;
+    const now = Date.now();
+    if (Object.keys(p).sort().join(',') !== 'capabilities,expiresAt,principal,resource,revoked,version' ||
+        p.version !== 1 || p.principal !== principal || p.resource !== WORKSPACE_RESOURCE || p.revoked !== false ||
+        !validCapabilities(p.capabilities) || !Number.isSafeInteger(p.expiresAt) ||
+        (p.expiresAt as number) <= now || (p.expiresAt as number) - now > MAX_LIFETIME) return null;
+    return { capabilities: p.capabilities, expiresAt: p.expiresAt as number };
+  } catch { return null; }
+}
+function workspaceAuthority(source: Storage, testDirectory?: string) {
+  return { authorize(capability: PrivateWorkspaceCapability): WorkspaceAccess | null {
+    if (!WORKSPACE_CAPABILITIES.includes(capability)) return null;
+    const policy = readWorkspacePolicy(source, testDirectory);
+    return policy?.capabilities.includes(capability) ? { workspace: workspacePath(testDirectory), expiresAt: policy.expiresAt } : null;
+  } };
+}
+/** Separate PRIVATE host policy. Never accepts workspace paths or grants from MCP input. */
+export function createPrivateWorkspaceAuthority(): { authorize(capability: PrivateWorkspaceCapability): WorkspaceAccess | null } {
+  return workspaceAuthority(storage(undefined, 'workspace'));
+}
+export function provisionPrivateWorkspace(action: 'grant' | 'revoke' | 'status', capabilities: readonly PrivateWorkspaceCapability[] = WORKSPACE_CAPABILITIES): {
+  state: 'active' | 'denied' | 'revoked'; expiresAt?: number; capabilities?: readonly PrivateWorkspaceCapability[];
+} {
+  if (action !== 'grant' && action !== 'revoke' && action !== 'status') throw Error('PRIVATE_POLICY_UNAVAILABLE');
+  const source = storage(undefined, 'workspace');
+  if (action === 'status') {
+    const policy = readWorkspacePolicy(source);
+    return policy ? { state: 'active', expiresAt: policy.expiresAt, capabilities: policy.capabilities } : { state: 'denied' };
+  }
+  const principal = localPrincipal();
+  if (!principal || !validCapabilities(capabilities)) throw Error('PRIVATE_POLICY_UNAVAILABLE');
+  if (action === 'grant') prepareWorkspace();
+  const expiresAt = Date.now() + (action === 'grant' ? 900_000 : 0);
+  source.write(JSON.stringify({ version: 1, principal, resource: WORKSPACE_RESOURCE, capabilities, expiresAt, revoked: action === 'revoke' }));
+  return action === 'grant' ? { state: 'active', expiresAt, capabilities: [...capabilities] } : { state: 'revoked' };
 }
 
 function readGrant(source: Storage): DiagnosticGrant | null {
@@ -130,12 +200,18 @@ export function provisionPrivateGrant(action: 'grant' | 'revoke' | 'status'): { 
 /** Explicit test seam, never used by the host or provisioning CLI. */
 export function createPrivateGrantTestHarness(directory: string) {
   const resolved = path.resolve(directory);
-  if (path.dirname(resolved) !== path.resolve(tmpdir()) || !/^DesktopControl-private-test-[A-Za-z0-9]+$/.test(path.basename(resolved)))
+  const testRoot = path.basename(resolved) === 'policy-store' ? path.dirname(resolved) : resolved;
+  const testBase = process.platform === 'win32' ? userInfo().homedir : tmpdir();
+  if (path.dirname(testRoot) !== path.resolve(testBase) || !/^DesktopControl-private-test-[A-Za-z0-9]+$/.test(path.basename(testRoot)))
     throw Error('PRIVATE_TEST_DIRECTORY_INVALID');
   const source = storage(resolved);
+  const workspaceSource = storage(resolved, 'workspace');
   return {
     store: { getGrants: () => { const grant = readGrant(source); return grant ? [grant] : []; } } satisfies ReadonlyGrantStore,
     writePolicy: (value: unknown) => source.write(JSON.stringify(value)),
-    writeRaw: (value: string) => source.write(value)
+    writeRaw: (value: string) => source.write(value),
+    workspaceAuthority: workspaceAuthority(workspaceSource, resolved),
+    prepareWorkspace: () => prepareWorkspace(resolved),
+    writeWorkspacePolicy: (value: unknown) => workspaceSource.write(JSON.stringify(value))
   };
 }
