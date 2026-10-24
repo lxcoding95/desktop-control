@@ -111,3 +111,8 @@ Linux full verify atf9a6e6e passes27units/10protocol+1Windowsskip. Windows nativ
 
 Owner-approved Windows elevated-token probe exit0:actual elevated/high-integrity token refused with0 adapter calls; no SID logged. Linux final-to-date29units/10protocol+1Windowsskip pass; Windows29units/lint pass. Production-only installs bothOS exit0, exactly3external runtime packages, zero missing standalone runtime licenses. npm native installed-SBOM command fails ESBOMPROBLEMS for omitted dev dependencies; tracked as tool limitation, custom installed-inventory SPDX2.3 output generated and relationships checked (fullschema validation NOT RUN). Final full matrix and independent review next. No release/CI/later sessions.
 
+
+## Completion checkpoint 2026-10-24T18:06:28.3179190+00:00
+
+Fresh Linux fullmatrix atb0bc3c4 passes29unit/10protocol+1skip, npm ls/audit/diff exit0. Fresh Windows native test failed due helper startup intermittency; direct cold recompile probe reproduced ETIMEDOUT (one round16s wall clock despite2s child timeout), while warmed queries60–80ms. No false allow; failure is fail-closed availability. Build now hashes source/compiler/binary, avoids rewriting unchanged executable and validates newly built helper before tests; verification in progress. Not claiming fixed until fresh matrix passes. Runtime-only installs3external packages bothOS; installed runtime LICENSE texts preserved in THIRD-PARTY-NOTICES.md. Custom actual-inventory SPDX2.3 schemas validate with existing AJV against official SPDX schema (both pass). npm installed SBOM failed omitted-dev workspace handling, raw error retained; not mislabeled as valid SBOM. Still no merge/CI/later sessions.
+
