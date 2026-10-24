@@ -13,6 +13,12 @@
 7. **Freie/offene Werkzeuge bevorzugen:** Qualifizierte kostenlose OSS-Werkzeuge mit nachvollziehbarer Lizenz/Version; keine kredit-/kostenpflichtige Reviewer-Abhängigkeit als Voraussetzung. Qodo nicht automatisch erneut installieren.
 8. **Kein versteckter Dauerbetrieb:** Ohne ausdrücklich eingerichtete GitHub-/Task-Automation keine periodischen Läufe oder Hintergrundarbeit versprechen. Tools nur gemäß verfügbarer Fähigkeiten nutzen.
 
+## Product milestone and information stewardship amendment (2026-10-24)
+
+The public portfolio uses **deliverable-oriented product M01–M06 plus M07+** in [PRODUCT-MILESTONES.md](PRODUCT-MILESTONES.md) and [ROADMAP](../../ROADMAP.md). Existing GitHub session-based milestone objects and historical #5–#10 issue links must be inventoried and migrated **without deletion, invented completion or orphaned issues**; [governance #25](https://github.com/lxcoding95/desktop-control/issues/25) tracks this work. Six reserved S01–S06 sessions remain a separate fixed historical axis. Changes to GitHub Milestones / private Project v2 require actual supported API/UI authorization and read-back; a branch documentation update is **not** a completed platform configuration.
+
+The [PUBLIC-INFORMATION-POLICY](PUBLIC-INFORMATION-POLICY.md) governs PUBLIC/INTERNAL/CONFIDENTIAL/SECRET classification and freshness checks. Check PR logs/screenshots, test evidence, Git history and private filesystem paths before any public GitHub commit. No automatic private-source upload. Correct source/drift at issue/PR boundaries; continuous automated maintenance is **not assumed running** until deployed and evidenced. Treat every update/release as **version + compatibility + migration + rollback + OS test + exact source provenance**, not just a green status.
+
 ## 2. Synchronisationsvertrag nach JEDER nachweisbaren Zustandsänderung
 
 Eine Arbeit gilt erst administrativ übergeben, wenn nach dem eigentlichen Schritt – soweit die Oberfläche verfügbar ist – diese zusammenhängenden Stellen geprüft und bei Bedarf konsistent aktualisiert wurden:
