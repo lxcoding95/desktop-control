@@ -101,3 +101,36 @@ test('extra adapter fields are excluded from the public response', async () => {
   assert.deepEqual('structuredContent' in result && result.structuredContent,
     { service: 'desktop-control', ready: true, api_version: 1 });
 });
+
+test('revocation before deferred entry records deny, never false allow', async () => {
+  let revoked = false, calls = 0;
+  const decisions: string[] = [];
+  const run = createStatusExecutor({
+    grants: { getGrants: () => [{ ...grant, revoked }] },
+    adapter: { readStatus: () => { calls++; return staticStatusAdapter.readStatus(); } },
+    audit: decision => { decisions.push(decision); }
+  });
+  const pending = run(ctx);
+  revoked = true;
+  const result = await pending;
+  assert.equal(result.content[0].text, 'PERMISSION_DENIED');
+  assert.equal(calls, 0);
+  assert.deepEqual(decisions, ['deny']);
+});
+
+test('cancellation before deferred entry records cancel, never false allow', async () => {
+  const controller = new AbortController();
+  let calls = 0;
+  const decisions: string[] = [];
+  const run = createStatusExecutor({
+    grants: allowed,
+    adapter: { readStatus: () => { calls++; return staticStatusAdapter.readStatus(); } },
+    audit: decision => { decisions.push(decision); }
+  });
+  const pending = run({ ...ctx, signal: controller.signal });
+  controller.abort();
+  const result = await pending;
+  assert.equal(result.content[0].text, 'CANCELLED');
+  assert.equal(calls, 0);
+  assert.deepEqual(decisions, ['cancel']);
+});
