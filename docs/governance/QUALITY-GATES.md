@@ -1,6 +1,8 @@
 # Engineering Quality Gates
 
-Status: **planned, not operational**. These requirements will be implemented and measured as code and CI become available.
+**Status checked 2026-10-24:** some local S02 source-quality, protocol, Windows/Linux regression and OSS scans have owner-provided PASS evidence on the unmerged [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22); [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6) documents actual results. **Regular CI, full independent semantic security review, installer, ChatGPT private plugin connection and release gates are NOT operational or accepted.** Requirements below are gates, not self-reported evidence.
+
+Public project milestones are evidence-based and unbounded ([M01–M06 and M07+](PRODUCT-MILESTONES.md)); separate internal S01–S06 history remains immutable. [Information classification and freshness controls](PUBLIC-INFORMATION-POLICY.md) apply to all test logs and status statements.
 
 ## Before starting work
 
