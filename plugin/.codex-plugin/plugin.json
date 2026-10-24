@@ -1,6 +1,6 @@
 {
   "name": "desktop-control-private",
-  "version": "0.0.1-preview.2",
+  "version": "0.0.1-preview.3",
   "description": "Private local stdio preview with default-deny diagnostics",
   "author": { "name": "lxcoding95", "email": "334623916+lxcoding95@users.noreply.github.com" },
   "requires_local_executor": true,

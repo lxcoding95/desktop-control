@@ -28,4 +28,20 @@ if (process.platform === 'win32') {
   }));
   if (probe.pid !== process.pid || typeof probe.sid !== 'string') throw Error('Native identity build probe failed');
   writeFileSync(target + '.build.json', JSON.stringify({ sourceHash, compilerHash, binaryHash: digest(target) }));
+  const privateTarget = path.join(root, 'dist/native/windows-private-policy.exe');
+  const privateSource = path.join(root, 'packages/mcp-server/native/WindowsPrivatePolicy.cs');
+  const privateHash = digest(privateSource);
+  let privateCurrent = false;
+  try {
+    const stamp = JSON.parse(readFileSync(privateTarget + '.build.json', 'utf8'));
+    privateCurrent = stamp.sourceHash === privateHash && stamp.compilerHash === compilerHash && stamp.binaryHash === digest(privateTarget);
+  } catch { /* Build missing or modified helper. */ }
+  if (!privateCurrent) execFileSync(compiler,
+    ['/nologo', '/optimize+', '/target:exe', '/reference:System.Security.dll', `/out:${privateTarget}`, privateSource],
+    { timeout: 30_000, windowsHide: true, stdio: 'pipe' });
+  const privateProbe = execFileSync(privateTarget, ['probe'], {
+    encoding: 'utf8', timeout: 30_000, maxBuffer: 4096, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe']
+  });
+  if (privateProbe.trim() !== 'PRIVATE_POLICY_V1') throw Error('Native private policy build probe failed');
+  writeFileSync(privateTarget + '.build.json', JSON.stringify({ sourceHash: privateHash, compilerHash, binaryHash: digest(privateTarget) }));
 }

@@ -1,0 +1,13 @@
+# Public privacy and security inspection checkpoint
+
+Scope: all fetched current branch heads, tags (none observed), and 12 public PR head refs of this repository; 146 reachable commits and 346 unique blobs at the scan checkpoint. Unreachable/deleted remote objects, caches, external clones and all historical discussion/artifact bytes are not certified.
+
+Gitleaks8.30.1 (MIT), official Windows x64 release SHA256 d29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e verified before execution. `gitleaks git --redact=100 --log-opts=--all` exit0, scanner reports143 nonempty commits/2.31MB, zero detected credential findings. GitHub Secret Scanning alert count0 and open Dependabot alert count0 at checkpoint. These results do not guarantee absence of credentials; no actual compromised key was established and no rotation is claimed. No signatures were independently verified for the scanner binary.
+
+Independent privacy pattern inspection flags historical non-noreply author/committer metadata (3 distinct addresses across127 reachable commits, including any automation/public addresses requiring classification) and four unique blobs with potential personal-path/metadata matches. Values are intentionally not published. No history rewrite, force push or deletion was performed. A separate risk-bounded owner decision is required before rewriting published history and accounting for PR/cache/external copies.
+
+The current private-preview branch redacts seven user-home occurrences in four existing Windows execution logs using `[LOCAL_HOME]`. Full original bytes retained privately; prior commits remain public and are not claimed remediated. Original commands/exitcodes/test outcomes remain present. Current-content home-path rescan reports0 matches. A broad public guard still flags email/copyright/license data and a synthetic SID; these require classification and must not be mislabeled credentials or silently allowlisted. Original upstream license notices must remain intact.
+
+New local commits use verified GitHub noreply author/committer metadata. Account-level email-privacy checkboxes could not yet be verified in the browser; local Git metadata protection does not prove those settings. Raw logs/reports and original evidence remain local, not attached to public GitHub.
+
+GitHub Actions repository policy was changed through the documented API and read back `sha_pinning_required:true`; existing selected-action allowlist and read-only workflow permissions preserved. No workflows existed at readback. SEC-GATE-001 remains open until its complete inventory/provenance/matrix/run-evidence requirements are satisfied; no regular CI or CodeQL activation is claimed.

@@ -5,7 +5,7 @@ Username: ALEXANDER-PC\aorfa
 RunAs User: ALEXANDER-PC\aorfa
 Configuration Name: 
 Machine: ALEXANDER-PC (Microsoft Windows NT 10.0.26300.0)
-Host Application: C:\Users\aorfa\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+Host Application: [LOCAL_HOME]\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
 $ErrorActionPreference='Continue'; $logPath=(Join-Path (Get-Location) 'outputs/s02-extension4/windows-verify.log'); Start-Transcript -Path $logPath -Force; Set-Location work/s02-extension3/closure-checkout; function Run-Recorded([string]$Name,[scriptblock]$Action) { Write-Output "COMMAND: $Name"; Write-Output ('START: '+[DateTimeOffset]::UtcNow.ToString('o')); & $Action; $code=$LASTEXITCODE; Write-Output "EXIT_CODE: $code"; Write-Output ('END: '+[DateTimeOffset]::UtcNow.ToString('o')); if ($code -ne 0) { throw "$Name failed, exit $code" } }; try { Run-Recorded 'git fetch origin' {git fetch origin}; Run-Recorded 'git pull --ff-only' {git pull --ff-only}; Run-Recorded 'git rev-parse HEAD' {git rev-parse HEAD}; Run-Recorded 'git ls-remote' {git ls-remote origin refs/heads/feat/s02-local-mcp-core}; Run-Recorded 'git status' {git status --short --branch}; Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,OSArchitecture | Format-List; Run-Recorded 'node --version' {node --version}; Run-Recorded 'npm --version' {npm.cmd --version}; Run-Recorded 'npm ci --ignore-scripts' {npm.cmd ci --ignore-scripts}; Run-Recorded 'npm run verify' {npm.cmd run verify}; Run-Recorded 'git status' {git status --short --branch}; } finally { Stop-Transcript }
 Process ID: 6712
 PSVersion: 7.6.5
@@ -18,7 +18,7 @@ PSRemotingProtocolVersion: 2.4
 SerializationVersion: 1.1.0.1
 WSManStackVersion: 3.0
 **********************
-Transcript started, output file is C:\Users\aorfa\Documents\Codex\2026-10-22\setze-ausschlie-lich-desktop-control-session\outputs\s02-extension4\windows-verify.log
+Transcript started, output file is [LOCAL_HOME]\Documents\Codex\2026-10-22\setze-ausschlie-lich-desktop-control-session\outputs\s02-extension4\windows-verify.log
 COMMAND: git fetch origin
 START: 2026-10-24T17:26:23.9537327+00:00
 

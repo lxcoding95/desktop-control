@@ -7,8 +7,12 @@ const root = resolve(process.argv[2]);
 const meta = { 'io.modelcontextprotocol/protocolVersion': '2026-07-28', 'io.modelcontextprotocol/clientInfo': { name: 'private-archive-test', version: '1' }, 'io.modelcontextprotocol/clientCapabilities': {} };
 // Test-only explicit host injection. This file and its grant are never packaged.
 const hostFixture = `import {serveStdio} from '@modelcontextprotocol/server/stdio'; import {createServer} from './dist/packages/mcp-server/src/server.mjs'; import {localPrincipal} from './dist/packages/mcp-server/src/bridge/principal.mjs'; const principal=localPrincipal(); const expiresAt=Date.now()+60000; const grants={getGrants:()=>[{principal,capability:'diagnostics.read',resource:'local:desktop-control',revoked:false,expiresAt}]}; void serveStdio(()=>createServer({grants}));`;
-for (const mode of ['production-denied', 'isolated-host-grant', 'production-restarted']) {
-  const child = spawn(process.execPath, mode === 'isolated-host-grant' ? ['--input-type=module', '-e', hostFixture] : ['start.mjs'], { cwd: root, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+const privateState = process.argv[3];
+if (privateState && !['active', 'denied'].includes(privateState)) throw Error('Expected private state active or denied');
+for (const mode of ['production-denied', 'isolated-host-grant', 'production-restarted', ...(privateState ? ['private-profile'] : [])]) {
+  const args = mode === 'isolated-host-grant' ? ['--input-type=module', '-e', hostFixture]
+    : [mode === 'private-profile' ? 'start.mjs' : 'dist/packages/mcp-server/src/index.mjs'];
+  const child = spawn(process.execPath, args, { cwd: root, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
   const closed = once(child, 'close');
   const lines = createInterface({ input: child.stdout });
   const iterator = lines[Symbol.asyncIterator]();
@@ -31,7 +35,7 @@ for (const mode of ['production-denied', 'isolated-host-grant', 'production-rest
     assert.ok((await request(1, 'server/discover')).result.supportedVersions.includes('2026-07-28'));
     assert.deepEqual((await request(2, 'tools/list')).result.tools.map(tool => tool.name), ['desktop_control.status']);
     const reply = await request(3, 'tools/call', { name: 'desktop_control.status', arguments: {} });
-    if (mode === 'isolated-host-grant') assert.deepEqual(reply.result.structuredContent, { service: 'desktop-control', ready: true, api_version: 1 });
+    if (mode === 'isolated-host-grant' || (mode === 'private-profile' && privateState === 'active')) assert.deepEqual(reply.result.structuredContent, { service: 'desktop-control', ready: true, api_version: 1 });
     else { assert.equal(reply.result.isError, true); assert.equal(reply.result.content[0].text, 'PERMISSION_DENIED'); }
     const invalid = await request(4, 'tools/call', { name: 'desktop_control.status', arguments: { grant: true } });
     assert.ok(invalid.error || invalid.result?.isError);

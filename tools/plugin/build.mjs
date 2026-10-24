@@ -20,11 +20,15 @@ const copy = (from, to = from) => {
   mkdirSync(resolve(stage, to, '..'), { recursive: true });
   cpSync(join(root, from), join(stage, to), { recursive: true, dereference: false, errorOnExist: true });
 };
-for (const name of ['plugin.json', 'mcp.json', '.codex-plugin/plugin.json', '.mcp.json', 'start.mjs', 'README.md']) copy(`plugin/${name}`, name);
+for (const name of ['plugin.json', 'mcp.json', '.codex-plugin/plugin.json', '.mcp.json', 'start.mjs', 'grant.mjs', 'README.md']) copy(`plugin/${name}`, name);
 copy('LICENSE'); copy('THIRD-PARTY-NOTICES.md');
 copy('dist/packages/mcp-server/src');
-if (process.platform === 'win32') copy('dist/native/windows-token.exe');
+if (process.platform === 'win32') {
+  copy('dist/native/windows-token.exe');
+  copy('dist/native/windows-private-policy.exe');
+}
 copy('packages/mcp-server/native/WindowsToken.cs', 'source/WindowsToken.cs');
+copy('packages/mcp-server/native/WindowsPrivatePolicy.cs', 'source/WindowsPrivatePolicy.cs');
 const lock = JSON.parse(readFileSync(join(root, 'package-lock.json'), 'utf8'));
 const dependencies = [];
 const names = ['@modelcontextprotocol/server', '@modelcontextprotocol/core', 'zod'];

@@ -6,7 +6,7 @@ added 4 packages, and audited 6 packages in 4s
 
 found 0 vulnerabilities
 EXIT_CODE:0
-desktop-control@0.0.0 C:\Users\aorfa\Documents\Codex\2026-10-22\setze-ausschlie-lich-desktop-control-session\work\s02-final\runtime-stage
+desktop-control@0.0.0 [LOCAL_HOME]\Documents\Codex\2026-10-22\setze-ausschlie-lich-desktop-control-session\work\s02-final\runtime-stage
 └─┬ @desktop-control/mcp-server@0.0.1 -> .\packages\mcp-server
   ├─┬ @modelcontextprotocol/server@2.3.1
   │ ├─┬ @modelcontextprotocol/core@2.3.1
