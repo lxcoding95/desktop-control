@@ -1,0 +1,9 @@
+{
+  "platform": "win32",
+  "node": "v24.21.0",
+  "principalKind": "null-fail-closed",
+  "adapterCalls": 0,
+  "resultCode": "PERMISSION_DENIED",
+  "windowsSIDImplemented": false
+}
+EXIT_CODE: 0

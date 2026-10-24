@@ -1,0 +1,17 @@
+{
+  "session": "S02",
+  "extension": 4,
+  "resume_utc": "2026-10-24T17:25:36.4324424+00:00",
+  "budget_seconds": 1162,
+  "deadline_utc": "2026-10-24T17:44:58.4324424+00:00",
+  "status": "checkpointed_acceptance_blocked",
+  "verification_stopped_at_utc": "2026-10-24T17:31:38.379Z",
+  "elapsed_wall_seconds_rounded_up": 362,
+  "publication_reserve_seconds": 180,
+  "resumed_seconds_charged_conservative": 542,
+  "previously_charged_seconds": 938,
+  "total_extension_seconds_charged_conservative": 1480,
+  "remaining_seconds_conservative": 620,
+  "publication_must_finish_by_utc": "2026-10-24T17:34:38.379Z",
+  "active_seconds_verified": null
+}

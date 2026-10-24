@@ -1,6 +1,6 @@
 # Desktop Control — repository working agreement
 
-**Status (2026-10-24):** S01 completed/merged (PR #21); S02 MCP stdio source remains on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), not yet approved/merged. Windows and Linux prior verified checks passed; later authorization-audit source regression tests and Linux socket descriptor probe are committed but require a clean Work rerun. S02 extension #4 was expressly authorized and is separately timed in [the branch-local state](docs/governance/PROJECT-STATE.json). **2/6 sessions started; S03–S06 remain locked.** `main` contains no runnable product release.
+**Status (2026-10-24):** S01 completed/merged (PR #21); S02 MCP stdio source remains on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), not yet approved/merged. Fresh Work checks on tested e7792f1: Windows verify passes (26 unit,9 protocol,1 Linux skip); Linux verify fails new socket assertion (26 unit,8 protocol,1 failure,1 Windows skip). Both new audit regressions pass; actual root denial verified. npm audit reports high Zod4.6.5. See docs/sessions/session-02/EXTENSION-4-WORK-VERIFICATION.md. S02 extension #4 was expressly authorized and is separately timed in [the branch-local state](docs/governance/PROJECT-STATE.json). **2/6 sessions started; S03–S06 remain locked.** `main` contains no runnable product release.
 
 ## Authoritative context
 

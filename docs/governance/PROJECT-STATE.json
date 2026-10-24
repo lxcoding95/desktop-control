@@ -5,7 +5,7 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_extension_4_paused_work_validation",
+  "phase": "S02_extension_4_checkpointed_acceptance_blocked",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "extension_4_paused_work_validation",
+      "status": "extension_4_checkpointed_acceptance_blocked",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -89,9 +89,9 @@
       "work_branch": "feat/s02-local-mcp-core",
       "pr_url": "https://github.com/lxcoding95/desktop-control/pull/22",
       "test_result": "Actual Windows npm ci/full typed ESLint/typecheck/23 unit tests/build/9 modern stdio protocol tests PASS. Both deferred-entry regressions red before fix, green after; external compiled boundary5/5 and protocol8/8 PASS.",
-      "environment_blocker": "Local tooling works. Native Windows SID, actual Linux/platform matrix, full redistribution license/provenance and independent semantic review remain unverified.",
+      "environment_blocker": "Windows verify passes26 unit/9 protocol+1skip; Linux verify fails socket-test oracle26 unit/8 protocol+1fail+1skip. Both audits high Zod4.6.5. Native Windows SID/license/independent review remain open.",
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "Owner Work on Windows + Linux Debian Docker: git fetch/pull --ff-only, verify live PR head, npm ci --ignore-scripts; npm run verify on Linux and Windows at same new HEAD, capture counts/skips/exits, run installed LICENSE/NOTICE inventory and native identity negative checks. No S03-S06, no CI, no Qodo or merge. Independent semantic review required.",
+      "next_exact_action": "Read EXTENSION-4-WORK-VERIFICATION.md and owner-verified remaining budget before any continuation. Resolve test oracle and Zod advisory; finish native identity, redistribution and independent review. No S03-S06/CI/Qodo/merge.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -168,16 +168,24 @@
           "reason": "User explicitly said 'weiter' after S02 extension3 evidence and had already allowed repeated S02-only up-to-35-minute extensions; continuing S02 acceptance work only",
           "started_at_utc": "2026-10-24T17:06:42.827Z",
           "max_seconds": 2100,
-          "charged_wall_seconds": 938,
-          "remaining_seconds_conservative": 1162,
+          "charged_wall_seconds": 1480,
+          "remaining_seconds_conservative": 620,
           "active_seconds_verified": null,
-          "status": "paused_for_work_platform_validation",
+          "status": "checkpointed_acceptance_blocked",
           "baseline_head_sha": "4fc8092476b6d0386cb5fbd87d2b9c9adc7bca3a",
           "scope": "S02 source/security review, native OS identity requirements, license/notice compliance and independent review gaps; no S03-S06, no CI and no unverified merge",
           "paused_at_utc": "2026-10-24T17:22:21.130Z",
-          "test_evidence": "Owner-provided Linux verified at earlier head 9789a610: 24/24 units and 8/9 protocol tests (1 Windows-only skip), npm ci/full verify exit0; extension4 HEAD audit fixes and new Linux /proc descriptor test NOT RUN on Windows/Linux. CodeRabbit incremental review call failed because HEAD changed.",
-          "last_known_head_sha": "bcfdea4e36e82c648d04d8161d280d44b49e231e",
-          "next_exact_action": "Owner Work on Windows + Linux Debian Docker: git fetch/pull --ff-only, verify live PR head, npm ci --ignore-scripts; npm run verify on Linux and Windows at same new HEAD, capture counts/skips/exits, run installed LICENSE/NOTICE inventory and native identity negative checks. No S03-S06, no CI, no Qodo or merge. Independent semantic review required."
+          "test_evidence": "Fresh Windows verify exit0:26units,9protocol pass/1Linuxskip. Linux verify exit1:26units,8protocol pass/1fail/1Windowsskip; new socket assertion wrongly includes inherited Unix stdio sockets, diagnosis logged. New audit regressions both pass. npm audit exit1 high Zod4.6.5. Native root denial actual uid/euid0 zero adapter calls. Independent CodeRabbit pending, no exact-head review.",
+          "last_known_head_sha": "Read live GitHub; documentation publication follows tested head",
+          "next_exact_action": "Read EXTENSION-4-WORK-VERIFICATION.md and owner-verified remaining budget before any continuation. Resolve test oracle and Zod advisory; finish native identity, redistribution and independent review. No S03-S06/CI/Qodo/merge.",
+          "resumed_at_utc": "2026-10-24T17:25:36.4324424+00:00",
+          "resumed_deadline_at_utc": "2026-10-24T17:44:58.4324424+00:00",
+          "checkpoint_at_utc": "2026-10-24T17:31:38.379Z",
+          "elapsed_resumed_wall_seconds_rounded_up": 362,
+          "publication_reserve_seconds": 180,
+          "publication_must_finish_by_utc": "2026-10-24T17:34:38.379Z",
+          "tested_head_sha": "e7792f1c782f28e0be4154e43ed596456022b409",
+          "evidence": "docs/sessions/session-02/EXTENSION-4-WORK-VERIFICATION.md"
         }
       ]
     },
@@ -210,7 +218,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Extension4 paused with 1162s conservative remaining at 2026-10-24T17:22:21.130Z. Resume SAME extension only after verifying the connected Work test environment, preserve elapsed charge and prior session counters. S03-S06 locked.",
+  "next_preflight_action": "S02 extension4 acceptance blocked; conservatively 620s remain after publication reserve. Read EXTENSION-4-WORK-VERIFICATION.md and owner-verified remaining budget before any continuation. Resolve test oracle and Zod advisory; finish native identity, redistribution and independent review. No S03-S06/CI/Qodo/merge.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
