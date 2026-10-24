@@ -5,7 +5,7 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_completion_local_oss_review_toolchain_not_yet_executed",
+  "phase": "S02_completion_local_oss_toolchain_linux_install_retest_pending",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "completion_local_oss_review_toolchain_validation_pending",
+      "status": "completion_local_oss_toolchain_linux_install_probe_fix_pending_retest",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -91,7 +91,7 @@
       "test_result": "Actual Windows npm ci/full typed ESLint/typecheck/23 unit tests/build/9 modern stdio protocol tests PASS. Both deferred-entry regressions red before fix, green after; external compiled boundary5/5 and protocol8/8 PASS.",
       "environment_blocker": null,
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "In an authorized local Windows 11 and Debian 12 Work checkout, fetch PR #22 head, run node tools/security/run-local.mjs install/selftest/scan and npm run verify + npm audit; capture exact hashes/logs/exits per OS. Afterwards obtain independent semantic/security review, then assess protected-main merge gates. S03-S06 locked.",
+      "next_exact_action": "Have owner Docker (uid1000) fast-forward latest S02 feature branch and rerun local security install. If passes, run selftest and scanner, validate findings then npm run verify. Windows also pending. Independent semantic security review remains open.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -207,7 +207,23 @@
         "independent_semantic_review_completed": false,
         "status": "configured_in_repo_only_waiting_for_owner_local_runner_access",
         "report_location": "tools/security/README.md",
-        "reason": "User rejected Work handoff and this Chat container has no DNS/local Windows Docker access; cannot claim local scanner execution. No GitHub Actions, no credentials, no Qodo/CodeRabbit."
+        "reason": "User rejected Work handoff and this Chat container has no DNS/local Windows Docker access; cannot claim local scanner execution. No GitHub Actions, no credentials, no Qodo/CodeRabbit.",
+        "linux_attempt_2026_10_24": {
+          "provenance": "Owner pasted PowerShell Docker exec raw output with line labels; not independently run by this chat",
+          "container": "desktop-control-linux-env-20261022",
+          "workdir": "/workspace/desktop-control",
+          "user": "node uid/euid=1000",
+          "environment": "Debian 12 Linux Docker, Node 24.22.1, npm 11.19.1",
+          "original_checkout": "38b5a9a526a6b82818d1dcf7c2011c2a8eec5b4f",
+          "fetched_and_fast_forwarded": "3ee75e859e4625e2cf9078090493f4c86e7cccd0",
+          "git_worktree_clean": true,
+          "installer_attempt": "Opengrep 1.30.0 release SHA256 check and --help exit0; OSV Scanner 2.7.0 release SHA256 check and --help exit0; reviewdog 0.21.2 --help exit2, printed usage, installer aborted; downloaded archive digest enforcement in script but source output did not print reviewdog SHA digest",
+          "fixed_in_commit": "00cac9ade4c247603845bdd423b6d55bdb3aafe3",
+          "fix": "reviewdog version probe now uses -version instead of --help",
+          "retest_status": "NOT RUN on owner Linux after fix",
+          "security_scan_status": "NOT RUN",
+          "next_steps": "Owner runs git pull --ff-only then node tools/security/run-local.mjs install as unprivileged UID 1000; record full output before selftest and scan"
+        }
       }
     },
     {
@@ -239,7 +255,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "S02 completion only: pinned OSS local security runner authored and 6 asset metadata SHA verified, but no local install or scanner invocation in this Chat environment. Await Work/local-run evidence; CodeRabbit owner-reported uninstalled. Keep PR22 Draft, main protected, SEC-GATE-001 open, S03-S06 locked.",
+  "next_preflight_action": "Latest installer probe fix commit 00cac9ade; actual owner Linux installer retest required. S03-S06 locked; no CI; no merge.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
