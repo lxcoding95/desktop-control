@@ -90,6 +90,7 @@ async function installOne(id) {
     copyFileSync(sourcePath, toolBin(id));
   }
   if (process.platform !== 'win32') chmodSync(toolBin(id), 0o700);
+  writeFileSync(join(folder, 'executable.sha256'), digest(readFileSync(toolBin(id))) + '\n');
   const probe = run(toolBin(id), ['--help'], { timeout: 20_000 });
   demand(probe.exit === 0, id + ' installed but --help failed (exit ' + probe.exit + '): ' + probe.stderr.slice(-700));
   return { id, version: tool.version, asset: asset.file, sha256: asset.sha256, helpExit: probe.exit };
@@ -100,6 +101,10 @@ function checkInstalled() {
     demand(existsSync(toolBin(id)) && existsSync(sourceAsset(id)), id + ' not installed. Run install.');
     const expected = lock.tools[id].assets[platform].sha256;
     demand(digest(readFileSync(sourceAsset(id))) === expected, id + ': cached release digest mismatch');
+    const pinnedExecutable = join(dirname(sourceAsset(id)), 'executable.sha256');
+    demand(existsSync(pinnedExecutable), id + ': no installed executable digest');
+    demand(digest(readFileSync(toolBin(id))) === readFileSync(pinnedExecutable, 'utf8').trim(),
+      id + ': executable changed after installer verification');
   }
 }
 function redactRun(record) {
@@ -143,6 +148,19 @@ async function scan() {
     ...targets
   ]);
   output('opengrep.stderr.txt', og.stderr);
+  // A green zero-target scan is not an acceptable security gate.
+  const coveragePath = join(reports, 'opengrep-coverage.json');
+  const coverage = run(toolBin('opengrep'), [
+    ...opengrepArgs('json', coveragePath), ...targets
+  ]);
+  demand(existsSync(coveragePath), 'Opengrep returned no coverage JSON');
+  const json = JSON.parse(readFileSync(coveragePath, 'utf8'));
+  const scannedPaths = json.paths?.scanned ?? [];
+  demand(Array.isArray(scannedPaths) && scannedPaths.length >= 4,
+    'Opengrep scanned fewer than four S02 source files: unsupported extension/config?');
+  demand(scannedPaths.some(p => String(p).includes('principal.mts')) &&
+         scannedPaths.some(p => String(p).includes('status.mts')),
+    'Opengrep skipped key TypeScript .mts security boundary files');
   const osv = run(toolBin('osv-scanner'), [
     'scan', 'source', '--lockfile', 'package-lock.json',
     '--format', 'json', '--output-file', join(reports, 'osv.json')
@@ -160,7 +178,9 @@ async function scan() {
   const summary = {
     generated: new Date().toISOString(), scope: 'S02 source + project package-lock',
     head: run('git', ['rev-parse', 'HEAD']).stdout.trim(),
-    results: { opengrep: redactRun(og), osv: redactRun(osv), reviewdog: redactRun(dog) },
+    results: { opengrep: redactRun(og), opengrepCoverage: redactRun(coverage),
+      osv: redactRun(osv), reviewdog: redactRun(dog) },
+    opengrepScannedPaths: scannedPaths.length,
     note: 'Local scans, not an independent semantic code review or CI. Findings must be triaged; no token or PR reporter used.'
   };
   output('summary.json', JSON.stringify(summary, null, 2) + '\n');
@@ -168,7 +188,7 @@ async function scan() {
     reportDirectory: join(here, '.reports'),
     exitCodes: Object.fromEntries(Object.entries(summary.results).map(([k,v])=>[k,v.exit]))
   }));
-  demand([og, osv, dog].every(x => x.exit === 0),
+  demand([og, coverage, osv, dog].every(x => x.exit === 0),
     'Security scanner failed or found findings. Read tools/security/.reports/summary.json; do NOT merge.');
 }
 async function selftest() {
