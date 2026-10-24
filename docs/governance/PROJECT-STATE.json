@@ -5,7 +5,7 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_completion_local_oss_toolchain_linux_install_retest_pending",
+  "phase": "S02_completion_linux_oss_install_pass_selftest_pending",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "completion_local_oss_toolchain_linux_install_probe_fix_pending_retest",
+      "status": "completion_linux_oss_tools_install_passed_selftest_pending",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -91,7 +91,7 @@
       "test_result": "Actual Windows npm ci/full typed ESLint/typecheck/23 unit tests/build/9 modern stdio protocol tests PASS. Both deferred-entry regressions red before fix, green after; external compiled boundary5/5 and protocol8/8 PASS.",
       "environment_blocker": null,
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "Have owner Docker (uid1000) fast-forward latest S02 feature branch and rerun local security install. If passes, run selftest and scanner, validate findings then npm run verify. Windows also pending. Independent semantic security review remains open.",
+      "next_exact_action": "On owner Linux Docker under uid1000, ff-only pull current PR22 head, then node tools/security/run-local.mjs selftest; capture output/exit. Then production scan, npm verify, Windows tool installation and independent semantic review. No S03-06.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -199,13 +199,13 @@
         },
         "official_asset_digests_checked": "6/6 publisher GitHub release metadata matches",
         "local_windows_installed": false,
-        "local_linux_installed": false,
+        "local_linux_installed": true,
         "opengrep_positive_control_executed": false,
         "production_scan_executed": false,
         "osv_dependency_scan_executed": false,
         "reviewdog_formatting_executed": false,
         "independent_semantic_review_completed": false,
-        "status": "configured_in_repo_only_waiting_for_owner_local_runner_access",
+        "status": "linux_pinned_tools_installed_scanner_selftest_and_scans_pending",
         "report_location": "tools/security/README.md",
         "reason": "User rejected Work handoff and this Chat container has no DNS/local Windows Docker access; cannot claim local scanner execution. No GitHub Actions, no credentials, no Qodo/CodeRabbit.",
         "linux_attempt_2026_10_24": {
@@ -220,9 +220,36 @@
           "installer_attempt": "Opengrep 1.30.0 release SHA256 check and --help exit0; OSV Scanner 2.7.0 release SHA256 check and --help exit0; reviewdog 0.21.2 --help exit2, printed usage, installer aborted; downloaded archive digest enforcement in script but source output did not print reviewdog SHA digest",
           "fixed_in_commit": "00cac9ade4c247603845bdd423b6d55bdb3aafe3",
           "fix": "reviewdog version probe now uses -version instead of --help",
-          "retest_status": "NOT RUN on owner Linux after fix",
+          "retest_status": "PASS according to owner-pasted actual Docker terminal output; after git fast-forward at b04841e",
           "security_scan_status": "NOT RUN",
-          "next_steps": "Owner runs git pull --ff-only then node tools/security/run-local.mjs install as unprivileged UID 1000; record full output before selftest and scan"
+          "next_steps": "Owner runs git pull --ff-only then node tools/security/run-local.mjs install as unprivileged UID 1000; record full output before selftest and scan",
+          "second_checkout": "b04841ee98ed0d1607f4c70aee9bd7a65b433d17",
+          "installed_tools": {
+            "opengrep": {
+              "version": "1.30.0",
+              "probeArgs": [
+                "--help"
+              ],
+              "exit": 0,
+              "sha256": "35779bdd72e92129c8df2a77f0c55e8c08356801ea92591ef32108d6b28d564c"
+            },
+            "osv-scanner": {
+              "version": "2.7.0",
+              "probeArgs": [
+                "--help"
+              ],
+              "exit": 0,
+              "sha256": "160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b"
+            },
+            "reviewdog": {
+              "version": "0.21.2",
+              "probeArgs": [
+                "-version"
+              ],
+              "exit": 0,
+              "sha256": "30413aa3c7443e9c3c157fe5766cad40e3bb39a32e210ee69b710a8d5c4b8e51"
+            }
+          }
         }
       }
     },
@@ -255,7 +282,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Latest installer probe fix commit 00cac9ade; actual owner Linux installer retest required. S03-S06 locked; no CI; no merge.",
+  "next_preflight_action": "Owner Docker Linux version-pinned tools installation PASSED at b04841e. Next opengrep positive-control selftest, then scan, reverify product on final head; PR22 draft, SEC gate open, S03-06 locked.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
