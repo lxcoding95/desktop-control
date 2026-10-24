@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "project": "Desktop Control",
-  "snapshot_date": "2026-10-22",
+  "snapshot_date": "2026-10-24",
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_extension_3_paused_work_environment",
+  "phase": "S02_extension_3_interrupted_closed_acceptance_pending",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -142,23 +142,26 @@
           "started_at_utc": "2026-10-22T19:45:49.389Z",
           "deadline_at_utc": "2026-10-22T20:20:49.389Z",
           "max_seconds": 2100,
-          "charged_wall_seconds": 402,
-          "remaining_seconds_conservative": 1698,
+          "charged_wall_seconds": 2100,
+          "remaining_seconds_conservative": 0,
           "active_seconds_verified": null,
-          "status": "paused_for_owner_work_environment_handoff",
+          "status": "interrupted_deadline_elapsed_no_verified_pause",
           "base_head_sha": "610dc241b31906db0e8bcbb84333a1abe8242612",
           "initial_environment": "Linux sandbox Node22.16/npm10.9/TS5.8.3; npm/github DNS resolution fails; no Codex registered environments",
           "scope": "S02-only remaining native Windows SID authority, real Linux matrix, license/provenance, independent semantic/security review; no main writes/CI/S03-S06",
           "paused_at_utc": "2026-10-22T19:52:31.939Z",
           "pause_reason": "Owner explicitly requested pause during ChatGPT Work environment remediation; no S02 development until return and verified status. Work must keep setup time distinct, do not silently reset or spend remaining development budget.",
-          "environment_status": "Work/operator-provided log verified by current chat: Debian 12 WSL2 Docker Node24.22.1 npm11.19.1, npm ping PONG, npm ci exit0, clean git checkout SHA590439; headless runtime smoke exit0. Product suites NOT RUN in Linux.",
+          "environment_status": "Actual Linux npm ci and verify exit0 on HEAD9789a610:24 unit pass,8 protocol pass,1 Windows-only skip. Logs committed. Docker engine unavailable on October24 recovery; no new product tests.",
           "last_implementation_commits": [
             "155ec347fb8c7d1677b7fb0a7e03e14bc7c60db8",
             "43ecf91565d495ef2a6bb462dba559637aa72b67"
           ],
           "environment_evidence": "docs/sessions/session-02/LINUX-ENVIRONMENT-READY-2026-10-22.md",
           "setup_does_not_consume_paused_budget": true,
-          "test_execution_location": "Owner's Work/local Docker Desktop container; not accessible from current Chat-mode container"
+          "test_execution_location": "Owner's Work/local Docker Desktop container; not accessible from current Chat-mode container",
+          "resumed_at_utc": "2026-10-22T20:06:40.8216927Z",
+          "resumed_deadline_at_utc": "2026-10-22T20:34:58.8216927Z",
+          "recovery_accounting": "Conservative allowance reservation only; interruption pause and active elapsed unverified. Documentation-only closure2026-10-24, no timer reset."
         }
       ]
     },
@@ -191,7 +194,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "S02 extension3 paused at 1698 seconds remaining. Owner's Docker-based Linux environment ready, product test suites still NOT RUN. Resume same extension only when explicitly proceeding in Work with local Docker access; S03-S06 locked.",
+  "next_preflight_action": "Read EXTENSION-3-LINUX-VERIFICATION.md. Linux verify passed24 units,8 protocols plus1 Windows-only skip. Conservative usable extension3 remaining0 after unrecorded interruption; exact active-time remainder unverified. New owner budget decision required before development. S03-S06 locked.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
