@@ -5,7 +5,7 @@
 | Stage | Current state | Primary objective | Evidence expected |
 | --- | --- | --- | --- |
 | Session 1: Foundation & Architecture | **Completed (docs); PR #21 merged** | Freeze minimal end-to-end scope, protocols and security boundaries | ADRs, verified feasibility and executable acceptance criteria |
-| Session 2: MCP Core & Connectivity | **In progress/paused; PR #22 draft; full SDK build and modern protocol tests pending** | Establish one local end-to-end read-only MCP operation | Automated protocol and transport tests, controlled smoke test |
+| Session 2: MCP Core & Connectivity | **Owner-authorized completion; PR #22 draft; final native/security/license/review acceptance pending** | Establish one local end-to-end read-only MCP operation | Automated protocol and transport tests, controlled smoke test |
 | Session 3: Filesystem & Terminal | **Not started / not authorized** | Add bounded read/edit/process primitives | Authorization tests, cancel/timeout/rollback tests |
 | Session 4: Desktop & Browser | **Not started / not authorized** | Platform-specific UI and browser integrations | Windows/Linux environment matrix, accessibility and input tests |
 | Session 5: Security, Packaging & Installation | **Not started / not authorized** | Permissions, installers and verified packaging | Abuse tests, install/uninstall and credential-revocation tests |

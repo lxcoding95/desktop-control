@@ -1,6 +1,6 @@
 # Desktop Control — Verbindlicher Projekt-Masterplan
 
-**Stand:** 2026-10-22 | **Status:** S02 MCP-Grundgerüst implementiert, SDK-Integration und End-to-End-Tests noch blockiert | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
+**Stand:** 2026-10-24 | **Status:** S02-Abschluss auf PR22: frühere Windows/Linux-SDK-Prüfungen bestanden, neuer Quellstand in vollständiger Neuprüfung; native Abnahme/Lizenzen/unabhängiges Review offen | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
 
 > Dieses Dokument beschreibt Ziele, Entscheidungen und Gates. Es ist keine Behauptung, dass das Produkt bereits implementiert ist. Vorhandene GitHub-Daten (Commits, PRs, Issues und aktuelle Branches) haben Vorrang vor statischen Statusangaben. Für neue ChatGPT-Chats zwingend auch [CHAT-CONTINUITY.md](../governance/CHAT-CONTINUITY.md) lesen.
 
@@ -150,9 +150,11 @@ Repository: https://github.com/lxcoding95/desktop-control; owner `lxcoding95`; p
 
 **Admin-Zugang:** [ADMIN-GATE-001](https://github.com/lxcoding95/desktop-control/issues/4) enthält Restarbeiten. Die bestehende lokale GitHub-CLI-Anmeldung ermöglicht administrative API-Zugriffe; Project-Workflows wurden zusätzlich in der angemeldeten UI geprüft. Keine neuen Tokens oder zusätzlichen Gebühren.
 
-## 7. Sechs Entwicklungssitzungen – festes Zeitbudget
+## 7. Sechs Entwicklungssitzungen – ursprüngliches Zeitbudget
 
-**Plan:** sechs Sitzungen, maximal je 25:00 Minuten, Ziel je 23:30 aktive Arbeitszeit (94 %). **Keine künstliche Verlängerung**, kein falsches Protokoll; bei Tool-/Nutzungsgrenzen früher stoppen und den Zustand verifizieren. Zeitangaben nur aus ausdrücklich protokollierten lokalen Zeitpunkten mit Zeitzone; eine pausierte Sitzung bleibt dieselbe Sitzungsnummer.
+**S02-Ausnahme2026-10-24:** Der Owner hat die erforderliche Zeit zur vollständigen S02-Fertigstellung ohne weitere feste Verlängerungen ausdrücklich freigegeben; alle alten Zeitbuchungen bleiben erhalten. [Abschlussfreigabe](../sessions/session-02/COMPLETION-AUTHORIZATION-2026-10-24.md). S03–S06 bleiben gesperrt.
+
+**Ursprünglicher Plan:** sechs Sitzungen, maximal je 25:00 Minuten, Ziel je 23:30 aktive Arbeitszeit (94 %). **Keine künstliche Verlängerung**, kein falsches Protokoll; bei Tool-/Nutzungsgrenzen früher stoppen und den Zustand verifizieren. Zeitangaben nur aus ausdrücklich protokollierten lokalen Zeitpunkten mit Zeitzone; eine pausierte Sitzung bleibt dieselbe Sitzungsnummer.
 
 | # | Issue / Milestone | Minimaler, überprüfbarer Meilenstein |
 | --- | --- | --- |

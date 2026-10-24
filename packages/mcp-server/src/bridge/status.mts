@@ -30,18 +30,21 @@ const failure = (code: 'PERMISSION_DENIED' | 'CANCELLED' | 'INTERNAL_ERROR' | 'T
 /** Gate immediately before the adapter; every failure is a redacted tool result. */
 export function createStatusExecutor(deps: StatusDependencies) {
   const grants = deps.grants ?? DENY_ALL_GRANTS;
+  const audit = (decision: 'allow' | 'deny' | 'cancel'): boolean => {
+    try { deps.audit?.(decision); return true; } catch { return false; }
+  };
   return async (ctx: StatusContext): Promise<StatusResult> => {
     if (ctx.signal?.aborted) {
-      deps.audit?.('cancel');
+      audit('cancel');
       return failure('CANCELLED');
     }
     if (!isAuthorized({ principal: ctx.principal, capability: STATUS_CAPABILITY, resource: STATUS_RESOURCE },
         grants, ctx.now ?? Date.now())) {
-      deps.audit?.('deny');
+      audit('deny');
       return failure('PERMISSION_DENIED');
     }
     if (ctx.signal?.aborted) {
-      deps.audit?.('cancel');
+      audit('cancel');
       return failure('CANCELLED');
     }
     // Report allow only after the final authorization check and immediately at adapter entry.
@@ -72,7 +75,7 @@ export function createStatusExecutor(deps: StatusDependencies) {
             throw new Error('adapter permission denied');
           }
           if (ctx.signal?.aborted) throw new Error('adapter cancelled');
-          deps.audit?.('allow');
+          if (!audit('allow')) throw new Error('audit unavailable');
           return deps.adapter.readStatus();
         }), timeout, aborted
       ]);
@@ -84,11 +87,11 @@ export function createStatusExecutor(deps: StatusDependencies) {
       return { content: [{ type: 'text', text: JSON.stringify(status) }], structuredContent: status };
     } catch {
       if (ctx.signal?.aborted) {
-        deps.audit?.('cancel');
+        audit('cancel');
         return failure('CANCELLED');
       }
       if (deniedAtEntry) {
-        deps.audit?.('deny');
+        audit('deny');
         return failure('PERMISSION_DENIED');
       }
       if (timedOut) return failure('TIMEOUT');

@@ -101,3 +101,8 @@ See [new authorization and preflight](COMPLETION-AUTHORIZATION-2026-10-24.md). W
 
 Socket regression reproduced red on Linux, corrected detector and deliberate TCP/UDP positive controls pass2/2. Zod4.6.7 locked without major/force upgrade. Native Windows read-only access-token helper implemented; first Windows ci/verify pass27 units,9 protocols+2 Linuxskips. Identity native-boundary tests, full Linux matrix, license/SBOM and independent review still pending. Production default-deny unchanged. No S03–S06/CI/merge. Actual authorization start2026-10-24T17:45:07.9371848Z; earlier locale-formatted start in initial document is superseded by this precise UTC value. Next: native privilege probes and clean Linux run.
 
+
+## Completion checkpoint 2026-10-24T17:57:00.5269019+00:00
+
+Linux full verify atf9a6e6e passes27units/10protocol+1Windowsskip. Windows native/audit-focused updated tests pass29/29; typed lint exit0. Native Linux root0/0 and real/effective mismatches1000/0,0/1000 deny under actual OS credentials, zero adapter calls. Added redacted audit-error handling. README/master/roadmap reconciled; review threads not resolved until committed verification. Pending: clean final matrix, SBOM/notices, independent finalhead review, actual Windows elevated negative probe. No new tools/CI/later sessions.
+
