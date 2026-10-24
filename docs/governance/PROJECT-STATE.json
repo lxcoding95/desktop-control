@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "project": "Desktop Control",
-  "snapshot_date": "2026-10-22",
+  "snapshot_date": "2026-10-24",
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_extension_1_paused_environment_blocked",
+  "phase": "S02_draft_windows_linux_owner_tested_independent_review_and_private_chatgpt_integration_pending",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -14,8 +14,8 @@
   "work_admin": {
     "owner_intends_resume_local_time": "2026-10-22T01:00:00+02:00",
     "scheduled_by_assistant": false,
-    "state": "ready_for_owner_review",
-    "notes": "Admin API and signed-in UI verified; Project root loading/API aggregate inconsistency remains, direct views and issue-level project memberships verified. See #4 and PREFLIGHT-REPORT.md."
+    "state": "closed_in_issue_4_but_product_milestone_ui_migration_pending",
+    "notes": "GitHub Issue #4 observed CLOSED on 2026-10-24; closure does not prove Project-v2 metadata or milestone descriptions editable by this connector. Product milestone migration tracked separately in Issue #25; leave Project visibility unchanged."
   },
   "decisions": {
     "product": "installable ChatGPT plugin and MCP tools, not new AI agent",
@@ -81,17 +81,17 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "extension_1_paused_environment_blocked",
+      "status": "cross_platform_owner_run_regressions_scans_passed_review_open_unmerged",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
       "remaining_budget_seconds_conservative": 0,
       "work_branch": "feat/s02-local-mcp-core",
       "pr_url": "https://github.com/lxcoding95/desktop-control/pull/22",
-      "test_result": "Windows locked install and 18/18 tests PASS; full typecheck/build FAIL; legacy Inspector list/denial PASS; modern discovery unsupported",
-      "environment_blocker": "Initial Node/npm/GitHub blockers resolved; test typing and modern/lifecycle validation remain",
+      "test_result": "On feature branch, owner-provided real Windows/Linux logs: 29/29 unit each; Windows 9 protocol passes + 2 Linux-only skips, Linux 10 protocol passes + 1 Windows-only skip; npm audit zero reported vulnerabilities and pinned local OSS security tools selftest/scan passed both platforms. Private ChatGPT plugin end-to-end untested; independent semantic review PENDING; no main merge.",
+      "environment_blocker": "Earlier SDK/npm environment failures are historic; Windows/Linux tests later PASSED. Remaining blockers: independent semantic review, native Windows privacy-log classification and actual private client-to-MCP integration.",
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "Same S02 extension #1, do not reset charged time; use working Node>=22.19 npm registry environment to run npm ci/typecheck/test/build/protocol; keep PR draft until results verified.",
+      "next_exact_action": "Verify latest S02 feature HEAD and Issue #6, complete independent semantic-security review and privacy-log triage before PR #22 acceptance. Do not start S03-S06. Governance/product milestones migration is a separate docs-only PR / Issue #25.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -106,7 +106,25 @@
           "environment_blocker": "Linux container cannot resolve npm registry; read-only Codex execution unavailable. Earlier Windows Work env not attached.",
           "test_evidence": "Local prepared Linux copy 20/20 tests and subset TS pass, 18 versioned tests; SDK protocol NOT run; clean npm/SDK build NOT run at latest head"
         }
-      ]
+      ],
+      "current_evidence_2026_10_24": {
+        "provenance": "Owner-supplied real Windows PowerShell/Linux Docker transcripts; GitHub Issue #6 and feature-branch PROJECT-STATE",
+        "tested_source_head": "5f4aa15c7b797c775f1c5615f7ce041bdd0020aa",
+        "latest_feature_branch_head_at_documentation": "303f1fe143195049e57ca498bc42d628b126f115",
+        "windows_unit_passes": 29,
+        "windows_protocol_passes": 9,
+        "windows_linux_specific_skips": 2,
+        "linux_unit_passes": 29,
+        "linux_protocol_passes": 10,
+        "linux_windows_specific_skips": 1,
+        "local_security_scanners": {
+          "windows": "PASS",
+          "linux": "PASS"
+        },
+        "independent_semantic_review": "not_completed",
+        "private_chatgpt_mcp_connection": "not_performed",
+        "pr22": "draft_unmerged"
+      }
     },
     {
       "id": "S03",
@@ -137,7 +155,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Current authoritative S02 code and time on branch feat/s02-local-mcp-core, draft PR #22 and Issue #6; at last pause extension #1 866s remained, verify live before action. S03-S06 not started.",
+  "next_preflight_action": "Read live main, open Draft PR #22 and Issue #6 for S02 test/review status. Review docs-only product-roadmap PR / Issue #25; create and verify product-based GitHub milestones and private Project fields via owner-approved UI only, without changing S01–S06 histories. SEC-GATE-001 open, no Actions; private ChatGPT plugin connection untested.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
@@ -175,5 +193,19 @@
     "timing_explanation": "First captured time was 16:44:06.576Z; preflight started before this, so full active duration cannot be independently reconstructed.",
     "s02": "not_started",
     "security_gate_001": "open"
+  },
+  "public_product_delivery": {
+    "policy": "Owner approved outcome-based public milestones M01–M06, expandable M07+; sessions S01–S06 historically independent and capped at six.",
+    "register": "docs/governance/PRODUCT-MILESTONES.md",
+    "roadmap": "ROADMAP.md",
+    "information_policy": "docs/governance/PUBLIC-INFORMATION-POLICY.md",
+    "github_platform_migration": "not_performed_existing_session_milestone_memberships_preserved_issue_25",
+    "mapping_issue": "https://github.com/lxcoding95/desktop-control/issues/25",
+    "approved_distribution": "public MIT source but no official installable binaries, npm packages, or published plugins before separately authorized release",
+    "private_auth": "device_bound_crypto_planned_no_username_only",
+    "optional_wsl_and_containers": "explicit_user_choice_only",
+    "mandatory_update_mode": "always_block_normal_mcp_on_verified_new_required_version_plan_only",
+    "browser_workspace": "separate headed browser_mcp_control_only_license_research_pending",
+    "confidential_material": "outside_public_repo_secrets_in_credential_vault"
   }
 }
