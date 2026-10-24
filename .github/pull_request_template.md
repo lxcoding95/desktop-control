@@ -50,6 +50,6 @@ Links to test runs, screenshots (redacted), upstream provenance and supporting d
 **Status:** Draft / Awaiting evidence / Ready for maintainer review
 
 **Unmet gates / owner-only actions:**
-- 
+- _Specify remaining blockers, or write 'none' with evidence._
 
 Do not mark ready based on an untested assumption. Never paste credentials, private data or exploit details into this PR.
