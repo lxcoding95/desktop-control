@@ -1,4 +1,4 @@
-# Desktop Control Private 0.0.1-preview.1
+# Desktop Control Private 0.0.1-preview.2
 
 Private connectivity preview, not a production release or general computer-control tool.
 Requires an existing Node.js >=22.19 installation on Windows x64 or Linux x64.
@@ -7,6 +7,8 @@ The Windows archive contains a .NET Framework token-query helper built from the 
 The portable manifest launches `node start.mjs` over stdio. Only `desktop_control.status` is advertised. The production entry intentionally has no grants and returns `PERMISSION_DENIED`; plugin installation does not authorize diagnostics. No test fixture, granting environment variable, local enrollment tool, shell or file capability is shipped. An isolated positive test does not establish production grant provisioning.
 
 Private installation: save/import this archive through Plugin Creator or a supported local marketplace on ChatGPT Desktop. Account save alone does not establish local installation or execution. Verify actual tool discovery and a denied call in a local chat. If the host cannot load local stdio packages, record the error; do not introduce a public proxy/tunnel.
+
+Portable and Codex compatibility manifests share the same identity, version and local command. Explicit public noreply author metadata prevents account-import defaults from inserting private contact details. Account import can normalize compatibility files; the archive byte inventory applies to the original artifact, not an unverified host-transformed export.
 
 Updates: replace with a separately verified private archive, restart the MCP connection and verify discovery again. No automatic/signature-based updater is implemented. Remove/disable the plugin through the host to disconnect it. Do not edit a host-managed cache.
 

@@ -1,7 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "desktop-control-private",
-  "version": "0.0.1-preview.1",
+  "version": "0.0.1-preview.2",
+  "author": { "name": "lxcoding95", "email": "334623916+lxcoding95@users.noreply.github.com" },
   "description": "Private local stdio connectivity preview. Diagnostics require a trusted host grant; production defaults to deny.",
   "repository": "https://github.com/lxcoding95/desktop-control",
   "license": "MIT",
@@ -10,6 +11,7 @@
       "requires_local_executor": true,
       "interface": {
         "displayName": "Desktop Control Private",
+        "developerName": "lxcoding95",
         "shortDescription": "Local MCP connectivity preview with default-deny diagnostics",
         "capabilities": ["Read"]
       }
