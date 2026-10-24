@@ -5,7 +5,7 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_completion_linux_opengrep_selftest_passed_scan_pending",
+  "phase": "S02_linux_oss_scan_passed_regression_windows_review_pending",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "completion_linux_oss_positive_control_passed_scan_pending",
+      "status": "completion_linux_oss_scan_passed_regression_windows_review_pending",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -91,7 +91,7 @@
       "test_result": "Actual Windows npm ci/full typed ESLint/typecheck/23 unit tests/build/9 modern stdio protocol tests PASS. Both deferred-entry regressions red before fix, green after; external compiled boundary5/5 and protocol8/8 PASS.",
       "environment_blocker": null,
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "Owner runs real Linux toolchain scan after git fast-forward; inspect .reports/summary.json, scanner exit codes and findings. Do not report S02 acceptance before Windows run and independent semantic review.",
+      "next_exact_action": "In existing unprivileged Linux Docker checkout, fast-forward latest S02 feature HEAD, run npm ci --ignore-scripts, npm run verify, npm audit and git diff --check; capture exit codes. Inspect local OSV report JSON and reviewdog output, then run Windows toolchain and independent semantic review. No main merge.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -201,11 +201,11 @@
         "local_windows_installed": false,
         "local_linux_installed": true,
         "opengrep_positive_control_executed": true,
-        "production_scan_executed": false,
-        "osv_dependency_scan_executed": false,
-        "reviewdog_formatting_executed": false,
+        "production_scan_executed": true,
+        "osv_dependency_scan_executed": true,
+        "reviewdog_formatting_executed": true,
         "independent_semantic_review_completed": false,
-        "status": "linux_install_and_opengrep_positive_control_passed_production_scan_pending",
+        "status": "linux_install_positive_control_and_local_sast_sca_scan_passed_linux_regression_and_windows_pending",
         "report_location": "tools/security/README.md",
         "reason": "User rejected Work handoff and this Chat container has no DNS/local Windows Docker access; cannot claim local scanner execution. No GitHub Actions, no credentials, no Qodo/CodeRabbit.",
         "linux_attempt_2026_10_24": {
@@ -221,7 +221,7 @@
           "fixed_in_commit": "00cac9ade4c247603845bdd423b6d55bdb3aafe3",
           "fix": "reviewdog version probe now uses -version instead of --help",
           "retest_status": "PASS according to owner-pasted actual Docker terminal output; after git fast-forward at b04841e",
-          "security_scan_status": "NOT RUN",
+          "security_scan_status": "PASS: user Docker output reports whole wrapper exit0 and individual Opengrep SAST/SARIF, independent coverage scan, OSV lockfile and reviewdog SARIF->RDJSON exits all0",
           "next_steps": "Owner runs git pull --ff-only then node tools/security/run-local.mjs install as unprivileged UID 1000; record full output before selftest and scan",
           "second_checkout": "b04841ee98ed0d1607f4c70aee9bd7a65b433d17",
           "installed_tools": {
@@ -256,6 +256,44 @@
             "output": "PASS: local SAST positive control detected deliberate eval and exited nonzero.",
             "meaning": "Opengrep deliberately unsafe eval positive fixture flagged; wrapper evaluated expected scanner failure correctly",
             "limitations": "No production scanning or OSV/reviewdog format check run during selftest"
+          },
+          "security_scan": {
+            "source": "Owner-supplied real PowerShell docker exec transcript, 2026-10-24T19:09:07.639Z",
+            "tested_head": "328ae3e2bbd34ae2c823cf99de394e9fd5733fc6",
+            "wrapper_exit": 0,
+            "opengrep": {
+              "version": "1.30.0",
+              "exit": 0,
+              "files": 5,
+              "custom_rules": 3,
+              "findings": 0,
+              "explicit_files": [
+                "bridge/policy.mts",
+                "bridge/principal.mts",
+                "bridge/status.mts",
+                "index.mts",
+                "server.mts"
+              ]
+            },
+            "opengrepCoverage": {
+              "exit": 0,
+              "scanned_paths": 5
+            },
+            "osvScanner": {
+              "version": "2.7.0",
+              "exit": 0,
+              "source": "package-lock.json",
+              "packages_reported_in_stderr": 245,
+              "advisory_json_review": "PENDING: .reports/osv.json not supplied"
+            },
+            "reviewdog": {
+              "version": "0.21.2",
+              "exit": 0,
+              "format": "SARIF->RDJSON",
+              "note": "No Opengrep findings; success with empty input doesn't establish substantive review or vulnerability absence"
+            },
+            "report_location": "tools/security/.reports (ignored local)",
+            "limits": "Only 3 custom SAST rules/5 source files; OSV JSON uninspected; independent semantic audit/Windows not completed"
           }
         }
       }
@@ -289,7 +327,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Owner Docker Linux installation and Opengrep eval positive-control passed at 0309d5c. Next run `node tools/security/run-local.mjs scan` in existing container with latest feature HEAD, capture output/report. S03-06 locked; no Actions.",
+  "next_preflight_action": "User Docker scan at HEAD 328ae3e passed: Opengrep 5 source/3 rules/0 findings, coverage exit0, OSV245 packages exit0, reviewdog exit0, overall exit0. Full Linux regression on updated docs head and Windows OSS scanner tests pending, OSV report needs inspection and independent security review pending. S03-S06 locked.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
