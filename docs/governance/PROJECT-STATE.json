@@ -5,7 +5,7 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_completion_linux_oss_install_pass_selftest_pending",
+  "phase": "S02_completion_linux_opengrep_selftest_passed_scan_pending",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "completion_linux_oss_tools_install_passed_selftest_pending",
+      "status": "completion_linux_oss_positive_control_passed_scan_pending",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -91,7 +91,7 @@
       "test_result": "Actual Windows npm ci/full typed ESLint/typecheck/23 unit tests/build/9 modern stdio protocol tests PASS. Both deferred-entry regressions red before fix, green after; external compiled boundary5/5 and protocol8/8 PASS.",
       "environment_blocker": null,
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "On owner Linux Docker under uid1000, ff-only pull current PR22 head, then node tools/security/run-local.mjs selftest; capture output/exit. Then production scan, npm verify, Windows tool installation and independent semantic review. No S03-06.",
+      "next_exact_action": "Owner runs real Linux toolchain scan after git fast-forward; inspect .reports/summary.json, scanner exit codes and findings. Do not report S02 acceptance before Windows run and independent semantic review.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -200,12 +200,12 @@
         "official_asset_digests_checked": "6/6 publisher GitHub release metadata matches",
         "local_windows_installed": false,
         "local_linux_installed": true,
-        "opengrep_positive_control_executed": false,
+        "opengrep_positive_control_executed": true,
         "production_scan_executed": false,
         "osv_dependency_scan_executed": false,
         "reviewdog_formatting_executed": false,
         "independent_semantic_review_completed": false,
-        "status": "linux_pinned_tools_installed_scanner_selftest_and_scans_pending",
+        "status": "linux_install_and_opengrep_positive_control_passed_production_scan_pending",
         "report_location": "tools/security/README.md",
         "reason": "User rejected Work handoff and this Chat container has no DNS/local Windows Docker access; cannot claim local scanner execution. No GitHub Actions, no credentials, no Qodo/CodeRabbit.",
         "linux_attempt_2026_10_24": {
@@ -249,6 +249,13 @@
               "exit": 0,
               "sha256": "30413aa3c7443e9c3c157fe5766cad40e3bb39a32e210ee69b710a8d5c4b8e51"
             }
+          },
+          "selftest": {
+            "result": "PASS per owner-pasted Docker command output",
+            "branch_head_tested": "0309d5c1b81fe774f3c51ae6aff1b32c9fa821f0",
+            "output": "PASS: local SAST positive control detected deliberate eval and exited nonzero.",
+            "meaning": "Opengrep deliberately unsafe eval positive fixture flagged; wrapper evaluated expected scanner failure correctly",
+            "limitations": "No production scanning or OSV/reviewdog format check run during selftest"
           }
         }
       }
@@ -282,7 +289,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Owner Docker Linux version-pinned tools installation PASSED at b04841e. Next opengrep positive-control selftest, then scan, reverify product on final head; PR22 draft, SEC gate open, S03-06 locked.",
+  "next_preflight_action": "Owner Docker Linux installation and Opengrep eval positive-control passed at 0309d5c. Next run `node tools/security/run-local.mjs scan` in existing container with latest feature HEAD, capture output/report. S03-06 locked; no Actions.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
