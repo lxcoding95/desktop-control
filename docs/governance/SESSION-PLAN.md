@@ -1,6 +1,6 @@
 # Six Development Sessions — Current State and Reservation
 
-The owner reserved **six sessions of at most 25 minutes each** after preflight. **Sessions started: 2 of 6.** S01 is completed (architecture/docs). S02 is under development with its original 25-minute budget exhausted and an explicitly owner-approved, separately metered 35-minute extension #1; it is paused pending functional validation. S03–S06 remain locked and require individual explicit authorization. This document does not start or spend further session time.
+The owner reserved **exactly six development sessions S01–S06** at most 25 minutes each, with separately owner-approved S02 extensions recorded in [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6). **2/6 sessions have started**: S01 architecture completed and merged; S02 local MCP core tested on Windows/Linux on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), independent semantic review pending; S03–S06 remain locked. **Between-session product-roadmap/governance work does not start a new development session or reset any elapsed budget.**
 
 Planning target: make strong use of the available session time, with focused tasks and measured time reporting. Accurate timestamps and completion evidence must be recorded during each actual session; do not fabricate elapsed time or percentage utilization.
 
@@ -12,6 +12,8 @@ Planning target: make strong use of the available session time, with focused tas
 | 4 | [#8](https://github.com/lxcoding95/desktop-control/issues/8) | Desktop & Browser Control | Not started; not authorized |
 | 5 | [#9](https://github.com/lxcoding95/desktop-control/issues/9) | Security, Packaging & Installation | Not started; not authorized |
 | 6 | [#10](https://github.com/lxcoding95/desktop-control/issues/10) | Integration, Quality & Release Candidate | Not started; not authorized |
+
+Public **product milestones M01–M06 and M07+ are a different axis**, defined in [PRODUCT-MILESTONES.md](PRODUCT-MILESTONES.md). These reserved session issues are historical and must not be silently renamed, closed or mapped to new product deliverables without a reversible migration.
 
 ## Session protocol
 
