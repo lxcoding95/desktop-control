@@ -41,6 +41,7 @@ The gateway, local bridge, identity model and transports remain subject to desig
 ## Canonical project plan and cross-chat continuity
 
 - [Product milestones M01–M06, migration and evidence semantics](docs/governance/PRODUCT-MILESTONES.md)
+- [Changelog — merged changes versus in-review work](CHANGELOG.md)
 - [Public information classification and repository freshness](docs/governance/PUBLIC-INFORMATION-POLICY.md)
 - [German masterplan (scope, decisions, architecture, sources and six sessions)](docs/master/PROJECT-MASTERPLAN.md)
 - [Cross-chat recovery protocol](docs/governance/CHAT-CONTINUITY.md)
