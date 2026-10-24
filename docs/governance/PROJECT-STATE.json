@@ -5,12 +5,12 @@
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_extension_4_running",
+  "phase": "S02_extension_4_paused_work_validation",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
   "development_session_target_active_fraction": 0.94,
-  "active_development_session": "S02",
+  "active_development_session": null,
   "work_admin": {
     "owner_intends_resume_local_time": "2026-10-22T01:00:00+02:00",
     "scheduled_by_assistant": false,
@@ -81,7 +81,7 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "extension_4_running",
+      "status": "extension_4_paused_work_validation",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
@@ -91,7 +91,7 @@
       "test_result": "Actual Windows npm ci/full typed ESLint/typecheck/23 unit tests/build/9 modern stdio protocol tests PASS. Both deferred-entry regressions red before fix, green after; external compiled boundary5/5 and protocol8/8 PASS.",
       "environment_blocker": "Local tooling works. Native Windows SID, actual Linux/platform matrix, full redistribution license/provenance and independent semantic review remain unverified.",
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "Within separately metered extension 4, audit current S02 source, dependency license metadata/provenance and platform security evidence. Keep PR22 draft until independent review/platform acceptance. Source runs occur only where execution is actually possible.",
+      "next_exact_action": "Owner Work on Windows + Linux Debian Docker: git fetch/pull --ff-only, verify live PR head, npm ci --ignore-scripts; npm run verify on Linux and Windows at same new HEAD, capture counts/skips/exits, run installed LICENSE/NOTICE inventory and native identity negative checks. No S03-S06, no CI, no Qodo or merge. Independent semantic review required.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -168,12 +168,16 @@
           "reason": "User explicitly said 'weiter' after S02 extension3 evidence and had already allowed repeated S02-only up-to-35-minute extensions; continuing S02 acceptance work only",
           "started_at_utc": "2026-10-24T17:06:42.827Z",
           "max_seconds": 2100,
-          "charged_wall_seconds": 0,
-          "remaining_seconds_conservative": 2100,
+          "charged_wall_seconds": 938,
+          "remaining_seconds_conservative": 1162,
           "active_seconds_verified": null,
-          "status": "running",
+          "status": "paused_for_work_platform_validation",
           "baseline_head_sha": "4fc8092476b6d0386cb5fbd87d2b9c9adc7bca3a",
-          "scope": "S02 source/security review, native OS identity requirements, license/notice compliance and independent review gaps; no S03-S06, no CI and no unverified merge"
+          "scope": "S02 source/security review, native OS identity requirements, license/notice compliance and independent review gaps; no S03-S06, no CI and no unverified merge",
+          "paused_at_utc": "2026-10-24T17:22:21.130Z",
+          "test_evidence": "Owner-provided Linux verified at earlier head 9789a610: 24/24 units and 8/9 protocol tests (1 Windows-only skip), npm ci/full verify exit0; extension4 HEAD audit fixes and new Linux /proc descriptor test NOT RUN on Windows/Linux. CodeRabbit incremental review call failed because HEAD changed.",
+          "last_known_head_sha": "bcfdea4e36e82c648d04d8161d280d44b49e231e",
+          "next_exact_action": "Owner Work on Windows + Linux Debian Docker: git fetch/pull --ff-only, verify live PR head, npm ci --ignore-scripts; npm run verify on Linux and Windows at same new HEAD, capture counts/skips/exits, run installed LICENSE/NOTICE inventory and native identity negative checks. No S03-S06, no CI, no Qodo or merge. Independent semantic review required."
         }
       ]
     },
@@ -206,8 +210,8 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "S02 extension4 active from 2026-10-24T17:06:42.827Z (max 2100s), prior extension3 exhausted without recovered budget; S03-S06 remain locked.",
-  "session_start_authorized": true,
+  "next_preflight_action": "Extension4 paused with 1162s conservative remaining at 2026-10-24T17:22:21.130Z. Resume SAME extension only after verifying the connected Work test environment, preserve elapsed charge and prior session counters. S03-S06 locked.",
+  "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
     "no_paid_services_without_new_permission": true,
