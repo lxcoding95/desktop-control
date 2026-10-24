@@ -1,0 +1,593 @@
+
+COMMAND:git fetch origin 
+START:2026-10-24T18:07:16Z
+From https://github.com/lxcoding95/desktop-control
+   b0bc3c4..38b5a9a  feat/s02-local-mcp-core -> origin/feat/s02-local-mcp-core
+
+EXIT_CODE:0
+END:2026-10-24T18:07:18Z
+
+COMMAND:git switch feat/s02-local-mcp-core 
+START:2026-10-24T18:07:18Z
+Already on 'feat/s02-local-mcp-core'
+Your branch is behind 'origin/feat/s02-local-mcp-core' by 1 commit, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+
+EXIT_CODE:0
+END:2026-10-24T18:07:18Z
+
+COMMAND:git pull --ff-only 
+START:2026-10-24T18:07:18Z
+Updating b0bc3c4..38b5a9a
+Fast-forward
+ THIRD-PARTY-NOTICES.md                       | 477 +++++++++++++++++++++++++++
+ docs/sessions/session-02/SESSION-STATE.md    |   5 +
+ packages/mcp-server/scripts/build-native.mjs |  25 +-
+ 3 files changed, 504 insertions(+), 3 deletions(-)
+ create mode 100644 THIRD-PARTY-NOTICES.md
+
+EXIT_CODE:0
+END:2026-10-24T18:07:18Z
+
+COMMAND:git rev-parse HEAD 
+START:2026-10-24T18:07:18Z
+38b5a9a526a6b82818d1dcf7c2011c2a8eec5b4f
+
+EXIT_CODE:0
+END:2026-10-24T18:07:18Z
+
+COMMAND:git status --short --branch 
+START:2026-10-24T18:07:18Z
+## feat/s02-local-mcp-core...origin/feat/s02-local-mcp-core
+
+EXIT_CODE:0
+END:2026-10-24T18:07:18Z
+
+COMMAND:node --version 
+START:2026-10-24T18:07:18Z
+v24.22.1
+
+EXIT_CODE:0
+END:2026-10-24T18:07:19Z
+
+COMMAND:npm --version 
+START:2026-10-24T18:07:19Z
+11.19.1
+
+EXIT_CODE:0
+END:2026-10-24T18:07:19Z
+
+COMMAND:id 
+START:2026-10-24T18:07:19Z
+uid=1000(node) gid=1000(node) groups=1000(node)
+
+EXIT_CODE:0
+END:2026-10-24T18:07:19Z
+
+COMMAND:npm ci --ignore-scripts 
+START:2026-10-24T18:07:19Z
+
+added 209 packages, and audited 211 packages in 11s
+
+81 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+EXIT_CODE:0
+END:2026-10-24T18:07:31Z
+
+COMMAND:npm run verify 
+START:2026-10-24T18:07:31Z
+
+> desktop-control@0.0.0 verify
+> npm run lint && npm run typecheck && npm test && npm run build && npm run test:protocol
+
+
+> desktop-control@0.0.0 lint
+> eslint --max-warnings 0 packages eslint.config.mjs
+
+
+> desktop-control@0.0.0 typecheck
+> tsc --noEmit --project tsconfig.json
+
+
+> desktop-control@0.0.0 test
+> node packages/mcp-server/scripts/build-native.mjs && node --experimental-strip-types --test packages/mcp-server/test/*.test.mts
+
+✔ native process principal gates valid, wrong, missing, expired and revoked host grants (3.580865ms)
+✔ audit failures remain redacted and cannot permit an unaudited adapter entry (0.762106ms)
+✔ deny by default (1.398635ms)
+✔ valid exact, unexpired grant permits read (0.393143ms)
+✔ different OS principal is denied (0.207182ms)
+✔ null principal is denied (0.166564ms)
+✔ grant expires exactly at deadline (0.234507ms)
+✔ revocation denies (0.299773ms)
+✔ missing grant store or invalid grants fail closed (0.324304ms)
+✔ wrong resource/capability denies (0.179875ms)
+✔ untrusted expiry values fail closed (0.345049ms)
+✔ same unprivileged POSIX uid yields matching principal (1.545462ms)
+✔ setuid/effective UID mismatch fails closed (0.284885ms)
+✔ privileged root identity fails closed even when both IDs match (0.185988ms)
+✔ invalid POSIX identity fails closed (0.305412ms)
+✔ real process principal is derived without request text (0.333757ms)
+✔ Windows token parser denies elevation, service, malformed and mismatched identity (0.565005ms)
+✔ denied request never invokes adapter (2.138028ms)
+✔ test-only explicit grant allows bounded structured result (1.540506ms)
+✔ revoke between calls blocks subsequent execution (0.385399ms)
+✔ cancelled request never reaches adapter (0.227612ms)
+✔ adapter exceptions and invalid shapes redact as INTERNAL_ERROR (1.399836ms)
+✔ revocation before deferred adapter entry prevents invocation (0.340901ms)
+✔ cancellation before deferred adapter entry prevents invocation (0.390317ms)
+✔ adapter timeout returns a bounded redacted failure (26.302441ms)
+✔ in-flight abort returns CANCELLED without waiting for adapter (1.369933ms)
+✔ extra adapter fields are excluded from the public response (1.430828ms)
+✔ revocation before deferred entry records deny, never false allow (0.702787ms)
+✔ cancellation before deferred entry records cancel, never false allow (0.534882ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 361.206646
+
+> desktop-control@0.0.0 build
+> tsc --project tsconfig.json && node packages/mcp-server/scripts/build-native.mjs
+
+
+> desktop-control@0.0.0 test:protocol
+> node --test packages/mcp-server/test/*.test.mjs
+
+✔ Linux production entry has no unexpected sockets beyond inherited Unix stdio (420.608154ms)
+✔ Linux socket detector finds deliberately listening TCP and UDP test endpoints (97.04534ms)
+✔ actual SDK stdio fixture allowed: result, adapter count, redaction and EOF (407.41498ms)
+✔ actual SDK stdio fixture denied: result, adapter count, redaction and EOF (360.538231ms)
+✔ actual SDK stdio fixture expired: result, adapter count, redaction and EOF (301.295576ms)
+✔ actual SDK stdio fixture revoked: result, adapter count, redaction and EOF (255.672642ms)
+✔ actual SDK stdio fixture error: result, adapter count, redaction and EOF (254.812957ms)
+﹣ production built entry on Windows: malformed input, no TCP listener and EOF (0.399984ms) # SKIP
+✔ production built entry: unterminated input exceeding SDK 10 MiB bound terminates (1211.412415ms)
+✔ actual SDK stdio fixture cancellation of in-flight adapter and subsequent liveness (311.53184ms)
+✔ modern MCP stdio discovery, strict arguments, default denial and clean EOF (544.169835ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 5621.079508
+
+EXIT_CODE:0
+END:2026-10-24T18:07:47Z
+
+COMMAND:npm ls --all 
+START:2026-10-24T18:07:47Z
+desktop-control@0.0.0 /workspace/desktop-control
++-- @desktop-control/mcp-server@0.0.1 -> ./packages/mcp-server
+| +-- @modelcontextprotocol/server@2.3.1
+| | +-- @modelcontextprotocol/core@2.3.1 deduped
+| | `-- zod@4.6.7 deduped
+| `-- zod@4.6.7
++-- @eslint/js@10.0.1
+| `-- eslint@10.13.0 deduped
++-- @modelcontextprotocol/inspector@2.12.0
+| +-- @hono/node-server@2.1.5
+| | `-- hono@4.13.13 deduped
+| +-- @modelcontextprotocol/client@2.3.1
+| | +-- @modelcontextprotocol/core@2.3.1 deduped
+| | +-- cross-spawn@7.0.6 deduped
+| | +-- eventsource-parser@3.1.1
+| | +-- eventsource@3.0.7
+| | | `-- eventsource-parser@3.1.1 deduped
+| | +-- jose@6.2.13
+| | +-- pkce-challenge@5.0.1
+| | `-- zod@4.6.7 deduped
+| +-- @modelcontextprotocol/core@2.3.1
+| | `-- zod@4.6.7 deduped
+| +-- @modelcontextprotocol/ext-apps@2.0.3
+| | +-- @modelcontextprotocol/client@2.3.1 deduped
+| | +-- @modelcontextprotocol/core@2.3.1 deduped
+| | +-- @modelcontextprotocol/server@2.3.1 deduped
+| | +-- @standard-schema/spec@1.1.0
+| | +-- UNMET OPTIONAL DEPENDENCY react-dom@^17.0.0 || ^18.0.0 || ^19.0.0
+| | +-- react@19.3.1 deduped
+| | `-- zod@4.6.7 deduped
+| +-- @modelcontextprotocol/ext-tasks@0.2.2
+| | +-- @modelcontextprotocol/client@2.3.1 deduped
+| | `-- zod@4.6.7 deduped
+| +-- @modelcontextprotocol/server@2.3.1 deduped
+| +-- @napi-rs/keyring@2.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-darwin-arm64@2.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-darwin-x64@2.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-freebsd-x64@2.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-linux-arm-gnueabihf@2.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-linux-arm64-gnu@2.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-linux-arm64-musl@2.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-linux-riscv64-gnu@2.1.2
+| | +-- @napi-rs/keyring-linux-x64-gnu@2.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-linux-x64-musl@2.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-win32-arm64-msvc@2.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-win32-ia32-msvc@2.1.2
+| | `-- UNMET OPTIONAL DEPENDENCY @napi-rs/keyring-win32-x64-msvc@2.1.2
+| +-- @vitejs/plugin-react@6.1.2
+| | +-- UNMET OPTIONAL DEPENDENCY @rolldown/plugin-babel@^0.1.7 || ^0.2.0
+| | +-- @rolldown/pluginutils@1.0.1
+| | +-- UNMET OPTIONAL DEPENDENCY babel-plugin-react-compiler@^1.0.0
+| | +-- UNMET OPTIONAL DEPENDENCY oxc-transform-react@^0.152.0
+| | `-- vite@8.3.5 deduped
+| +-- ajv@8.20.0
+| | +-- fast-deep-equal@3.1.3 deduped
+| | +-- fast-uri@3.1.9
+| | +-- json-schema-traverse@1.0.0
+| | `-- require-from-string@2.0.2
+| +-- atomically@2.1.1
+| | +-- stubborn-fs@2.0.0
+| | | `-- stubborn-utils@1.0.2
+| | `-- when-exit@2.1.5
+| +-- chokidar@4.0.3
+| | `-- readdirp@4.1.2
+| +-- commander@15.0.0
+| +-- hono@4.13.13
+| +-- ink@6.8.0
+| | +-- @alcalzone/ansi-tokenize@0.2.5
+| | | +-- ansi-styles@6.2.3 deduped
+| | | `-- is-fullwidth-code-point@5.1.0
+| | |   `-- get-east-asian-width@1.7.0 deduped
+| | +-- UNMET OPTIONAL DEPENDENCY @types/react@>=19.0.0
+| | +-- ansi-escapes@7.3.0
+| | | `-- environment@1.1.0
+| | +-- ansi-styles@6.2.3
+| | +-- auto-bind@5.0.1
+| | +-- chalk@5.6.2
+| | +-- cli-boxes@3.0.0
+| | +-- cli-cursor@4.0.0
+| | | `-- restore-cursor@4.0.0
+| | |   +-- onetime@5.1.2
+| | |   | `-- mimic-fn@2.1.0
+| | |   `-- signal-exit@3.0.7 deduped
+| | +-- cli-truncate@5.2.0
+| | | +-- slice-ansi@8.0.0 deduped
+| | | `-- string-width@8.3.0 deduped
+| | +-- code-excerpt@4.0.0
+| | | `-- convert-to-spaces@2.0.1
+| | +-- es-toolkit@1.52.0
+| | +-- indent-string@5.0.0
+| | +-- is-in-ci@2.0.0
+| | +-- patch-console@2.0.0
+| | +-- UNMET OPTIONAL DEPENDENCY react-devtools-core@>=6.1.2
+| | +-- react-reconciler@0.33.0
+| | | +-- react@19.3.1 deduped
+| | | `-- scheduler@0.27.0 deduped
+| | +-- react@19.3.1 deduped
+| | +-- scheduler@0.27.0
+| | +-- signal-exit@3.0.7
+| | +-- slice-ansi@8.0.0
+| | | +-- ansi-styles@6.2.3 deduped
+| | | `-- is-fullwidth-code-point@5.1.0 deduped
+| | +-- stack-utils@2.0.6
+| | | `-- escape-string-regexp@2.0.0
+| | +-- string-width@8.3.0
+| | | +-- get-east-asian-width@1.7.0
+| | | `-- strip-ansi@7.2.0
+| | |   `-- ansi-regex@6.4.0
+| | +-- terminal-size@4.0.1
+| | +-- type-fest@5.10.0
+| | | `-- tagged-tag@1.0.0
+| | +-- widest-line@6.0.0
+| | | `-- string-width@8.3.0 deduped
+| | +-- wrap-ansi@9.0.2
+| | | +-- ansi-styles@6.2.3 deduped
+| | | +-- string-width@7.2.0
+| | | | +-- emoji-regex@10.6.0
+| | | | +-- get-east-asian-width@1.7.0 deduped
+| | | | `-- strip-ansi@7.2.0 deduped
+| | | `-- strip-ansi@7.2.0 deduped
+| | +-- ws@8.22.0
+| | | +-- UNMET OPTIONAL DEPENDENCY bufferutil@^4.0.1
+| | | `-- UNMET OPTIONAL DEPENDENCY utf-8-validate@>=5.0.2
+| | `-- yoga-layout@3.2.1
+| +-- open@11.0.4
+| | +-- default-browser@5.5.1
+| | | +-- bundle-name@4.1.1
+| | | | `-- run-applescript@7.1.0
+| | | `-- default-browser-id@5.0.1
+| | +-- define-lazy-prop@3.0.0
+| | +-- is-in-ssh@1.0.0
+| | +-- is-inside-container@1.0.0
+| | | `-- is-docker@3.0.0
+| | +-- powershell-utils@0.2.1
+| | `-- wsl-utils@1.0.1
+| |   +-- is-wsl@3.1.1
+| |   | `-- is-inside-container@1.0.0 deduped
+| |   `-- powershell-utils@0.2.1 deduped
+| +-- pino@9.14.0
+| | +-- @pinojs/redact@0.4.0
+| | +-- atomic-sleep@1.0.0
+| | +-- on-exit-leak-free@2.1.2
+| | +-- pino-abstract-transport@2.0.0
+| | | `-- split2@4.2.0
+| | +-- pino-std-serializers@7.1.0
+| | +-- process-warning@5.1.1
+| | +-- quick-format-unescaped@4.0.4
+| | +-- real-require@0.2.0
+| | +-- safe-stable-stringify@2.5.0
+| | +-- sonic-boom@4.2.1
+| | | `-- atomic-sleep@1.0.0 deduped
+| | `-- thread-stream@3.2.0
+| |   `-- real-require@0.2.0 deduped
+| +-- proper-lockfile@4.1.2
+| | +-- graceful-fs@4.2.11
+| | +-- retry@0.12.0
+| | `-- signal-exit@3.0.7 deduped
+| +-- react@19.3.1
+| +-- undici@8.12.3
+| +-- vite@8.3.5
+| | +-- @types/node@22.15.30 deduped
+| | +-- UNMET OPTIONAL DEPENDENCY @vitejs/devtools@^0.7.1 || ^0.8.0
+| | +-- UNMET OPTIONAL DEPENDENCY esbuild@^0.27.0 || ^0.28.0
+| | +-- UNMET OPTIONAL DEPENDENCY fsevents@~2.3.3
+| | +-- UNMET OPTIONAL DEPENDENCY jiti@>=1.21.0
+| | +-- UNMET OPTIONAL DEPENDENCY less@^4.0.0
+| | +-- lightningcss@1.33.0
+| | | +-- detect-libc@2.1.2
+| | | +-- UNMET OPTIONAL DEPENDENCY lightningcss-android-arm64@1.33.0
+| | | +-- UNMET OPTIONAL DEPENDENCY lightningcss-darwin-arm64@1.33.0
+| | | +-- UNMET OPTIONAL DEPENDENCY lightningcss-darwin-x64@1.33.0
+| | | +-- UNMET OPTIONAL DEPENDENCY lightningcss-freebsd-x64@1.33.0
+| | | +-- UNMET OPTIONAL DEPENDENCY lightningcss-linux-arm-gnueabihf@1.33.0
+| | | +-- UNMET OPTIONAL DEPENDENCY lightningcss-linux-arm64-gnu@1.33.0
+| | | +-- UNMET OPTIONAL DEPENDENCY lightningcss-linux-arm64-musl@1.33.0
+| | | +-- lightningcss-linux-x64-gnu@1.33.0
+| | | +-- UNMET OPTIONAL DEPENDENCY lightningcss-linux-x64-musl@1.33.0
+| | | +-- UNMET OPTIONAL DEPENDENCY lightningcss-win32-arm64-msvc@1.33.0
+| | | `-- UNMET OPTIONAL DEPENDENCY lightningcss-win32-x64-msvc@1.33.0
+| | +-- picomatch@4.0.7
+| | +-- postcss@8.5.31
+| | | +-- nanoid@3.3.20
+| | | +-- picocolors@1.1.1
+| | | `-- source-map-js@1.2.2
+| | +-- rolldown@1.2.15
+| | | +-- @oxc-project/types@0.155.0
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-android-arm-eabi@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-android-arm64@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-darwin-arm64@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-darwin-x64@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-freebsd-x64@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-linux-arm-gnueabihf@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-linux-arm64-gnu@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-linux-arm64-musl@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-linux-ppc64-gnu@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-linux-s390x-gnu@1.2.15
+| | | +-- @rolldown/binding-linux-x64-gnu@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-linux-x64-musl@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-openharmony-arm64@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-win32-arm64-msvc@1.2.15
+| | | +-- UNMET OPTIONAL DEPENDENCY @rolldown/binding-win32-x64-msvc@1.2.15
+| | | `-- @rolldown/pluginutils@1.0.1 deduped
+| | +-- UNMET OPTIONAL DEPENDENCY sass-embedded@^1.70.0
+| | +-- UNMET OPTIONAL DEPENDENCY sass@^1.70.0
+| | +-- UNMET OPTIONAL DEPENDENCY stylus@>=0.54.8
+| | +-- UNMET OPTIONAL DEPENDENCY sugarss@^5.0.0
+| | +-- UNMET OPTIONAL DEPENDENCY terser@^5.16.0
+| | +-- tinyglobby@0.2.17
+| | | +-- fdir@6.5.0
+| | | | `-- picomatch@4.0.7 deduped
+| | | `-- picomatch@4.0.7 deduped
+| | +-- UNMET OPTIONAL DEPENDENCY tsx@^4.8.1
+| | `-- yaml@2.9.1 deduped
+| +-- yaml@2.9.1
+| `-- zod@4.6.7 deduped
++-- @types/node@22.15.30
+| `-- undici-types@6.21.0
++-- eslint@10.13.0
+| +-- @eslint-community/eslint-utils@4.10.1
+| | +-- eslint-visitor-keys@3.4.3
+| | `-- eslint@10.13.0 deduped
+| +-- @eslint-community/regexpp@4.12.2
+| +-- @eslint/config-array@0.23.5
+| | +-- @eslint/object-schema@3.0.5
+| | +-- debug@4.4.3 deduped
+| | `-- minimatch@10.2.6 deduped
+| +-- @eslint/config-helpers@0.7.0
+| | `-- @eslint/core@1.2.1 deduped
+| +-- @eslint/core@1.2.1
+| | `-- @types/json-schema@7.0.15
+| +-- @eslint/plugin-kit@0.7.3
+| | +-- @eslint/core@1.2.1 deduped
+| | `-- levn@0.4.1
+| |   +-- prelude-ls@1.2.1 deduped
+| |   `-- type-check@0.4.0 deduped
+| +-- @humanfs/node@0.16.8
+| | +-- @humanfs/core@0.19.2
+| | | `-- @humanfs/types@0.15.0 deduped
+| | +-- @humanfs/types@0.15.0
+| | `-- @humanwhocodes/retry@0.4.3 deduped
+| +-- @humanwhocodes/module-importer@1.0.1
+| +-- @humanwhocodes/retry@0.4.3
+| +-- @types/estree@1.0.9
+| +-- ajv@6.15.0
+| | +-- fast-deep-equal@3.1.3 deduped
+| | +-- fast-json-stable-stringify@2.1.0
+| | +-- json-schema-traverse@0.4.1
+| | `-- uri-js@4.4.1
+| |   `-- punycode@2.3.1
+| +-- cross-spawn@7.0.6
+| | +-- path-key@3.1.1
+| | +-- shebang-command@2.0.0
+| | | `-- shebang-regex@3.0.0
+| | `-- which@2.0.2
+| |   `-- isexe@2.0.0
+| +-- debug@4.4.3
+| | `-- ms@2.1.3
+| +-- escape-string-regexp@4.0.0
+| +-- eslint-scope@9.1.2
+| | +-- @types/esrecurse@4.3.1
+| | +-- @types/estree@1.0.9 deduped
+| | +-- esrecurse@4.3.0
+| | | `-- estraverse@5.3.0 deduped
+| | `-- estraverse@5.3.0
+| +-- eslint-visitor-keys@5.0.1
+| +-- espree@11.2.0
+| | +-- acorn-jsx@5.3.2
+| | | `-- acorn@8.19.0 deduped
+| | +-- acorn@8.19.0
+| | `-- eslint-visitor-keys@5.0.1 deduped
+| +-- esquery@1.7.0
+| | `-- estraverse@5.3.0 deduped
+| +-- esutils@2.0.3
+| +-- fast-deep-equal@3.1.3
+| +-- file-entry-cache@11.1.5
+| | `-- flat-cache@6.1.23
+| |   +-- cacheable@2.5.0
+| |   | +-- @cacheable/memory@2.2.0
+| |   | | +-- @cacheable/utils@2.5.0 deduped
+| |   | | +-- @keyv/bigmap@1.3.1
+| |   | | | +-- hashery@1.5.1 deduped
+| |   | | | +-- hookified@1.15.1 deduped
+| |   | | | `-- keyv@5.6.0 deduped
+| |   | | +-- hookified@1.15.1 deduped
+| |   | | `-- keyv@5.6.0 deduped
+| |   | +-- @cacheable/utils@2.5.0
+| |   | | +-- hashery@1.5.1
+| |   | | | `-- hookified@1.15.1 deduped
+| |   | | `-- keyv@5.6.0 deduped
+| |   | +-- hookified@1.15.1 deduped
+| |   | +-- keyv@5.6.0
+| |   | | `-- @keyv/serialize@1.1.1
+| |   | `-- qified@0.10.1
+| |   |   `-- hookified@2.2.0
+| |   +-- flatted@3.4.4
+| |   `-- hookified@1.15.1
+| +-- find-up@5.0.0
+| | +-- locate-path@6.0.0
+| | | `-- p-locate@5.0.0
+| | |   `-- p-limit@3.1.0
+| | |     `-- yocto-queue@0.1.0
+| | `-- path-exists@4.0.0
+| +-- glob-parent@6.0.2
+| | `-- is-glob@4.0.3 deduped
+| +-- ignore@5.3.2
+| +-- imurmurhash@0.1.4
+| +-- is-glob@4.0.3
+| | `-- is-extglob@2.1.1
+| +-- UNMET OPTIONAL DEPENDENCY jiti@*
+| +-- json-stable-stringify-without-jsonify@1.0.1
+| +-- minimatch@10.2.6
+| | `-- brace-expansion@5.0.12
+| |   `-- balanced-match@4.0.4
+| +-- natural-compare@1.4.0
+| `-- optionator@0.9.4
+|   +-- deep-is@0.1.4
+|   +-- fast-levenshtein@2.0.6
+|   +-- levn@0.4.1 deduped
+|   +-- prelude-ls@1.2.1
+|   +-- type-check@0.4.0
+|   | `-- prelude-ls@1.2.1 deduped
+|   `-- word-wrap@1.2.5
++-- typescript-eslint@8.72.0
+| +-- @typescript-eslint/eslint-plugin@8.72.0
+| | +-- @eslint-community/regexpp@4.12.2 deduped
+| | +-- @typescript-eslint/parser@8.72.0 deduped
+| | +-- @typescript-eslint/scope-manager@8.72.0
+| | | +-- @typescript-eslint/types@8.72.0 deduped
+| | | `-- @typescript-eslint/visitor-keys@8.72.0 deduped
+| | +-- @typescript-eslint/type-utils@8.72.0
+| | | +-- @typescript-eslint/types@8.72.0 deduped
+| | | +-- @typescript-eslint/typescript-estree@8.72.0 deduped
+| | | +-- @typescript-eslint/utils@8.72.0 deduped
+| | | +-- debug@4.4.3 deduped
+| | | +-- eslint@10.13.0 deduped
+| | | +-- ts-api-utils@2.5.0 deduped
+| | | `-- typescript@5.9.3 deduped
+| | +-- @typescript-eslint/utils@8.72.0 deduped
+| | +-- @typescript-eslint/visitor-keys@8.72.0
+| | | +-- @typescript-eslint/types@8.72.0 deduped
+| | | `-- eslint-visitor-keys@5.0.1 deduped
+| | +-- eslint@10.13.0 deduped
+| | +-- ignore@7.0.13
+| | +-- natural-compare@1.4.0 deduped
+| | +-- ts-api-utils@2.5.0
+| | | `-- typescript@5.9.3 deduped
+| | `-- typescript@5.9.3 deduped
+| +-- @typescript-eslint/parser@8.72.0
+| | +-- @typescript-eslint/scope-manager@8.72.0 deduped
+| | +-- @typescript-eslint/types@8.72.0
+| | +-- @typescript-eslint/typescript-estree@8.72.0 deduped
+| | +-- @typescript-eslint/visitor-keys@8.72.0 deduped
+| | +-- debug@4.4.3 deduped
+| | +-- eslint@10.13.0 deduped
+| | `-- typescript@5.9.3 deduped
+| +-- @typescript-eslint/typescript-estree@8.72.0
+| | +-- @typescript-eslint/project-service@8.72.0
+| | | +-- @typescript-eslint/tsconfig-utils@8.72.0 deduped
+| | | +-- @typescript-eslint/types@8.72.0 deduped
+| | | +-- debug@4.4.3 deduped
+| | | `-- typescript@5.9.3 deduped
+| | +-- @typescript-eslint/tsconfig-utils@8.72.0
+| | | `-- typescript@5.9.3 deduped
+| | +-- @typescript-eslint/types@8.72.0 deduped
+| | +-- @typescript-eslint/visitor-keys@8.72.0 deduped
+| | +-- debug@4.4.3 deduped
+| | +-- minimatch@10.2.6 deduped
+| | +-- semver@7.8.5
+| | +-- tinyglobby@0.2.17 deduped
+| | +-- ts-api-utils@2.5.0 deduped
+| | `-- typescript@5.9.3 deduped
+| +-- @typescript-eslint/utils@8.72.0
+| | +-- @eslint-community/eslint-utils@4.10.1 deduped
+| | +-- @typescript-eslint/scope-manager@8.72.0 deduped
+| | +-- @typescript-eslint/types@8.72.0 deduped
+| | +-- @typescript-eslint/typescript-estree@8.72.0 deduped
+| | +-- eslint@10.13.0 deduped
+| | `-- typescript@5.9.3 deduped
+| +-- eslint@10.13.0 deduped
+| `-- typescript@5.9.3 deduped
+`-- typescript@5.9.3
+
+
+EXIT_CODE:0
+END:2026-10-24T18:07:47Z
+
+COMMAND:npm audit --json 
+START:2026-10-24T18:07:47Z
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {},
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "dependencies": {
+      "prod": 6,
+      "dev": 241,
+      "optional": 39,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 246
+    }
+  }
+}
+
+EXIT_CODE:0
+END:2026-10-24T18:07:48Z
+
+COMMAND:git diff --check 
+START:2026-10-24T18:07:48Z
+
+EXIT_CODE:0
+END:2026-10-24T18:07:48Z
+
+COMMAND:git status --short --branch 
+START:2026-10-24T18:07:48Z
+## feat/s02-local-mcp-core...origin/feat/s02-local-mcp-core
+
+EXIT_CODE:0
+END:2026-10-24T18:07:48Z

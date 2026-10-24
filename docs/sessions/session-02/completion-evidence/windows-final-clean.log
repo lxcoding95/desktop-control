@@ -1,0 +1,90 @@
+**********************
+PowerShell transcript start
+Start time: 20261024200705
+Username: ALEXANDER-PC\aorfa
+RunAs User: ALEXANDER-PC\aorfa
+Configuration Name: 
+Machine: ALEXANDER-PC (Microsoft Windows NT 10.0.26300.0)
+Host Application: C:\Users\aorfa\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+& ./work/s02-final/final-windows.ps1
+Process ID: 10868
+PSVersion: 7.6.5
+PSEdition: Core
+GitCommitId: 7.6.5
+OS: Microsoft Windows 10.0.26300
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+Transcript started, output file is C:\Users\aorfa\Documents\Codex\2026-10-22\setze-ausschlie-lich-desktop-control-session\outputs\s02-final\windows-final-clean.log
+COMMAND:git fetch origin
+START:2026-10-24T18:07:05.4846741+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:06.2596802+00:00
+COMMAND:git switch feat/s02-local-mcp-core
+START:2026-10-24T18:07:06.2631580+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:06.3761054+00:00
+COMMAND:git pull --ff-only
+START:2026-10-24T18:07:06.3774849+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:07.1320783+00:00
+COMMAND:git rev-parse HEAD
+START:2026-10-24T18:07:07.1340293+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:07.1966239+00:00
+COMMAND:git status
+START:2026-10-24T18:07:07.1982038+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:07.2643859+00:00
+COMMAND:node --version
+START:2026-10-24T18:07:07.2660932+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:07.3100890+00:00
+COMMAND:npm --version
+START:2026-10-24T18:07:07.3112500+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:07.7853813+00:00
+COMMAND:npm ci --ignore-scripts
+START:2026-10-24T18:07:07.7866691+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:25.1707481+00:00
+COMMAND:npm run verify
+START:2026-10-24T18:07:25.1728097+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:46.6927112+00:00
+COMMAND:npm ls --all
+START:2026-10-24T18:07:46.6939073+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:49.0195649+00:00
+COMMAND:npm audit --json
+START:2026-10-24T18:07:49.0206350+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:51.3687377+00:00
+COMMAND:git diff --check
+START:2026-10-24T18:07:51.3705663+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:51.4632547+00:00
+COMMAND:git status
+START:2026-10-24T18:07:51.4641438+00:00
+
+EXIT_CODE:0
+END:2026-10-24T18:07:51.5264833+00:00
+**********************
+PowerShell transcript end
+End time: 20261024200751
+**********************

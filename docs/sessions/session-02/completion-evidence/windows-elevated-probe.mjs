@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {pathToFileURL} from 'node:url';import path from 'node:path';
+const root=process.argv[2];
+const facts=JSON.parse(execFileSync(path.join(root,'dist/native/windows-token.exe'),[String(process.pid)],{encoding:'utf8',timeout:2000,windowsHide:true}));
+assert.equal(facts.elevated,true,'this test requires an actual elevated Windows token');
+assert.ok(facts.integrity>=12288);
+const {localPrincipal}=await import(pathToFileURL(path.join(root,'dist/packages/mcp-server/src/bridge/principal.mjs')));
+const {createStatusExecutor}=await import(pathToFileURL(path.join(root,'dist/packages/mcp-server/src/bridge/status.mjs')));
+const principal=localPrincipal();assert.equal(principal,null);let calls=0;
+const execute=createStatusExecutor({grants:{getGrants:()=>[{principal:'windows:'+facts.sid,capability:'diagnostics.read',resource:'local:desktop-control',revoked:false,expiresAt:Date.now()+60000}]},adapter:{readStatus:()=>{calls++;return {service:'desktop-control',ready:true,api_version:1}}}});
+const result=await execute({principal});assert.equal(result.isError,true);assert.equal(result.content[0].text,'PERMISSION_DENIED');assert.equal(calls,0);
+console.log(JSON.stringify({platform:process.platform,elevated:true,integrityHigh:true,principal:null,adapterCalls:calls,result:'PERMISSION_DENIED',sidLogged:false}));

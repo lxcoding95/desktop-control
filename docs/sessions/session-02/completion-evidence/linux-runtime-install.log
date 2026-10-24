@@ -1,0 +1,19 @@
+
+added 4 packages, and audited 6 packages in 1s
+
+1 package is looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+CI_EXIT:0
+desktop-control@0.0.0 /tmp/s02-runtime-stage
+`-- @desktop-control/mcp-server@0.0.1 -> ./packages/mcp-server
+  +-- @modelcontextprotocol/server@2.3.1
+  | +-- @modelcontextprotocol/core@2.3.1
+  | | `-- zod@4.6.7 deduped
+  | `-- zod@4.6.7 deduped
+  `-- zod@4.6.7
+
+LS_EXIT:0
+SBOM_EXIT:1
+WORKSPACE_SBOM_EXIT:1

@@ -116,3 +116,13 @@ Owner-approved Windows elevated-token probe exit0:actual elevated/high-integrity
 
 Fresh Linux fullmatrix atb0bc3c4 passes29unit/10protocol+1skip, npm ls/audit/diff exit0. Fresh Windows native test failed due helper startup intermittency; direct cold recompile probe reproduced ETIMEDOUT (one round16s wall clock despite2s child timeout), while warmed queries60–80ms. No false allow; failure is fail-closed availability. Build now hashes source/compiler/binary, avoids rewriting unchanged executable and validates newly built helper before tests; verification in progress. Not claiming fixed until fresh matrix passes. Runtime-only installs3external packages bothOS; installed runtime LICENSE texts preserved in THIRD-PARTY-NOTICES.md. Custom actual-inventory SPDX2.3 schemas validate with existing AJV against official SPDX schema (both pass). npm installed SBOM failed omitted-dev workspace handling, raw error retained; not mislabeled as valid SBOM. Still no merge/CI/later sessions.
 
+
+## Final source matrix checkpoint 2026-10-24T18:09:24.6946458+00:00
+
+Clean testedsource38b5a9a526a6b82818d1dcf7c2011c2a8eec5b4f: Windows29unit/9protocol+2Linuxskip; Linux29unit/10protocol+1Windowskip. Both ci/verify/ls-all/audit/diff exit0. Native Windows elevated probe passed (approved UAC test, no SID logged); Linux root and both real/effective mismatch probes pass. Runtime3package notice inventory/SPDX official schema pass. Old extension4 history: paused with1162s before17:25:36 resume; checkpoint remaining620s after1480/2100 conservative charge. These records remain historical; new owner-required-time authorization supersedes need for another fixed extension. Pending only final independent review/disposition and acceptance decision; no merge yet/S03-S06 locked.
+
+
+## Review-ready technical checkpoint 2026-10-24T18:12:43.2034956+00:00
+
+[Full report](COMPLETION-VERIFICATION.md): source38b5a9a both clean fullmatrices pass29units; Win9protocol+2skip,Linux10protocol+1skip; both ci/verify/ls/audit/diff exit0. Native Windows normal/elevated, Linux root/bothUIDmismatches pass. License/notices/SPDX technical inventory complete; no legal/releasecertification. Initial Windows helper startup failure preserved plus corrected build-cache/probe evidence. Independent finalhead review now pending; PR Draft/project Blocked, no merge/session3–6. Same owner-required-time S02 authorization; no resets. Next exact action: reply/resolve verified4oldthreads, request independent review of frozen head, assess all new findings.
+

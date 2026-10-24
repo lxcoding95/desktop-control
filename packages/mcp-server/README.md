@@ -1,6 +1,6 @@
 # Local MCP server (S02 feature branch)
 
-**Current state — 2026-10-24:** implementation on `feat/s02-local-mcp-core` / [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), not merged to `main` and not an installable desktop product. At source checkpoint f9a6e6e, Windows and Debian full verification pass27 unit tests, Windows9 protocol pass+2 Linux skips, Linux10 protocol pass+1 Windows skip. Additional audit-failure/native-identity tests and final clean matrix are being completed; these are not independent acceptance. See the [live checkpoint](../../docs/sessions/session-02/SESSION-STATE.md).
+**Current state — 2026-10-24:** source on `feat/s02-local-mcp-core` / [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), not merged to `main`. Clean source checkpoint **38b5a9a526a6b82818d1dcf7c2011c2a8eec5b4f** passes both full matrices: Windows29 unit/9 protocol+2 Linux skips; Debian29 unit/10 protocol+1 Windows skip. npm ci, verify, npm ls, audit and diff checks exit0 on both; no reported advisories. Native normal/elevated Windows and Linux root/mismatched-ID evidence exists. Independent current-final-head review remains required; no production release claimed. See [completion verification](../../docs/sessions/session-02/COMPLETION-VERIFICATION.md).
 
 ## Purpose and authorization
 

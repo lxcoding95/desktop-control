@@ -1,0 +1,3 @@
+windows: SPDX2.3 official schema PASS
+linux: SPDX2.3 official schema PASS
+EXIT_CODE:0

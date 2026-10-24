@@ -11,5 +11,5 @@ Plan: reproduce Linux failure and audit; repair detector with real listener posi
 Native identity implementation choice (within requested S02): a narrowly scoped read-only Windows access-token helper using Windows APIs and an absolute, fixed local executable path, no shell interpolation. Fail closed on invalid/elevated/system identity, missing helper or helper failure. It confers no grant. Permission UI/enrollment remains deferred under the existing contract. Exact implementation is subject to tests and independent review, not presumed complete.
 
 Authoritative user instruction allows autonomous implementation of these specified fixes and native S02 requirements; unnecessary design confirmation omitted. No paid services, new secrets, Qodo, unsafe CI, ruleset bypass or changes to other repositories.
-Actual work started_at_utc: 10/24/2026 19:45:07
+Actual work started_at_utc: 2026-10-24T17:45:07.9371848Z
 

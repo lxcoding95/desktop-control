@@ -1,6 +1,6 @@
 # Desktop Control — Verbindlicher Projekt-Masterplan
 
-**Stand:** 2026-10-24 | **Status:** S02-Abschluss auf PR22: frühere Windows/Linux-SDK-Prüfungen bestanden, neuer Quellstand in vollständiger Neuprüfung; native Abnahme/Lizenzen/unabhängiges Review offen | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
+**Stand:** 2026-10-24 | **Status:** S02-Abschluss auf PR22: saubere Windows/Linux-Prüfungen und native Identitätsnachweise bestanden; unabhängiges finales Review/Abnahme ausstehend | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
 
 > Dieses Dokument beschreibt Ziele, Entscheidungen und Gates. Es ist keine Behauptung, dass das Produkt bereits implementiert ist. Vorhandene GitHub-Daten (Commits, PRs, Issues und aktuelle Branches) haben Vorrang vor statischen Statusangaben. Für neue ChatGPT-Chats zwingend auch [CHAT-CONTINUITY.md](../governance/CHAT-CONTINUITY.md) lesen.
 
