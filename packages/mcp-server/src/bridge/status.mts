@@ -47,7 +47,7 @@ export function createStatusExecutor(deps: StatusDependencies) {
       audit('cancel');
       return failure('CANCELLED');
     }
-    // Report allow only after the final authorization check and immediately at adapter entry.
+    // Audit decisions are authorization snapshots, not adapter invocation receipts.
     const timeoutMs = Number.isSafeInteger(deps.timeoutMs) && (deps.timeoutMs ?? 0) > 0
       ? Math.min(deps.timeoutMs!, 10_000) : 2_000;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -76,6 +76,15 @@ export function createStatusExecutor(deps: StatusDependencies) {
           }
           if (ctx.signal?.aborted) throw new Error('adapter cancelled');
           if (!audit('allow')) throw new Error('audit unavailable');
+          // Even a trusted synchronous audit sink may revoke or abort. Do not cross
+          // the execution boundary based on a decision made before that callback.
+          if (ctx.signal?.aborted) throw new Error('adapter cancelled');
+          if (!isAuthorized({ principal: ctx.principal, capability: STATUS_CAPABILITY, resource: STATUS_RESOURCE },
+              grants, ctx.now ?? Date.now())) {
+            deniedAtEntry = true;
+            throw new Error('adapter permission denied');
+          }
+          if (ctx.signal?.aborted) throw new Error('adapter cancelled');
           return deps.adapter.readStatus();
         }), timeout, aborted
       ]);

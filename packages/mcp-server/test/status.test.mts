@@ -8,6 +8,29 @@ const grant: DiagnosticGrant = { principal: 'posix:1000', capability: STATUS_CAP
 const allowed: ReadonlyGrantStore = { getGrants: () => [grant] };
 const ctx = { principal: 'posix:1000', now };
 
+for (const change of ['revoke', 'cancel'] as const) {
+  test(`audit callback ${change} cannot cross adapter entry`, async () => {
+    let revoked = false, calls = 0;
+    const controller = new AbortController();
+    const decisions: string[] = [];
+    const run = createStatusExecutor({
+      grants: { getGrants: () => [{ ...grant, revoked }] },
+      adapter: { readStatus: () => { calls++; return staticStatusAdapter.readStatus(); } },
+      audit: decision => {
+        decisions.push(decision);
+        if (decision === 'allow') {
+          if (change === 'revoke') revoked = true;
+          else controller.abort();
+        }
+      }
+    });
+    const result = await run({ ...ctx, signal: controller.signal });
+    assert.equal(calls, 0);
+    assert.equal(result.content[0].text, change === 'revoke' ? 'PERMISSION_DENIED' : 'CANCELLED');
+    assert.deepEqual(decisions, ['allow', change === 'revoke' ? 'deny' : 'cancel']);
+  });
+}
+
 test('denied request never invokes adapter', async () => {
   let calls = 0;
   const run = createStatusExecutor({ adapter: { readStatus: () => { calls++; return staticStatusAdapter.readStatus(); } } });

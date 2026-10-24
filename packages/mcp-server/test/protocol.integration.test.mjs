@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { listenerQuery, windowsListenerCount } from './fixtures/windows-listeners.mjs';
+import { once } from 'node:events';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const fixture = fileURLToPath(new URL('./fixtures/status-server.mjs', import.meta.url));
@@ -102,11 +104,31 @@ test('production built entry on Windows: malformed input, no TCP listener and EO
     assert.equal((await s.request('tools/list').promise).result.tools.length, 1);
     const bad = await s.request('tools/call', { name: 'desktop_control.status', arguments: [] }).promise;
     assert.ok(bad.error || bad.result?.isError);
-    const listeners = execFileSync('powershell.exe', ['-NoLogo','-NoProfile','-NonInteractive','-Command', `@(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object OwningProcess -eq ${s.child.pid}).Count`], { windowsHide: true, encoding: 'utf8', timeout: 15000 });
-    assert.equal(listeners.trim(), '0');
+    assert.equal(windowsListenerCount(s.child.pid), 0);
     assert.equal((await s.close()).code, 0);
     assert.equal(s.buffer, '');
   } finally { await s.close(); }
+});
+
+test('Windows listener oracle detects real TCP/UDP endpoints and fails closed on query errors', { skip: process.platform !== 'win32' }, async () => {
+  const child = spawn(process.execPath, ['--input-type=module', '-e',
+    `import net from 'node:net'; import dgram from 'node:dgram'; const t=net.createServer(); const u=dgram.createSocket('udp4'); t.listen(0,'127.0.0.1',()=>u.bind(0,'127.0.0.1',()=>console.log('READY'))); process.stdin.resume(); process.stdin.on('end',()=>{t.close();u.close();});`],
+  { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+  const done = once(child, 'close');
+  let timer;
+  try {
+    await Promise.race([once(child.stdout, 'data'), new Promise((_, reject) => { timer = setTimeout(() => reject(Error('Listener control startup timeout')), 5000); })]);
+    clearTimeout(timer);
+    assert.ok(windowsListenerCount(child.pid) >= 2);
+    for (const cmd of ['Get-NetTCPConnection', 'Get-NetUDPEndpoint']) {
+      const script = `Import-Module NetTCPIP -ErrorAction Stop; function ${cmd} { Write-Error 'test query failure' }; ${listenerQuery(child.pid)}`;
+      assert.throws(() => execFileSync('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', script],
+        { windowsHide: true, timeout: 30000, stdio: ['ignore', 'pipe', 'pipe'] }), error => error.status === 2);
+    }
+    child.stdin.end();
+    timer = setTimeout(() => child.kill(), 5000);
+    assert.deepEqual(await done, [0, null]);
+  } finally { clearTimeout(timer); if (child.exitCode === null) child.kill(); await done; }
 });
 
 test('production built entry: unterminated input exceeding SDK 10 MiB bound terminates', async () => {

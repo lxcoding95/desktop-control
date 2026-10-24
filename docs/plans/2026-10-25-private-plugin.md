@@ -2,7 +2,7 @@
 
 Owner master order received 2026-10-25 (Europe/Berlin). Existing S02 completion authorization of 2026-10-24 permits necessary finishing time without another fixed extension. Historical session ledgers stay unchanged; S03-S06 remain not started/not authorized.
 
-Baseline: S02 303f1fe143195049e57ca498bc42d628b126f115; protected main 963024f9af90d981a8b3a495e6ddec2bd32a65af. Working branch feat/private-diagnostics-plugin-20261025 is a reviewable private-preview packaging branch based on S02, not a new numbered session. Work interval started 2026-10-24T22:25:00Z approximately (first exact checkpoint 22:30:08.6779919Z); active elapsed time is not independently measured.
+Baseline: S02 303f1fe143195049e57ca498bc42d628b126f115; protected main 963024f9af90d981a8b3a495e6ddec2bd32a65af. Working branch feat/private-diagnostics-plugin-20261025 is a reviewable private-preview packaging branch based on S02, not a new numbered session. First exact recorded checkpoint: 2026-10-24T22:30:08.6779919Z. Earlier preflight start and active elapsed time were not independently recorded; do not infer either from that checkpoint.
 
 ## Design and invariants
 
