@@ -1,6 +1,6 @@
 # Desktop Control — repository working agreement
 
-**Status: S02 Windows typed lint/build, 23 unit and 9 stdio tests verified (2026-10-22); native platform/license/review gates remain.** Two of six sessions started (S01 completed; S02 running or paused per its live checkpoint). S03-S06 require separate explicit owner authorization. See [S02 session record](docs/sessions/session-02/SESSION-STATE.md) and [draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22).
+**Status (2026-10-24):** S01 completed/merged (PR #21); S02 MCP stdio source remains on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), not yet approved/merged. Windows and Linux prior verified checks passed; later authorization-audit source regression tests and Linux socket descriptor probe are committed but require a clean Work rerun. S02 extension #4 was expressly authorized and is separately timed in [the branch-local state](docs/governance/PROJECT-STATE.json). **2/6 sessions started; S03–S06 remain locked.** `main` contains no runnable product release.
 
 ## Authoritative context
 
@@ -9,6 +9,10 @@
 - Actual progress: live GitHub main SHA, active working branch, PR, session issue (#5–#10), recent tests/checks and session checkpoint.
 - Security: [SECURITY.md](SECURITY.md), [threat model](docs/architecture/THREAT-MODEL.md), [quality gates](docs/governance/QUALITY-GATES.md).
 - Open-source reuse: [sources](docs/research/SOURCES.md) and [license requirements](docs/governance/REUSE-LICENSES.md).
+
+## Binding GitHub autonomy standard
+
+The owner requires a **showcase-quality, automation-first, secure and consistently synchronized repository**. Follow [GITHUB-OPERATIONS-STANDARD](docs/governance/GITHUB-OPERATIONS-STANDARD.md) for issues, milestones, Projects v2, labels, PRs, branches, reviews, dependency/security posture, release gates and mandatory cross-chat handoffs. Perform available authorized operations autonomously; if a surface is owner-only, supply Alex a direct link and exact steps, record the blocker and verify afterwards. Automation must not bypass consent, branch protection, test evidence, the active session scope or SEC-GATE-001. Do **not** reactivate Qodo automatically. Latest S02 evidence is on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), not yet merged.
 
 ## Hard boundaries
 
@@ -28,7 +32,3 @@ Read current repository state before writing. If an active or paused session exi
 Follow: source review → small plan → risks and license → branch change → positive and negative tests → diff/CI review → authorized squash merge → update docs, issue and next exact action. Unverified work is blocked, not done.
 
 This file guides tooling that recognizes AGENTS.md; it cannot launch a new ChatGPT session or bypass usage limits.
-
-## Free local S02 quality checks
-
-Use `npm ci` then `npm run verify` (typed ESLint, full typecheck, unit tests, build, real protocol tests). The owner removed Qodo on this computer; do not invoke, reinstall or require Qodo/credit-based services. Local static checks do not establish independent semantic review. Keep ordinary CI disabled until SEC-GATE-001 is verified. See the [current S02 evidence](docs/sessions/session-02/EXTENSION-2-2026-10-22.md).
