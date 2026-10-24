@@ -15,7 +15,7 @@
 
 ## What actually passed
 
-The **portable public guard** was written and checked locally on Linux Node `v22.16.0` with five synthetic cases: clean Git file, fake Windows path and email redaction, fake GitHub token redaction, binary fail-closed, and non-Git failure exit 2. `node --check` and `node --test` passed **5/5**. These are self-contained fixture tests, **not** a run against full S02 Git history, a Windows test, an independent code review or an enabled GitHub CI run.
+The **portable public guard** was written and checked locally on Linux Node `v22.16.0` with six synthetic cases: clean Git file, fake Windows path and email redaction, fake GitHub token redaction, binary fail-closed, non-Git failure exit 2, and hashed sensitive filenames. `node --check` and `node --test` passed **6/6**. These are self-contained fixture tests, **not** a run against full S02 Git history, a Windows test, an independent code review or an enabled GitHub CI run.
 
 ## Exact open gates
 
