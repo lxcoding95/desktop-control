@@ -91,9 +91,12 @@ async function installOne(id) {
   }
   if (process.platform !== 'win32') chmodSync(toolBin(id), 0o700);
   writeFileSync(join(folder, 'executable.sha256'), digest(readFileSync(toolBin(id))) + '\n');
-  const probe = run(toolBin(id), ['--help'], { timeout: 20_000 });
-  demand(probe.exit === 0, id + ' installed but --help failed (exit ' + probe.exit + '): ' + probe.stderr.slice(-700));
-  return { id, version: tool.version, asset: asset.file, sha256: asset.sha256, helpExit: probe.exit };
+  // reviewdog 0.21.x intentionally returns exit 2 for help/usage. Its supported
+  // -version flag is the appropriate non-destructive readiness probe.
+  const probeArgs = id === 'reviewdog' ? ['-version'] : ['--help'];
+  const probe = run(toolBin(id), probeArgs, { timeout: 20_000 });
+  demand(probe.exit === 0, id + ' installed but '+ probeArgs.join(' ') + ' failed (exit ' + probe.exit + '): ' + probe.stderr.slice(-700));
+  return { id, version: tool.version, asset: asset.file, sha256: asset.sha256, probeArgs, probeExit: probe.exit };
 }
 function checkInstalled() {
   for (const id of tools) {
