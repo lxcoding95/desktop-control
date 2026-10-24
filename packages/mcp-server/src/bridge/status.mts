@@ -44,7 +44,7 @@ export function createStatusExecutor(deps: StatusDependencies) {
       deps.audit?.('cancel');
       return failure('CANCELLED');
     }
-    deps.audit?.('allow');
+    // Report allow only after the final authorization check and immediately at adapter entry.
     const timeoutMs = Number.isSafeInteger(deps.timeoutMs) && (deps.timeoutMs ?? 0) > 0
       ? Math.min(deps.timeoutMs!, 10_000) : 2_000;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -72,6 +72,7 @@ export function createStatusExecutor(deps: StatusDependencies) {
             throw new Error('adapter permission denied');
           }
           if (ctx.signal?.aborted) throw new Error('adapter cancelled');
+          deps.audit?.('allow');
           return deps.adapter.readStatus();
         }), timeout, aborted
       ]);
@@ -82,8 +83,14 @@ export function createStatusExecutor(deps: StatusDependencies) {
       const status: StatusPayload = { service: 'desktop-control', ready: true, api_version: 1 };
       return { content: [{ type: 'text', text: JSON.stringify(status) }], structuredContent: status };
     } catch {
-      if (ctx.signal?.aborted) return failure('CANCELLED');
-      if (deniedAtEntry) return failure('PERMISSION_DENIED');
+      if (ctx.signal?.aborted) {
+        deps.audit?.('cancel');
+        return failure('CANCELLED');
+      }
+      if (deniedAtEntry) {
+        deps.audit?.('deny');
+        return failure('PERMISSION_DENIED');
+      }
       if (timedOut) return failure('TIMEOUT');
       return failure('INTERNAL_ERROR');
     } finally {
