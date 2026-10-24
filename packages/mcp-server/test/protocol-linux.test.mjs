@@ -7,6 +7,12 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
+function deadline(promise, message) {
+  let timer;
+  return Promise.race([promise, new Promise((_, reject) => {
+    timer = setTimeout(() => reject(Error(message)), 4000);
+  })]).finally(() => clearTimeout(timer));
+}
 
 test('Linux production entry has no unexpected sockets beyond inherited Unix stdio', {
   skip: process.platform !== 'linux' ? 'Requires Linux /proc/<pid>/fd' : false,
@@ -36,10 +42,7 @@ test('Linux production entry has no unexpected sockets beyond inherited Unix std
         'io.modelcontextprotocol/clientCapabilities': {}
       } }
     }) + '\n');
-    const line = await Promise.race([
-      lines.next(),
-      new Promise((_, reject) => setTimeout(() => reject(Error('server/discover did not respond')), 4_000))
-    ]);
+    const line = await deadline(lines.next(), 'server/discover did not respond');
     assert.equal(line.done, false);
     const response = JSON.parse(line.value);
     assert.equal(response.id, 1);
@@ -48,10 +51,7 @@ test('Linux production entry has no unexpected sockets beyond inherited Unix std
     const sockets = await inspectSockets(child.pid);
     assert.deepEqual(sockets.unexpected, [], 'no additional Unix or TCP/UDP sockets, including on stdio fds');
     child.stdin.end();
-    const exit = await Promise.race([
-      exitPromise,
-      new Promise((_, reject) => setTimeout(() => reject(Error('stdio EOF process shutdown timed out')), 4_000))
-    ]);
+    const exit = await deadline(exitPromise, 'stdio EOF process shutdown timed out');
     assert.equal(exit.code, 0, `process exit ${JSON.stringify(exit)}; stderr=${stderr.slice(-200)}`);
   } finally {
     output.close();

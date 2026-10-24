@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 /** Accept only unelevated medium-integrity interactive account tokens. Never MCP input. */
 export function windowsPrincipal(value: unknown, pid: number): string | null {
-  if (value === null || typeof value !== 'object') return null;
+  if (value === null || typeof value !== 'object' || !Number.isSafeInteger(pid) || pid <= 0) return null;
   const v = value as Record<string, unknown>;
   return v.pid === pid && typeof v.sid === 'string' && /^S-1-5-21-\d+-\d+-\d+-\d+$/.test(v.sid) &&
     v.elevated === false && v.uiAccess === false && v.integrity === 0x2000 &&

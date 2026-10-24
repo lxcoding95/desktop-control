@@ -106,3 +106,8 @@ Socket regression reproduced red on Linux, corrected detector and deliberate TCP
 
 Linux full verify atf9a6e6e passes27units/10protocol+1Windowsskip. Windows native/audit-focused updated tests pass29/29; typed lint exit0. Native Linux root0/0 and real/effective mismatches1000/0,0/1000 deny under actual OS credentials, zero adapter calls. Added redacted audit-error handling. README/master/roadmap reconciled; review threads not resolved until committed verification. Pending: clean final matrix, SBOM/notices, independent finalhead review, actual Windows elevated negative probe. No new tools/CI/later sessions.
 
+
+## Completion checkpoint 2026-10-24T18:01:30.7344349+00:00
+
+Owner-approved Windows elevated-token probe exit0:actual elevated/high-integrity token refused with0 adapter calls; no SID logged. Linux final-to-date29units/10protocol+1Windowsskip pass; Windows29units/lint pass. Production-only installs bothOS exit0, exactly3external runtime packages, zero missing standalone runtime licenses. npm native installed-SBOM command fails ESBOMPROBLEMS for omitted dev dependencies; tracked as tool limitation, custom installed-inventory SPDX2.3 output generated and relationships checked (fullschema validation NOT RUN). Final full matrix and independent review next. No release/CI/later sessions.
+
