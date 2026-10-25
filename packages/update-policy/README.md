@@ -14,7 +14,7 @@
 
 ## Pure update activation lifecycle
 
-`activation-machine.mjs` is a second, independent state machine. `node --test packages/update-policy/activation-machine.test.mjs` passed **27/27** on Linux Node **22.16.0** at the tested prototype source. The test suite exercises correct order, stage/quiesce/switch failure, health failure, mandatory versus optional rollback, aborts, wrong transaction IDs, state mutation and forged ACTIVE snapshots. The source and test Git blob IDs were checked against the locally tested files. No Windows run or actual filesystem install has been performed.
+`activation-machine.mjs` is a second, independent state machine. `node --test packages/update-policy/activation-machine.test.mjs` passed **29/29** on Linux Node **22.16.0** at the tested prototype source. The test suite exercises correct order, stage/quiesce/switch failure, health failure, mandatory versus optional rollback, aborts, wrong transaction IDs, state mutation and forged ACTIVE snapshots, all 14,641 four-event permutations (only one ordering reaches ACTIVE), and repeat-abort handling. The source and test Git blob IDs were checked against the locally tested files. No Windows run or actual filesystem install has been performed.
 
 The sequence is `AWAITING_STAGE → AWAITING_QUIESCE → AWAITING_SWITCH → AWAITING_HEALTH → ACTIVE`. Failures after a possible active-pointer swap go to `ROLLBACK_REQUIRED`; a rollback or abort never silently authorizes an older bridge if the update is mandatory. All non-`ACTIVE` states keep normal tools closed in `activationGate`, including `RETAINED_OLD`: a separate trusted signed-policy/recovery recheck must decide whether an optional old runtime can resume.
 
@@ -27,6 +27,10 @@ The module accepts update lifecycle **events and descriptors only from a trusted
 An OS-owned, **immutable** per-user launcher must own its public trust keys; no JSON supplied by an MCP client or remote HTTP endpoint can add a trust key or mutate the update checkpoint. Only an out-of-band authorized key-rotation operation could change that anchor. Real installation must additionally validate platform artifact signatures, private release transport, download length/hash, clean frozen source/lockfile, provenance, dependency licenses, ACLs/symlinks, locking, atomic pointer changes, health verification and rollback restrictions. Windows and Linux native tests are required; a green Node unit suite is not an end-to-end proof.
 
 **Plugin vs Bridge:** This library addresses the local **B** version policy and records allowed **P** versions. It cannot update the host-installed ChatGPT **P** plugin, manifest, cache or tool list. That layer requires Plugin Creator/versioned host installation and real reconnect/discovery tests. No plugin ZIP should be uploaded per commit; no public GitHub Releases or npm distribution in the private phase.
+
+## Independent pre-integration blocker identified
+
+**SECURITY BLOCKER (unresolved in this draft):** `index.mjs` currently exposes `decideAccess(policy, ...)` where the caller can supply a structurally valid but **unsigned** policy object, and `verifyArtifact(bytes, artifact)` accepts an arbitrary checksum object that is not cryptographically tied to a verified signed policy. Both are useful pure helpers but **must never be called with MCP-supplied policy or untrusted update metadata** to grant or activate functionality. Before connecting an updater or MCP handler, require an opaque in-process proof obtained solely from `verifyPolicy` (or an equivalent single trusted verification-and-decision API), make the policy/metadata immutable, reject unverified inputs and add signed/unsigned substitution tests. Even proof objects alone do not replace OS-protected persistence, checking signed-policy expiry on every access, host grants or independently verified health receipts.
 
 ## Next integration acceptance
 
