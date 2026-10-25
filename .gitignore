@@ -54,3 +54,10 @@ desktop-control.txt
 .dc-wss-local-*.json
 .dc-preview-credentials-*.json
 .preview-owner-local.json
+
+# Cloudflare local secret bindings, private issuer state and staged vault files
+.dev.vars
+.dev.vars.*
+*.preview-license
+.dc-vault-write-*.tmp
+.dc-license-update-*.tmp
