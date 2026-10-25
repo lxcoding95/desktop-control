@@ -9,6 +9,7 @@ import { McpServer } from '@modelcontextprotocol/server';
 import { createMcpHandler } from 'agents/mcp/server';
 import { z } from 'zod';
 import { handleHealthTool } from '../oauth-health-gate.mjs';
+import { configuredPreviewOwner, isAllowedPreviewOwner } from '../preview-single-owner.mjs';
 import { PROBE_RELAY_SHARD, RemoteHealthRelay } from './remote-relay-do';
 export { RemoteHealthRelay };
 
@@ -18,6 +19,8 @@ interface Env {
   RESOURCE_URL?: string;
   AUTH_ISSUER?: string;
   ENABLE_REMOTE_HEALTH?: string;
+  PREVIEW_SINGLE_USER?: string;
+  PREVIEW_OWNER_ID?: string;
   REMOTE_RELAY?: DurableObjectNamespace;
 }
 
@@ -104,7 +107,7 @@ export default {
     // accepting ANY remote health operation. Never proxy /health publicly.
     const incoming = new URL(request.url);
     if (incoming.pathname === '/device') {
-      if (env.ENABLE_REMOTE_HEALTH !== '1' || !env.REMOTE_RELAY ||
+      if (env.ENABLE_REMOTE_HEALTH !== '1' || !configuredPreviewOwner(env) || !env.REMOTE_RELAY ||
           incoming.search || incoming.hash || request.method !== 'GET' ||
           request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') {
         return new Response('Device endpoint unavailable', { status: 503 });
@@ -120,7 +123,8 @@ export default {
     }
     // This prevents staging assets from accidentally becoming a public MCP
     // endpoint. A separate, reviewed change is required to enable it.
-    if (env.ENABLE_REMOTE_HEALTH !== '1') return new Response('Remote disabled', { status: 503 });
+    if (env.ENABLE_REMOTE_HEALTH !== '1' || !configuredPreviewOwner(env))
+      return new Response('Remote disabled', { status: 503 });
 
     const resourceServer = new OAuthResourceServer<Env, IdentityProps>({
       resourceMetadata: {
@@ -134,7 +138,8 @@ export default {
         fetch: (req, verifiedEnv, ctx) => {
           if (!ctx.auth.scope.includes('remote.health') ||
               typeof ctx.props?.userId !== 'string' ||
-              ctx.auth.userId !== ctx.props.userId) {
+              ctx.auth.userId !== ctx.props.userId ||
+              !isAllowedPreviewOwner(ctx.auth.userId, verifiedEnv)) {
             return new Response('Forbidden', { status: 403 });
           }
           const mcp = createMcpHandler(
