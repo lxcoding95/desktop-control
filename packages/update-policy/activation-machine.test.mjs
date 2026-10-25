@@ -45,3 +45,22 @@ test('foreign property in state rejected', () => fails(() => activationGate({...
 test('malformed or unknown event blocked', () => { fails(() => advanceActivation(beginActivation(base()),event('HACK'))); fails(() => advanceActivation(beginActivation(base()),null)); });
 test('forged ACTIVE snapshot cannot bypass normal-tool block', () => { const s = beginActivation(base()); fails(() => activationGate({...s,phase:'ACTIVE',step:4})); fails(() => advanceActivation({...s},event('STAGE_OK'))); });
 test('caller cannot mutate returned snapshots', () => {const s = beginActivation(base()); assert.ok(Object.isFrozen(s)); assert.equal(s.phase,'AWAITING_STAGE'); });
+test('exhaustively rejects every premature or out-of-order four-event success path', () => {
+  const alphabet = ['STAGE_OK','STAGE_FAILED','QUIESCE_OK','QUIESCE_FAILED','SWITCH_OK','SWITCH_FAILED','HEALTH_OK','HEALTH_FAILED','ROLLBACK_OK','ROLLBACK_FAILED','ABORT'];
+  let activePaths = 0, reviewedPaths = 0;
+  for (const a of alphabet) for (const b of alphabet) for (const c of alphabet) for (const d of alphabet) {
+    const seq = [a,b,c,d];
+    let s = beginActivation(base());
+    for (const type of seq) {
+      try { s = advanceActivation(s,event(type)); } catch { break; }
+    }
+    reviewedPaths++;
+    if (s.phase === 'ACTIVE') {
+      activePaths++;
+      assert.deepEqual(seq,['STAGE_OK','QUIESCE_OK','SWITCH_OK','HEALTH_OK']);
+    }
+  }
+  assert.equal(reviewedPaths, 14641);
+  assert.equal(activePaths, 1);
+});
+test('repeat abort after rollback required cannot advance state', () => fails(() => advanceActivation(advanceActivation(progress(),event('ABORT')),event('ABORT'))));
