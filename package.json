@@ -20,7 +20,9 @@
     "lint": "eslint --max-warnings 0 packages eslint.config.mjs",
     "test:private-files": "node --test packages/private-files/test/*.test.mjs",
     "test:private-components": "node --test --test-concurrency=1 packages/private-browser/test/*.test.mjs packages/private-desktop/test/*.test.mjs packages/private-settings/test/*.test.mjs tools/plugin/release-policy.test.mjs",
-    "verify": "npm run lint && npm run typecheck && npm test && npm run test:private-files && npm run build && npm run test:private-components && npm run test:protocol"
+    "test:update-policy": "node --test packages/update-policy/index.test.mjs packages/update-policy/activation-machine.test.mjs",
+    "test:bridge-updater": "node packages/bridge-updater/build-native.mjs && node --test packages/bridge-updater/runtime.test.mjs",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run test:private-files && npm run build && npm run test:private-components && npm run test:update-policy && npm run test:bridge-updater && npm run test:protocol"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

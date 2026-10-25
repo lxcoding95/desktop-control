@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "project": "Desktop Control",
-  "snapshot_date": "2026-10-24",
+  "snapshot_date": "2026-10-25",
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_cross_platform_scans_regressions_passed_independent_review_pending",
+  "phase": "private_integration_development_security_acceptance_open",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -462,7 +462,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Windows/Linux local pinned OSS install, positive controls, real SAST/SCA and native npm regression PASS. Windows source tested at 5f4aa15, Linux at 386f996. Windows OSV/RDJSON summaries and INDEPENDENT semantic review pending; PR #22 draft; main protected, SEC-GATE-001 open, S03-06 locked.",
+  "next_preflight_action": "Verify final private bundle on clean Windows/Linux; complete live MCP updater lease/per-operation policy and verified publisher before activation. PR33 Draft; no main merge or public release.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
@@ -544,9 +544,28 @@
       "skip": 7,
       "verify_log_sha256": "7c8bc616fef608fea3a6c6ce0a28a02043aedead73ab4cd6b61fb0b2171bcce3"
     },
-    "unattended_updater": "not_implemented",
+    "unattended_updater": "development_slice_tested_production_off",
     "active_elapsed_seconds_verified": null,
     "owner_scope": "selected_private_S02_S06_authorized_no_formal_session_reset",
-    "main_merge_performed": false
+    "main_merge_performed": false,
+    "next_bundle_version": "0.0.1-preview.5",
+    "updater_fixture_windows": {
+      "tests": 16,
+      "pass": 15,
+      "fail": 0,
+      "skip": 1
+    },
+    "updater_fixture_linux": {
+      "tests": 16,
+      "pass": 16,
+      "fail": 0,
+      "skip": 0
+    },
+    "updater_runtime_sha256": "6510ad5b7a130fa6ab7145261e203b1e1ff7ae505c3e88d54b7526a7bd8b499f",
+    "docker_mcp_profile": "desktop-control_core_only_local_tested",
+    "docker_image_id": "sha256:11c6f85d8ca36069d0b7b08a4cc4114b505ba9a95bdbff840d0bd58389b49e91",
+    "stale_local_marketplace": "removed_via_supported_cli_other_config_unchanged",
+    "last_checkpoint_utc": "2026-10-25T12:06:00Z",
+    "checkpoint_time_precision": "minute approximate; command and matrix receipts contain exact times"
   }
 }

@@ -2,7 +2,7 @@
 
 **Aktuelle Privatfreigabe (25.10.2026):** Vorgezogene ausgewählte S02–S06-Funktionen, eigener Chromium-basierter KI-Browser mit separatem Profil/virtuellem Zeiger und zusätzlich sichtbare Desktopsteuerung mit Esc sind ausdrücklich beauftragt. [Aktueller Integrations-/Abnahmeplan](../plans/2026-10-25-recovery-and-ai-browser.md). Historische Sitzungszähler bleiben erhalten; Freigabe ist keine Abnahme. Geschütztes main und offene Security-/CI-/Releasegates bleiben verbindlich.
 
-**Stand:** 2026-10-24 | **Status:** S02-Abschluss auf PR22: saubere Windows/Linux-Prüfungen und native Identitätsnachweise bestanden; unabhängiges finales Review/Abnahme ausstehend | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
+**Stand:** 2026-10-25 | **Status:** private Integration auf Draft PR33, S02-Abnahme auf PR22 weiterhin offen. Preview.4 ist im echten Windows-Host verbunden; Docker-MCP-Profil lokal getestet. Automatischer produktiver Bridge-Updater und finale Review-/Releasegates offen. | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
 
 > Dieses Dokument beschreibt Ziele, Entscheidungen und Gates. Es ist keine Behauptung, dass das Produkt bereits implementiert ist. Vorhandene GitHub-Daten (Commits, PRs, Issues und aktuelle Branches) haben Vorrang vor statischen Statusangaben. Für neue ChatGPT-Chats zwingend auch [CHAT-CONTINUITY.md](../governance/CHAT-CONTINUITY.md) lesen.
 

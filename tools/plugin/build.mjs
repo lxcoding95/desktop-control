@@ -35,6 +35,7 @@ copy('packages/private-settings/management.mjs');
 copy('packages/private-desktop/native/DesktopController.cs');
 copy('packages/private-settings/native/PrivateSettings.cs');
 copy('plugin/skills', 'skills');
+for (const file of ['desktop-control.svg', 'desktop-control.png']) copy(`plugin/assets/${file}`, `assets/${file}`);
 if (process.platform === 'win32') {
   copy('dist/native/windows-token.exe');
   copy('dist/native/windows-private-policy.exe');

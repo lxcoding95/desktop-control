@@ -29,6 +29,17 @@ node tools/docker-mcp/install-profile.mjs
 node tools/docker-mcp/test-gateway.mjs
 ```
 
+The retained initial local profile was subsequently migrated **in place** from its
+version tag to the exact tested image ID using `node tools/docker-mcp/migrate-profile.mjs`.
+That one-time migration accepts only the complete original Desktop Control profile
+shape and exact old image, verifies the image ID, UID and source/author labels,
+exports a private backup first, and uses the documented `profile server add` route.
+It then reads back the exact pinned image and sole product-tool allowlist. It does
+not remove/recreate the profile, connect clients or modify global features. Repeating
+the migration refuses the now-changed profile before writing anything. Future
+migrations need a separately reviewed source/image pair; do not edit hashes merely
+to make a failed guard pass.
+
 The builder snapshots only the committed lockfile, package manifests, project
 license and five production source modules. It never sends the working tree,
 `.git`, private logs, credentials, grants or host workspace to the Docker builder.
@@ -65,6 +76,8 @@ the uploaded preview.4 source `5817093949ece2a7451588020397ccb85d6eccb3`.
 
 Local image: `desktop-control/mcp-local:9ec243963ec0`.
 Image ID: `sha256:11c6f85d8ca36069d0b7b08a4cc4114b505ba9a95bdbff840d0bd58389b49e91`.
+The installed profile's `image` and snapshot image both now use this **image ID**,
+not the mutable tag. Its explicit product allowlist is only `desktop_control.status`.
 
 | Actual command/check | Result |
 | --- | --- |
@@ -76,8 +89,11 @@ Image ID: `sha256:11c6f85d8ca36069d0b7b08a4cc4114b505ba9a95bdbff840d0bd58389b49e
 | Local profile creation via YAML | Exit0;1 server; no client connection |
 | `docker mcp gateway run --profile desktop-control --dry-run` | Exit0;1 product tool discovered |
 | `node tools/docker-mcp/test-gateway.mjs` | Exit0;5 named acceptance checks, all PASS |
+| Guarded in-place profile image-ID migration | Exit0; original export retained locally; exact readback PASS |
+| Repeating the profile migration | Expected exit1; unexpected/current profile preserved |
+| Gateway test after image-ID pinning | Exit0; all5 named checks PASS again |
 | Gateway initialize / discovery / denied call / forged grant / EOF | PASS |
-| Docker Desktop rendered profile card | NOT RUN; CLI profile exists |
+| Docker Desktop rendered profile card | PASS; coordinating agent visually confirmed the Desktop Control card |
 | Windows host control through the Docker profile | NOT IMPLEMENTED |
 | Positive authorization through Docker profile | NOT RUN; no grant provisioning |
 
@@ -92,6 +108,8 @@ this Windows installation; the supported default stdio gateway succeeds without
 installing another dependency or disabling signature checks. A non-fatal Docker
 OAuth notification pipe warning appeared during dry-run. No OAuth is required
 by this server, and the subsequent real gateway call completed successfully.
+The pinned run also reported Docker's secrets-engine socket unavailable; this
+server requires no secrets and all five actual gateway checks still passed.
 
 To see the local setup, open Docker Desktop → MCP Toolkit → Profiles and refresh;
 look for **Desktop Control**. Docker's official catalog/template listing is a

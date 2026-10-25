@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "desktop-control-private",
-  "version": "0.0.1-preview.4",
+  "version": "0.0.1-preview.5",
   "author": {
     "name": "Anon Allman",
     "email": "334623916+lxcoding95@users.noreply.github.com"
@@ -15,6 +15,10 @@
       "interface": {
         "displayName": "Desktop Control",
         "developerName": "Anon Allman",
+        "logo": "./assets/desktop-control.svg",
+        "composerIcon": "./assets/desktop-control.png",
+        "brandColor": "#2374DE",
+        "brandColorDark": "#68D9F4",
         "shortDescription": "Desktop tools & workspace",
         "capabilities": [
           "Read",

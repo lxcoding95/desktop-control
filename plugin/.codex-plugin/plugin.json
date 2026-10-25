@@ -1,6 +1,6 @@
 {
   "name": "desktop-control-private",
-  "version": "0.0.1-preview.4",
+  "version": "0.0.1-preview.5",
   "description": "Local MCP preview: host-approved diagnostics, isolated workspace/PDF/terminal, separate browser and visible Windows desktop control. Signed Bridge updates are not active.",
   "author": {
     "name": "Anon Allman",
@@ -11,6 +11,10 @@
   "interface": {
     "displayName": "Desktop Control",
     "developerName": "Anon Allman",
+    "logo": "./assets/desktop-control.svg",
+    "composerIcon": "./assets/desktop-control.png",
+    "brandColor": "#2374DE",
+    "brandColorDark": "#68D9F4",
     "shortDescription": "Desktop tools & workspace",
     "capabilities": [
       "Read",
