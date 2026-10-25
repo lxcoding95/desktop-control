@@ -75,3 +75,20 @@ npm run inspect:remote:health
 The Inspector's graphical Web UI is intentionally **not** started automatically. Its proxy/admin token and local HTTP endpoints must be restricted to loopback. Never open Inspector proxy ports to the LAN or internet, never paste tokens in chat/logs, and never point unattended Inspector smoke checks at the production 34-tool server. Browser/TUI inspection may be started manually for debugging with explicit local permission.
 
 If tunnel-client becomes available and operator authorizes a tunnel, run its separate health/doctor checks, then use Inspector only where transport and authentication support it. A successful local MCP Inspector result cannot make a cloud ChatGPT session accept a local STDIO server.
+
+
+## Account-bound relay core — implemented locally, NOT publicly deployed
+
+The dependency-free `tools/remote/relay-core.mjs` is an **in-memory transport policy core**, not an OAuth provider, Cloudflare Worker, Durable Object, or public MCP handler. It can be instantiated only with explicit `verifyClient` and `verifyDevice` callbacks. Those callbacks MUST be implemented against validated OAuth access tokens and a durable, individually paired device-ticket store before this core can be used in a remotely accessible service; accepting client-provided owner IDs as verified identities would be a critical vulnerability.
+
+The API `attachDevice({ticket,send})` binds one locally approved device connection to its owner, and `callHealth({credential,deviceId,signal})` forwards **only** `desktop_control.remote_health`. Owner isolation, hardcoded allowed tool, strict empty arguments, expiry, per-request nonce, response correlation to the original session, replay rejection, strict/size-limited response parsing, maximum four in-flight requests, bounded five-second timeouts, cancellation and live connection replacement/revoke are implemented. `revokeDevice` requires `devices.revoke` authorization and only interrupts live sessions: **durable credential/ticket revocation is not implemented** and must be enforced by the backing authorization service. Authentication adapters and tests contain no real tokens or external calls.
+
+```powershell
+npm run test:remote:relay
+```
+
+Test evidence: Node.js 22.16.0 Linux sandbox: **16/16 pass** for authentication adapter enforcement, device/account isolation, unallowed tools, expired credentials, nonce/replay, untrusted responses, limits, disconnect/replace, scope-gated revoke, abort and timeout. Windows results are **pending**. The suite is wired to `npm run verify` on the PR branch; no assertion of full verify or CI success.
+
+**Remaining blockers before a working ChatGPT cloud connection:** approved Free hosting account and deployment permission; upstream OAuth library and a stable user sign-in; an OAuth-approved device enrollment flow with local user interaction, proof of possession and durable revocation; authenticator/transport adapters for Cloudflare Workers/Durable Objects; an outbound Windows device channel; an HTTPS MCP Streamable HTTP route compatible with the 2026-07-28 protocol; user-facing ChatGPT custom MCP connection and end-to-end tests. The latest MCP transport spec requires header/body method metadata parity and Origin restrictions: https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2026-07-28/basic/transports/streamable-http.mdx . Prefer Cloudflare's current `createMcpHandler` and `OAuthProvider` implementations over custom token issuance or inventing the latest MCP transport: https://developers.cloudflare.com/agents/model-context-protocol/guides/remote-mcp-server/ .
+
+A successful local test is not proof of public internet exposure, ChatGPT connection, or remote permissions. `main`, the installed `preview.5`, and the Windows app remain unchanged. **No development session ledger was advanced.**
