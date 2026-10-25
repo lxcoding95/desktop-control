@@ -15,6 +15,10 @@ Open-source desktop control tooling for MCP-compatible AI clients on Windows and
 
 An AI client makes decisions; this project will provide **tools and a local execution bridge**, not another AI agent.
 
+## Visual architecture atlas
+
+The [public system atlas](docs/architecture/SYSTEM-ATLAS-2026.md) provides four source-linked Mermaid views: local runtime and trust boundaries, product milestones, the GitHub/QA/release chain, and the planned install/update lifecycle. Every view separates the historical and Draft-only evidence from unimplemented target capabilities; no private device information belongs in this public document.
+
 ## Product roadmap and verified delivery
 
 Desktop Control uses **product-outcome milestones M01–M06 and M07+** (unbounded) to present real user-visible progress, dependencies and evidence; they are **not** the six timeboxed development sessions. See the [product roadmap](ROADMAP.md) and [milestone/evidence register](docs/governance/PRODUCT-MILESTONES.md). Full GitHub milestone/Project-v2 migration is **not yet independently verified** (Issue #28 is assigned milestone object #7, but that does not certify the whole migration): the [non-destructive migration issue #25](https://github.com/lxcoding95/desktop-control/issues/25) tracks verified owner/UI follow-up.
