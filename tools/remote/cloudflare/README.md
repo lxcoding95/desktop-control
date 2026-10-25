@@ -81,3 +81,20 @@ Local smoke acceptance is only evidence that a disabled Worker starts and denies
 Owner ran the original localhost smoke fixture at commit `bd9b45bb1789715377d561ca99c3ee116a863807`. The smoke **failed before it could start or run HTTP assertions**: the pinned `wrangler@4.145.0` local `workerd` reported its maximum supported compatibility date as `2026-10-07`, but the fixture requested `2026-10-25`. This does **not** indicate an OAuth or application-level failure; no smoke cases were executed. The fixture-only `wrangler.mcp.local-smoke.jsonc` now uses `2026-10-07`, exactly the reported local-runtime limit. All deployable Worker templates are left unchanged and remain default disabled.
 
 This local compatibility-date override tests the behavior of an **older runtime configuration** only. Cloudflare compatibility dates control API and behavior changes, so a passing local smoke test cannot certify a future production configuration dated `2026-10-25`. Before any deployment, validate separately against the then-current supported `workerd` release and intended production compatibility date; do not silently backdate production settings. See https://developers.cloudflare.com/workers/configuration/compatibility-dates/ . **Retest of the changed fixture is pending.**
+
+
+## Local actual-workerd WebSocket admission DENIAL test (not yet executed)
+
+`smoke-local-wss-deny.mjs` is a **separate negative integration test**, not a production service. It starts exactly pinned `wrangler@4.145.0` with `--local --ip 127.0.0.1`, using an ephemeral, locally generated 32-byte HMAC test key, a temporary config file and an empty, isolated SQLite-backed Durable Object state directory. It keeps public routes disabled, does not authenticate any owner or approve any pairing, never accesses Cloudflare accounts or API keys, and removes the test config/state afterward.
+
+Because the test intentionally enables the **local** WSS device upgrade route, it MUST NOT be deployed or exposed beyond loopback. It sends five unauthorized messages over real `ws://127.0.0.1` connections to the running Cloudflare Worker/Durable Object; each connection must be rejected with WebSocket close code 1008. Cases: omitted ticket, malformed ticket, wrong protocol message, privileged terminal message, syntactically valid but never-issued ticket. The OAuth-protected MCP URL must also still return HTTP 503. No approved pairing exists, so **no successful device session is possible**.
+
+To execute in an isolated local Worker copy with previously installed pinned dependencies:
+
+```powershell
+npm run test:local:wss-deny
+```
+
+Expected only after a real run: `WSS_DENIALS=5`, `RESULT=WORKER_LOCAL_WSS_DENY_PASSED`. Until then it is **UNVERIFIED**; a TypeScript compile or mocked transport test is insufficient. If the local WebSocket runtime reports a different status, record the exact error and resolve it without weakening ticket validation.
+
+**Separate outstanding positive acceptance:** Securely seed a user-approved pairing in a test-only Durable Object without exposing test write routes to the production Worker; use Cloudflare's `createTestHarness()` or Workers Vitest integration to exercise a real signed one-use ticket, correct device binding and revocation. The official harness supports access to SQLite Durable Object storage without permanent debug endpoints: https://developers.cloudflare.com/workers/testing/test-harness/prepare-test-state/ . Do not deploy before these are verified. Note that the local compatibility date `2026-10-07` is the pinned workerd limit; it does not certify later production runtime dates.
