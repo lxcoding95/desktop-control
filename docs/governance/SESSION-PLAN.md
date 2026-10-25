@@ -1,6 +1,6 @@
 # Six Development Sessions — Current State and Reservation
 
-The owner reserved **exactly six development sessions S01–S06** at most 25 minutes each, with separately owner-approved S02 extensions recorded in [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6). **2/6 sessions have started**: S01 architecture completed and merged; S02 local MCP core tested on Windows/Linux on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), independent semantic review pending; S03–S06 remain locked. **Between-session product-roadmap/governance work does not start a new development session or reset any elapsed budget.**
+The owner reserved **exactly six development sessions S01–S06** at most 25 minutes each, with separately owner-approved S02 extensions recorded in [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6). **2/6 sessions have started**: S01 architecture completed and merged; S02 local MCP core tested on Windows/Linux on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), independent semantic review pending; S03–S06 remain locked. **Separately owner-approved private integration/prototype work and product-roadmap/governance work do not start a new formal development session or reset any elapsed budget.**
 
 Planning target: make strong use of the available session time, with focused tasks and measured time reporting. Accurate timestamps and completion evidence must be recorded during each actual session; do not fabricate elapsed time or percentage utilization.
 
