@@ -50,7 +50,7 @@ export function advanceActivation(state, event) {
   let next;
   if (t === 'ABORT') {
     // After any pointer-switch attempt, old executable state is ambiguous.
-    if (p === 'AWAITING_HEALTH' || p === 'ROLLBACK_REQUIRED') next = 'ROLLBACK_REQUIRED';
+    if (p === 'AWAITING_HEALTH') next = 'ROLLBACK_REQUIRED';
     else if (p === 'AWAITING_STAGE' || p === 'AWAITING_QUIESCE' || p === 'AWAITING_SWITCH') next = state.mandatory ? 'REPAIR_ONLY' : 'RETAINED_OLD';
     else deny();
   } else if (p === 'AWAITING_STAGE' && t === 'STAGE_OK') next = 'AWAITING_QUIESCE';
