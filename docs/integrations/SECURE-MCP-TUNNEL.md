@@ -66,17 +66,17 @@ Existing plugin `preview.5`, local MCP registration, Docker profiles and rollbac
 
 ## MCP Inspector — local automated checks
 
-The project's existing, exactly pinned \`@modelcontextprotocol/inspector@2.12.0\` development dependency is reused. No dynamic \`@latest\`, added service or public listener is required for CLI checks. Upstream: https://github.com/modelcontextprotocol/inspector and https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/cli . Its upstream LICENSE contains MIT/Apache-2.0 transition notices: preserve the third-party inventory and do not copy its sources into this project.
+The project's existing, exactly pinned `@modelcontextprotocol/inspector@2.12.0` development dependency is reused. No dynamic `@latest`, added service or public listener is required for CLI checks. Upstream: https://github.com/modelcontextprotocol/inspector and https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/cli . Its upstream LICENSE contains MIT/Apache-2.0 transition notices: preserve the third-party inventory and do not copy its sources into this project.
 
-On a **clean, ordinary-user** checkout after \`npm ci --ignore-scripts\`:
+On a **clean, ordinary-user** checkout after `npm ci --ignore-scripts`:
 
-\`\`\`powershell
+```powershell
 npm run test:remote
 npm run inspect:remote
 npm run inspect:remote:health
-\`\`\`
+```
 
-\`test:remote\` is included in the repository \`npm run verify\` sequence. The two Inspector scripts start a fresh, standalone **health-only** server for each invocation, using \`npx --no-install\`, so npm cannot silently fetch an unreviewed latest Inspector. \`inspect:remote\` uses strict schema validation; \`inspect:remote:health\` calls only the harmless connectivity tool. Both require an installed local \`node_modules\`. They do **not** connect to ChatGPT or prove remote authentication. Exact Inspector CLI exit codes must be checked; failed checks are not approvals.
+`test:remote` is included in the repository `npm run verify` sequence. The two Inspector scripts start a fresh, standalone **health-only** server for each invocation, using `npx --no-install`, so npm cannot silently fetch an unreviewed latest Inspector. `inspect:remote` uses strict schema validation; `inspect:remote:health` calls only the harmless connectivity tool. Both require an installed local `node_modules`. They do **not** connect to ChatGPT or prove remote authentication. Exact Inspector CLI exit codes must be checked; failed checks are not approvals.
 
 The Inspector's graphical Web UI is intentionally **not** started automatically. Its proxy/admin token and local HTTP endpoints must be restricted to loopback. Never open Inspector proxy ports to the LAN or internet, never paste tokens in chat/logs, and never point unattended Inspector smoke checks at the production 34-tool server. Browser/TUI inspection may be started manually for debugging with explicit local permission.
 
