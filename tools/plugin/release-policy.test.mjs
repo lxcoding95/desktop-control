@@ -114,3 +114,14 @@ test('Git inspection ignores docs/version-only commits but detects real runtime 
     assert.notEqual(inspectGit(root).fingerprint, baseline.fingerprint);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
+
+test('official preview release is blocked without independently evidenced account enforcement', () => {
+  const input = fixture();
+  assert.ok(REQUIRED_CHECKS.includes('preview-single-owner-auth'));
+  input.receipts.checks = input.receipts.checks.filter(
+    record => record.name !== 'preview-single-owner-auth'
+  );
+  const result = decideRelease(input);
+  assert.equal(result.status, 'WAIT_GATES');
+  assert.ok(result.missingGates.includes('preview-single-owner-auth'));
+});
