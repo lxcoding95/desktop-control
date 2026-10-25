@@ -256,3 +256,24 @@ test('workspace uses a stable protected lock outside container-writable data and
     assert.equal(h.workspaceAuthority.authorize('files.read'), null, 'missing fixed lock denies even with a valid grant');
   } finally { removeFixture(directory); }
 });
+
+test('emergency host stop survives a fresh authority and only explicit matching local grants clear its markers', () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    if (!localPrincipal()) { assert.throws(() => h.stopControls()); return; }
+    h.provisionControl('grant', ['browser.read', 'desktop.input'], ['https://example.com']);
+    assert.ok(h.controlAuthority.authorize('browser.read'));
+    h.stopControls();
+    const restarted = createPrivateGrantTestHarness(directory);
+    assert.equal(restarted.controlAuthority.authorize('browser.read'), null);
+    assert.equal(restarted.controlAuthority.authorize('desktop.input'), null);
+    restarted.provisionControl('status');
+    assert.equal(restarted.controlAuthority.authorize('browser.read'), null);
+    restarted.provisionControl('grant', ['browser.read'], ['https://example.com']);
+    assert.ok(restarted.controlAuthority.authorize('browser.read'));
+    assert.ok(lstatSync(path.join(directory, 'desktop-stop')).isFile(), 'browser re-enable cannot clear desktop stop');
+    restarted.provisionControl('grant', ['desktop.input']);
+    assert.ok(restarted.controlAuthority.authorize('desktop.input'));
+  } finally { removeFixture(directory); }
+});

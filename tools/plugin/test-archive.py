@@ -14,6 +14,7 @@ cases = ['valid', 'remote', 'no-local', 'fixture', 'missing-license', 'zero-depe
          'extra-dependency', 'private-evidence', 'wrong-platform', 'missing-notice', 'bad-sbom', 'bad-license-hash', 'symlink', 'duplicate', 'noncanonical-path',
          'case-collision', 'missing-runtime', 'wrong-compat', 'worker-version', 'unlisted-transitive', 'sbom-version']
 cases += ['alias', 'case-alias', 'windows-device', 'oversize', 'long-component', 'backslash', 'space-suffix', 'dirty-provenance', 'wrong-commit', 'version-drift', 'metadata-name', 'mcp-drift']
+cases += ['windows-question-alias', 'windows-quote', 'windows-angle', 'windows-pipe', 'windows-star', 'windows-superscript-device', 'windows-console-device']
 with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temporary:
     root = pathlib.Path(temporary)
     for case in cases:
@@ -94,6 +95,16 @@ with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temp
             files['.codex-plugin/plugin.json'] = json.dumps(metadata).encode()
         if case == 'mcp-drift':
             files['.mcp.json'] = json.dumps({'mcpServers': {'desktop-control': {'type': 'http'}}}).encode()
+        portable_aliases = {
+            'windows-question-alias': {'node_modules/zod/a?b.txt': b'A', 'node_modules/zod/a_b.txt': b'B'},
+            'windows-quote': {'node_modules/zod/a"b.txt': b'A'},
+            'windows-angle': {'node_modules/zod/a<b.txt': b'A'},
+            'windows-pipe': {'node_modules/zod/a|b.txt': b'A'},
+            'windows-star': {'node_modules/zod/a*b.txt': b'A'},
+            'windows-superscript-device': {'node_modules/zod/COM\u00b9.txt': b'A'},
+            'windows-console-device': {'node_modules/zod/CONOUT$.txt': b'A'},
+        }
+        files.update(portable_aliases.get(case, {}))
         inventory = {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}
         if case == 'tamper':
             files['plugin.json'] += b' '

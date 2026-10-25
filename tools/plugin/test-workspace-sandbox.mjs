@@ -5,7 +5,7 @@ import { execFileSync, spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { userInfo, tmpdir } from 'node:os';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { createPrivateGrantTestHarness } from '../../dist/packages/mcp-server/src/bridge/private-grants.mjs';
 import { localPrincipal } from '../../dist/packages/mcp-server/src/bridge/principal.mjs';
 import { runWorkspaceSandbox, createWorkspaceExecutor, WORKSPACE_IMAGE } from '../../dist/packages/mcp-server/src/bridge/workspace.mjs';
@@ -16,6 +16,7 @@ const base = process.platform === 'win32' ? userInfo().homedir : tmpdir();
 const directory = mkdtempSync(path.join(base, 'DesktopControl-private-test-'));
 const harness = createPrivateGrantTestHarness(directory);
 const workspace = path.join(directory, 'workspace');
+const lockFile = path.join(directory, 'workspace-lock');
 const lockName = 'desktop-control-lock-control-' + randomUUID();
 let holder;
 let checks = 0;
@@ -44,6 +45,26 @@ try {
     "const fs=require('fs');if(fs.existsSync('/app/.git')||fs.existsSync('/app/.cache')||fs.existsSync('/var/run/docker.sock'))process.exit(9);try{fs.writeFileSync('/app/forbidden','x');process.exit(8)}catch{};console.log('ISOLATED')"] });
   assert.equal(shell.ok, true); assert.equal(shell.exitCode, 0); assert.equal(shell.stdout.trim(), 'ISOLATED');
   pass('actual terminal read-only runtime mount without checkout/evidence/Docker socket');
+  const tamper = await runWorkspaceSandbox(workspace, { op: 'terminal', argv: ['node', '-e',
+    "const fs=require('fs');for(const action of [()=>fs.unlinkSync('/run/desktop-control.lock'),()=>fs.writeFileSync('/run/desktop-control.lock','REPLACED')]){let denied=false;try{action()}catch{denied=true}if(!denied)process.exit(9)}console.log('LOCK_PROTECTED')"] });
+  assert.equal(tamper.ok, true); assert.equal(tamper.exitCode, 0); assert.equal(tamper.stdout.trim(), 'LOCK_PROTECTED');
+  pass('hostile terminal cannot unlink or overwrite stable protected lock');
+  const canonicalWorkspace = process.platform === 'win32' ? path.resolve(workspace).toLowerCase() : path.resolve(workspace);
+  const reservationName = 'desktop-control-reservation-' + createHash('sha256').update(canonicalWorkspace).digest('hex');
+  const first = runWorkspaceSandbox(workspace, { op: 'terminal', argv: ['node', '-e', "setTimeout(()=>console.log('SERIALIZED'),3000)"] });
+  try {
+    const deadline = Date.now() + 8000;
+    while (docker('ps', '-a', '--filter', `name=${reservationName}`, '--format', '{{.Names}}').trim() !== reservationName) {
+      if (Date.now() > deadline) throw Error('RESERVATION_CONTROL_TIMEOUT');
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    await assert.rejects(runWorkspaceSandbox(workspace, { op: 'list' }), /BUSY/);
+  } finally {
+    const completed = await first;
+    assert.equal(completed.ok, true); assert.equal(completed.stdout.trim(), 'SERIALIZED');
+  }
+  assert.equal(docker('ps', '-a', '--filter', `name=${reservationName}`, '--format', '{{.Names}}').trim(), '');
+  pass('host-owned reservation serializes jobs and is released only after cleanup');
   const noisy = await runWorkspaceSandbox(workspace, { op: 'terminal', argv: ['node', '-e', "process.stdout.write('x'.repeat(100000))"] });
   assert.equal(noisy.error.code, 'LIMIT_EXCEEDED'); pass('actual terminal output limit');
   const hung = await runWorkspaceSandbox(workspace, { op: 'terminal', argv: ['node', '-e', 'setInterval(()=>{},1000)'] });
@@ -52,8 +73,9 @@ try {
   // Positive control: another actual container holds the same OS lock.
   holder = spawn('docker', ['run', '--rm', '--name', lockName, '--network', 'none', '--read-only', '--cap-drop', 'ALL',
     '--security-opt', 'no-new-privileges', '--user', '1000:1000', '--pids-limit', '16', '--memory', '64m',
-    '--mount', `type=bind,source=${workspace},target=/workspace`, WORKSPACE_IMAGE,
-    '/usr/bin/flock', '--exclusive', '/workspace/.desktop-control-lock', 'node', '-e',
+    '--mount', `type=bind,source=${workspace},target=/workspace`,
+    '--mount', `type=bind,source=${lockFile},target=/run/desktop-control.lock,readonly`, WORKSPACE_IMAGE,
+    '/usr/bin/flock', '--exclusive', '/run/desktop-control.lock', 'node', '-e',
     "console.log('LOCKED');setTimeout(()=>{},30000)"], { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
   holder.stderr.resume();
   let timer;

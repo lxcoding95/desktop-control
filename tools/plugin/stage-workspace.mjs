@@ -5,8 +5,17 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const destination = path.join(root, 'dist/private-workspace-runtime');
-if (path.dirname(destination) !== path.join(root, 'dist')) throw Error('INVALID_BUILD_DESTINATION');
+const samePath = (left, right) => process.platform === 'win32' ? left.toLowerCase() === right.toLowerCase() : left === right;
+// Validate the canonical parent BEFORE recursive removal: a dist junction can
+// redirect an otherwise ordinary-looking child outside this checkout.
+if (lstatSync(root).isSymbolicLink() || !samePath(realpathSync(root), path.resolve(root))) throw Error('INVALID_BUILD_DESTINATION');
+const parent = path.join(root, 'dist');
+if (existsSync(parent)) {
+  if (lstatSync(parent).isSymbolicLink() || !lstatSync(parent).isDirectory() || !samePath(realpathSync(parent), parent)) throw Error('INVALID_BUILD_DESTINATION');
+} else mkdirSync(parent);
+if (path.dirname(destination) !== parent) throw Error('INVALID_BUILD_DESTINATION');
 if (existsSync(destination) && lstatSync(destination).isSymbolicLink()) throw Error('INVALID_BUILD_DESTINATION');
+if (existsSync(destination) && !samePath(realpathSync(destination), destination)) throw Error('INVALID_BUILD_DESTINATION');
 rmSync(destination, { recursive: true, force: true });
 mkdirSync(destination, { recursive: true });
 for (const name of ['operations.mjs', 'worker.mjs', 'terminal.mjs', 'package.json'])

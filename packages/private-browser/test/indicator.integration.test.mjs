@@ -9,8 +9,7 @@ test('own visible page: AI cursor ignores independent trusted mouse moves; Esc i
   skip: process.env.DC_BROWSER_INTERACTIVE_TEST !== '1' ? 'Requires explicitly coordinated visible browser fixture' : false,
   timeout: 30000,
 }, async () => {
-  const executable = process.env.DC_BROWSER_MANAGED_TEST === '1'
-    ? { executablePath: await managedBrowserExecutable() } : { channel: 'msedge' };
+  const executable = { executablePath: await managedBrowserExecutable() };
   const browser = await chromium.launch({ ...executable, headless: false, chromiumSandbox: true });
   try {
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });

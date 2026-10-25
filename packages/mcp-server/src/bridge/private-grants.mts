@@ -16,7 +16,7 @@ const helper = fileURLToPath(new URL('dist/native/windows-private-policy.exe', r
 const productionDirectory = () => path.join(userInfo().homedir, '.desktop-control-private');
 interface Storage { read(): string; write(value: string): void; }
 
-function native(mode: 'read' | 'write' | 'read-workspace' | 'write-workspace' | 'prepare-workspace' | 'read-control' | 'write-control' | 'prepare-browser' | 'clear-desktop-stop' | 'prepare-browser-runtime' | 'validate-browser-runtime', input?: string, testDirectory?: string): string {
+function native(mode: 'read' | 'write' | 'read-workspace' | 'write-workspace' | 'prepare-workspace' | 'read-control' | 'write-control' | 'prepare-browser' | 'clear-desktop-stop' | 'clear-browser-stop' | 'stop-controls' | 'prepare-browser-runtime' | 'validate-browser-runtime', input?: string, testDirectory?: string): string {
   return execFileSync(helper, testDirectory ? [mode, '--test-directory', testDirectory] : [mode], {
     ...(input === undefined ? {} : { input }), encoding: 'utf8', timeout: 2_000,
     maxBuffer: 32_768, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe']
@@ -196,6 +196,35 @@ function desktopStopped(directory: string): boolean {
   try { lstatSync(path.join(directory, 'desktop-stop')); return true; }
   catch (error) { return (error as NodeJS.ErrnoException).code !== 'ENOENT'; }
 }
+function browserStopped(directory: string): boolean {
+  try { lstatSync(path.join(directory, 'browser-stop')); return true; }
+  catch (error) { return (error as NodeJS.ErrnoException).code !== 'ENOENT'; }
+}
+function clearBrowserStop(testDirectory?: string): void {
+  if (process.platform === 'win32') { native('clear-browser-stop', undefined, testDirectory); return; }
+  const directory = testDirectory ?? productionDirectory();
+  assertParentTrust(directory); assertPosixDirectory(directory);
+  const sentinel = path.join(directory, 'browser-stop');
+  try {
+    const stat = lstatSync(sentinel);
+    if (!stat.isFile() || stat.isSymbolicLink() || stat.uid !== process.geteuid?.() || stat.nlink !== 1) throw Error('PRIVATE_POLICY_UNAVAILABLE');
+    unlinkSync(sentinel);
+  } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+}
+function stopControls(testDirectory?: string): void {
+  if (!localPrincipal()) throw Error('PRIVATE_POLICY_UNAVAILABLE');
+  if (process.platform === 'win32') { native('stop-controls', undefined, testDirectory); return; }
+  const directory = testDirectory ?? productionDirectory();
+  assertParentTrust(directory); assertPosixDirectory(directory);
+  for (const name of ['browser-stop', 'desktop-stop']) {
+    try {
+      const fd = openSync(path.join(directory, name), constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, 0o600);
+      try { writeFileSync(fd, 'STOPPED\n'); fsyncSync(fd); } finally { closeSync(fd); }
+    } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
+  }
+}
+/** Safety-only operation: denies controls; never grants or clears a stop. */
+export function stopPrivateControls(): void { stopControls(); }
 function prepareBrowser(testDirectory?: string): void {
   if (process.platform === 'win32') { native('prepare-browser', undefined, testDirectory); return; }
   const directory = testDirectory ?? productionDirectory();
@@ -263,7 +292,7 @@ function controlAuthority(source: Storage, testDirectory?: string) {
     if (!CONTROL_CAPABILITIES.includes(capability)) return null;
     const directory = testDirectory ?? productionDirectory();
     const policy = readControlPolicy(source, testDirectory);
-    if (!policy?.capabilities.includes(capability) || (capability.startsWith('desktop.') && desktopStopped(directory))) return null;
+    if (!policy?.capabilities.includes(capability) || (capability.startsWith('desktop.') && desktopStopped(directory)) || (capability.startsWith('browser.') && browserStopped(directory))) return null;
     return { expiresAt: policy.expiresAt, allowedOrigins: [...policy.allowedOrigins], profileDirectory: path.join(directory, 'browser-profile') };
   } };
 }
@@ -288,6 +317,7 @@ function provisionControl(source: Storage, action: 'grant' | 'revoke' | 'status'
   // Only this explicitly invoked local provisioning action may reset the durable stop.
   // A failed reset leaves the valid policy stopped, never re-enables through MCP.
   if (action === 'grant' && capabilities.some(c => c.startsWith('desktop.'))) clearDesktopStop(testDirectory);
+  if (action === 'grant' && capabilities.some(c => c.startsWith('browser.'))) clearBrowserStop(testDirectory);
   return action === 'grant' ? { state: 'active', capabilities: [...capabilities], allowedOrigins: [...allowedOrigins], expiresAt, desktopStopped: false } : { state: 'revoked' };
 }
 export function provisionPrivateControl(action: 'grant' | 'revoke' | 'status', capabilities: readonly PrivateControlCapability[] = [], allowedOrigins: readonly string[] = []) {
@@ -356,6 +386,7 @@ export function createPrivateGrantTestHarness(directory: string) {
     prepareBrowserRuntime: () => browserRuntime(true, resolved),
     validateBrowserRuntime: () => browserRuntime(false, resolved),
     writeControlPolicy: (value: unknown) => controlSource.write(JSON.stringify(value)),
-    provisionControl: (action: 'grant' | 'revoke' | 'status', capabilities: readonly PrivateControlCapability[] = [], origins: readonly string[] = []) => provisionControl(controlSource, action, capabilities, origins, resolved)
+    provisionControl: (action: 'grant' | 'revoke' | 'status', capabilities: readonly PrivateControlCapability[] = [], origins: readonly string[] = []) => provisionControl(controlSource, action, capabilities, origins, resolved),
+    stopControls: () => stopControls(resolved)
   };
 }

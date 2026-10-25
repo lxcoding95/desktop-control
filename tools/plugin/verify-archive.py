@@ -49,9 +49,10 @@ with zipfile.ZipFile(archive_path) as archive:
         segments = name.split('/')
         if (not name or name.startswith('/') or name.endswith('/') or
                 len(name) > 4096 or path.is_absolute() or
-                any(part in ('', '.', '..') or len(part) > 255 or
-                    part.endswith((' ', '.')) or
-                    re.fullmatch(r'(?i)(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?', part)
+                any(unicodedata.normalize('NFKC', part) in ('', '.', '..') or len(part) > 255 or
+                    unicodedata.normalize('NFKC', part).endswith((' ', '.')) or
+                    any(c in unicodedata.normalize('NFKC', part) for c in '<>"|?*') or
+                    re.fullmatch(r'(?i)(CON|CONIN\$|CONOUT\$|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?', unicodedata.normalize('NFKC', part))
                     for part in segments) or
                 '\\' in name or ':' in name or any(ord(c) < 32 or ord(c) == 127 for c in name)):
             raise ValueError('Unsafe archive member')

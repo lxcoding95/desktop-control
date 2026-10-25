@@ -125,21 +125,28 @@ internal sealed class PrivateSettings : Form {
         var input = new System.Text.StringBuilder();
         for (int c; (c = Console.In.Read()) != -1;) {
             input.Append((char)c);
-            if (input.Length > 2048) return 2;
+            if (input.Length > 140000) return 2;
         }
-        var parser = new JavaScriptSerializer { MaxJsonLength = 2048, RecursionLimit = 8 };
+        var parser = new JavaScriptSerializer { MaxJsonLength = 140000, RecursionLimit = 8 };
         var value = parser.DeserializeObject(input.ToString()) as Dictionary<string, object>;
-        if (value == null || value.Count != 2 || !value.ContainsKey("kind") || !value.ContainsKey("summary")) return 2;
-        string kind = value["kind"] as string, summary = value["summary"] as string;
+        if (value == null || value.Count != 3 || !value.ContainsKey("kind") || !value.ContainsKey("summary") || !value.ContainsKey("details")) return 2;
+        string kind = value["kind"] as string, summary = value["summary"] as string, details = value["details"] as string;
         if ((kind != "desktop.input" && kind != "browser.interact") || String.IsNullOrWhiteSpace(summary) || summary.Length > 240) return 2;
         foreach (char c in summary) if (Char.IsControl(c) || (c >= 0x202a && c <= 0x202e) || (c >= 0x2066 && c <= 0x2069)) return 2;
-        DialogResult result = MessageBox.Show(
-            "Allow this single " + (kind == "desktop.input" ? "desktop input" : "browser interaction") + "?" + Environment.NewLine + Environment.NewLine +
-            summary + Environment.NewLine + Environment.NewLine +
-            "Approve only if this matches your intended action. This does not grant future actions or change permissions.",
-            "Desktop Control approval", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2,
-            MessageBoxOptions.DefaultDesktopOnly);
-        return result == DialogResult.OK ? 0 : 3;
+        if (String.IsNullOrEmpty(details) || details.Length > 65536) return 2;
+        foreach (char c in details) if ((c < 32 && c != '\r' && c != '\n') || c > 126) return 2;
+        using (Form prompt = new Form { Text="Desktop Control approval", Width=800, Height=600, MinimumSize=new Size(650,450), StartPosition=FormStartPosition.CenterScreen, TopMost=true }) {
+            var layout = new TableLayoutPanel { Dock=DockStyle.Fill, RowCount=3, ColumnCount=1, Padding=new Padding(16) };
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); layout.RowStyles.Add(new RowStyle(SizeType.Percent,100)); layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.Controls.Add(new Label { Text="Approve ONE action only: " + summary + "\r\nInspect the exact bound arguments below. This never grants future actions.", AutoSize=true, MaximumSize=new Size(740,0) });
+            layout.Controls.Add(new TextBox { Text=details, Multiline=true, ReadOnly=true, ScrollBars=ScrollBars.Both, WordWrap=false, Dock=DockStyle.Fill, Font=new Font(FontFamily.GenericMonospace,10), AccessibleName="Exact action arguments" });
+            var buttons=new FlowLayoutPanel { Dock=DockStyle.Fill, AutoSize=true, FlowDirection=FlowDirection.RightToLeft };
+            var cancel=new Button { Text="Cancel", DialogResult=DialogResult.Cancel, AutoSize=true };
+            var approve=new Button { Text="Approve this action", DialogResult=DialogResult.OK, AutoSize=true };
+            buttons.Controls.Add(cancel); buttons.Controls.Add(approve); layout.Controls.Add(buttons); prompt.Controls.Add(layout);
+            prompt.CancelButton=cancel; prompt.AcceptButton=cancel; prompt.Shown += delegate { cancel.Focus(); };
+            return prompt.ShowDialog() == DialogResult.OK ? 0 : 3;
+        }
     }
     [STAThread] static int Main(string[] args) {
         try {

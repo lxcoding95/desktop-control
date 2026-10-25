@@ -43,6 +43,7 @@ export function createBrowserController({ authorize, profileDirectory = join(hom
   const ids = new Map();
   let closing;
   let generation = 0;
+  let emergencyLatched = false;
 
   async function close() {
     generation++;
@@ -86,11 +87,11 @@ export function createBrowserController({ authorize, profileDirectory = join(hom
     const acceptedGeneration = generation;
     const result = queue.then(async () => {
       try {
-        if (acceptedGeneration !== generation) throw fail('Browser was stopped.');
+        if (emergencyLatched || acceptedGeneration !== generation) throw fail('Browser was stopped.');
         await check(capability, currentOrigin());
-        if (acceptedGeneration !== generation) throw fail('Browser was stopped.');
+        if (emergencyLatched || acceptedGeneration !== generation) throw fail('Browser was stopped.');
         const result = await fn(acceptedGeneration);
-        if (acceptedGeneration !== generation && !allowSelfClose) throw fail('Browser was stopped.');
+        if (emergencyLatched || (acceptedGeneration !== generation && !allowSelfClose)) throw fail('Browser was stopped.');
         return result;
       } catch (error) {
         if (error?.safeBrowserError) throw error;
@@ -178,8 +179,18 @@ export function createBrowserController({ authorize, profileDirectory = join(hom
       });
       context.setDefaultTimeout(5000);
       await context.exposeBinding('__desktopControlEmergencyStop', async () => {
+        if (emergencyLatched) return { stopped: true };
+        // Latch before any asynchronous work: callback/persistence failures
+        // must never permit this controller instance to restart after Esc.
+        emergencyLatched = true;
+        generation++;
+        try {
+          // Invoke the trusted host immediately so its connection gate and
+          // durable revocation begin before browser cleanup. Do not await it:
+          // the callback may itself stop this controller and await close().
+          void Promise.resolve(onEmergencyStop?.()).catch(() => {});
+        } catch { /* Synchronous host failure does not clear the local latch. */ }
         await close();
-        try { await onEmergencyStop?.(); } catch { /* Stop stays enforced even if audit/host notification fails. */ }
         return { stopped: true };
       });
       await context.addInitScript(installBrowserIndicator);

@@ -9,9 +9,31 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { createBrowserController } from '../controller.mjs';
+import { ownedProcessStopScript } from './owned-process-fixture.mjs';
+
+test('managed single-tab closure releases the profile before an immediate restart', {
+  skip: process.env.DC_BROWSER_INTERACTIVE_TEST !== '1' ? 'Requires explicitly coordinated visible Desktop-Control-Browser fixture' : false,
+  timeout: 90000,
+}, async () => {
+  const profileDirectory = await mkdtemp(join(tmpdir(), 'desktop-control-browser-fixture-'));
+  const controller = createBrowserController({ profileDirectory, authorize: async () => ({
+    expiresAt: Date.now() + 30000, allowedOrigins: ['https://example.com'],
+  }) });
+  try {
+    for (let iteration = 0; iteration < 6; iteration++) {
+      assert.deepEqual(await controller.start(), { running: true });
+      const tabs = (await controller.tabs()).tabs;
+      assert.equal(tabs.length, 1);
+      assert.deepEqual(await controller.closeTab({ tabId: tabs[0].tabId }), { closed: true });
+    }
+  } finally {
+    await controller.stop();
+    await rm(profileDirectory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  }
+});
 
 test('headed private browser: own fixture interactions, exact origins and revocation', {
-  skip: process.env.DC_BROWSER_INTERACTIVE_TEST !== '1' ? 'Requires explicitly coordinated visible Edge fixture' : false,
+  skip: process.env.DC_BROWSER_INTERACTIVE_TEST !== '1' ? 'Requires explicitly coordinated visible Desktop-Control-Browser fixture' : false,
   timeout: 90000,
 }, async () => {
   let secondHits = 0;
@@ -29,10 +51,9 @@ test('headed private browser: own fixture interactions, exact origins and revoca
   await once(fixture, 'listening');
   const origin = `http://127.0.0.1:${fixture.address().port}`;
   const profileDirectory = await mkdtemp(join(tmpdir(), 'desktop-control-browser-fixture-'));
-  const managed = process.env.DC_BROWSER_MANAGED_TEST === '1';
   let granted = true;
   let emergencyStops = 0;
-  const controller = createBrowserController({ profileDirectory, channel: managed ? undefined : 'msedge', allowPrivateOrigins: true, onEmergencyStop: () => { emergencyStops++; }, authorize: async (_capability, requestedOrigin) => {
+  const controller = createBrowserController({ profileDirectory, allowPrivateOrigins: true, onEmergencyStop: () => { emergencyStops++; throw new Error('FIXTURE_HOST_CALLBACK_FAILURE'); }, authorize: async (_capability, requestedOrigin) => {
     if (!granted || (requestedOrigin && requestedOrigin !== origin)) throw new Error('fixture denied');
     return { expiresAt: Date.now() + 30000, allowedOrigins: [origin] };
   } });
@@ -77,8 +98,8 @@ test('headed private browser: own fixture interactions, exact origins and revoca
     const staleRejected = stale.then(() => ({ succeeded: true }), error => ({ error: error.message }));
     await delay(100);
     const killed = await promisify(execFile)('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
-      '$ErrorActionPreference="Stop"; $targets=@(Get-CimInstance Win32_Process -Filter "Name=\'$($env:DC_BROWSER_FIXTURE_PROCESS)\'" | Where-Object { $_.CommandLine -and $_.CommandLine.Contains($env:DC_BROWSER_FIXTURE_PROFILE) -and $_.CommandLine -notmatch "--type=" }); if($targets.Count -ne 1){throw "Owned browser process not uniquely identified"}; if($targets[0].CommandLine -match "(?:^|\s)--no-sandbox(?:\s|$)"){throw "Browser sandbox disabled"}; $targets | ForEach-Object { $owned=Get-Process -Id $_.ProcessId -ErrorAction Stop; $owned.Kill(); if(-not $owned.WaitForExit(5000)){throw "Owned browser process did not exit"} }; Write-Output $targets.Count'], {
-      env: { ...process.env, DC_BROWSER_FIXTURE_PROFILE: profileDirectory, DC_BROWSER_FIXTURE_PROCESS: managed ? 'chrome.exe' : 'msedge.exe' }, timeout: 10000, windowsHide: true,
+      ownedProcessStopScript], {
+      env: { ...process.env, DC_BROWSER_FIXTURE_PROFILE: profileDirectory, DC_BROWSER_FIXTURE_PROCESS: 'chrome.exe' }, timeout: 10000, windowsHide: true,
     });
     assert.equal(killed.stdout.trim(), '1');
     assert.ok((await pendingCrash).error);
@@ -92,8 +113,8 @@ test('headed private browser: own fixture interactions, exact origins and revoca
     // Also exercise idle closure: there is no failed in-flight action whose
     // catch handler could incidentally clear the stale context for us.
     await promisify(execFile)('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
-      '$ErrorActionPreference="Stop"; $targets=@(Get-CimInstance Win32_Process -Filter "Name=\'$($env:DC_BROWSER_FIXTURE_PROCESS)\'" | Where-Object { $_.CommandLine -and $_.CommandLine.Contains($env:DC_BROWSER_FIXTURE_PROFILE) -and $_.CommandLine -notmatch "--type=" }); if($targets.Count -ne 1){throw "Owned browser process not uniquely identified"}; if($targets[0].CommandLine -match "(?:^|\s)--no-sandbox(?:\s|$)"){throw "Browser sandbox disabled"}; $targets | ForEach-Object { $owned=Get-Process -Id $_.ProcessId -ErrorAction Stop; $owned.Kill(); if(-not $owned.WaitForExit(5000)){throw "Owned browser process did not exit"} }'], {
-      env: { ...process.env, DC_BROWSER_FIXTURE_PROFILE: profileDirectory, DC_BROWSER_FIXTURE_PROCESS: managed ? 'chrome.exe' : 'msedge.exe' }, timeout: 10000, windowsHide: true,
+      ownedProcessStopScript], {
+      env: { ...process.env, DC_BROWSER_FIXTURE_PROFILE: profileDirectory, DC_BROWSER_FIXTURE_PROCESS: 'chrome.exe' }, timeout: 10000, windowsHide: true,
     });
     await delay(500);
     await controller.start();
@@ -111,13 +132,19 @@ test('headed private browser: own fixture interactions, exact origins and revoca
     await controller.start();
     const lastTab = (await controller.tabs()).tabs[0].tabId;
     assert.deepEqual(await controller.closeTab({ tabId: lastTab }), { closed: true });
-    stage = 'page Escape emergency stop';
+    stage = 'page Escape restart after last-tab closure';
     await controller.start();
+    stage = 'page Escape own-fixture navigation';
     await controller.navigate({ url: origin });
+    stage = 'page Escape dispatch';
     await controller.press({ role: 'textbox', name: 'Fixture input', key: 'Escape' }).catch(() => {});
+    stage = 'page Escape latch and failed host callback';
     for (let attempt = 0; attempt < 20 && emergencyStops === 0; attempt++) await delay(25);
     assert.equal(emergencyStops, 1, 'page Esc must notify only the host stop callback');
-    await assert.rejects(controller.snapshot(), { message: 'Browser is not running.' });
+    await assert.rejects(controller.snapshot(), { message: 'Browser was stopped.' });
+    await assert.rejects(controller.start(), { message: 'Browser was stopped.' });
+    await controller.stop();
+    await assert.rejects(controller.start(), { message: 'Browser was stopped.' });
   } catch (error) {
     throw new Error(`Owned-browser fixture failed at ${stage}.`, { cause: error });
   } finally {

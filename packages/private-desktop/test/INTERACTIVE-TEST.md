@@ -20,7 +20,7 @@ try {
 }
 ```
 
-When DC_DESKTOP_WAIT_FOR_FOCUS=1, the test prints READY_FOR_FOCUS and waits at most 15 seconds for the visible owned window to become foreground, before granting desktop input. Root can activate that unique fixture using the official Computer UI. Waiting is a read-only foreground check; no AttachThreadInput, foreground-lock setting, registry mutation or bypass is used. A timeout fails safely. The opt-in fixture is launched visibly (windowsHide=false); background native helpers remain hidden.
+When DC_DESKTOP_WAIT_FOR_FOCUS=1, the test prints READY_FOR_FOCUS and waits at most 60 seconds for the visible owned window to become foreground, before granting desktop input. Root can activate that unique fixture using the official Computer UI. Waiting is a read-only foreground check; no AttachThreadInput, foreground-lock setting, registry mutation or bypass is used. A timeout fails safely. The opt-in fixture is launched visibly (windowsHide=false); background native helpers remain hidden.
 
 The dedicated visible WinForms window has a unique nonprivate title, one button and one textbox. JSON operations focus only those controls, verify the fixture remains foreground, report click/text counts, hash copied system-cursor bitmaps, inspect the captured helper PID for its visible banner label, send paired Escape, and close itself. It does not expose arbitrary typing, clicking, screen capture, shell, files or general process control.
 
@@ -30,4 +30,4 @@ Every cleanup is attempted even if another cleanup fails. Failures are emitted a
 
 The fixture is not proof of arbitrary applications, multiple monitors, mixed DPI, human/automation contention, secure desktop, UAC, reboot recovery, or a separately independent physical cursor. Foreground checks and Windows SendInput are not an atomic transaction. A human moving focus between the guard and OS dispatch is a residual interactive race, so the announced test interval matters. Cold WinForms startup can exceed five seconds; native commands use a bounded 30-second test deadline. A timeout remains a failed result, not an approval.
 
-Current status: test source compiles, JavaScript syntax and ESLint pass, default opt-in test is SKIPPED. Actual interactive execution is pending root coordination.
+Verified 2026-10-25T10:28Z on Windows 10.0.26300, Node24.21.0/npm12.2.0: explicit coordinated run passed 1/1 test, 0 failures/skips, exit0. All three phases above completed. Independent post-check confirmed control state denied, desktop.input refused, stop marker present, and no owned helper/fixture processes. Raw local log desktop-interactive-native-T4.log SHA256 5BF388D76B7EAD02F953BD384FD7CEED72025EA572877C578B07A85EEF074DED. Earlier startup/focus/CURSOR_FAILED attempts remain preserved; this success does not erase their history. Default opt-in discovery remains SKIPPED.

@@ -36,8 +36,10 @@ export function openPrivateSettings() {
 
 function validAction(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
-    && Object.keys(value).sort().join(',') === 'kind,summary'
+    && Object.keys(value).sort().join(',') === 'details,kind,summary'
     && ['desktop.input', 'browser.interact'].includes(value.kind)
+    && typeof value.details === 'string' && value.details.length > 0 && value.details.length <= 65536
+    && /^[\x20-\x7e\r\n]*$/.test(value.details)
     && typeof value.summary === 'string' && value.summary.trim().length > 0 && value.summary.length <= 240
     && !Array.from(value.summary).some(character => {
       const code = character.codePointAt(0);

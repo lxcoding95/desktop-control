@@ -8,7 +8,7 @@ import { registerPrivateControls } from './private-controls.mts';
 const relative = z.string().min(1).max(512);
 const sha = z.string().regex(/^[0-9a-f]{64}$/);
 const encoding = z.enum(['utf8', 'base64']);
-const code = z.enum(['INVALID_INPUT', 'PATH_NOT_ALLOWED', 'NOT_FOUND', 'CONFLICT', 'LIMIT_EXCEEDED', 'INTERNAL_ERROR', 'PERMISSION_DENIED', 'CANCELLED', 'BUSY', 'TIMEOUT', 'SANDBOX_UNAVAILABLE', 'PROCESS_UNAVAILABLE']);
+const code = z.enum(['INVALID_INPUT', 'PATH_NOT_ALLOWED', 'NOT_FOUND', 'CONFLICT', 'LIMIT_EXCEEDED', 'INTERNAL_ERROR', 'PERMISSION_DENIED', 'CANCELLED', 'BUSY', 'TIMEOUT', 'SANDBOX_UNAVAILABLE', 'SANDBOX_CLEANUP_FAILED', 'PROCESS_UNAVAILABLE']);
 const written = { path: relative, bytes: z.number().int().min(0).max(1048576), sha256: sha };
 
 /** Private capabilities are independently host-authorized; the normal S02 factory is unchanged. */

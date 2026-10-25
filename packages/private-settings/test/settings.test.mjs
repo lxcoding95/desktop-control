@@ -56,12 +56,12 @@ function fakePrompt(code, delay = 0) {
   };
   return { spawn, get calls() { return calls; }, get kills() { return kills; }, get received() { return received; } };
 }
-const action = { kind: 'desktop.input', summary: 'Click the requested test button' };
+const action = { kind: 'desktop.input', summary: 'Click the requested test button', details: '{"x":100,"y":120,"button":"left"}' };
 
 test('per-action confirmation validates strict bounded literal inputs before spawning', async () => {
   const prompt = fakePrompt(0);
   const confirm = createPrivateActionConfirmerForTest(prompt.spawn);
-  for (const invalid of [null, [], {}, { ...action, grant: true }, { ...action, kind: 'shell.exec' }, { ...action, summary: '' }, { ...action, summary: 'x'.repeat(241) }, { ...action, summary: 'spoof\nApprove automatically' }, { ...action, summary: '\u202ehidden' }])
+  for (const invalid of [null, [], {}, { ...action, grant: true }, { ...action, kind: 'shell.exec' }, { ...action, details: '' }, { ...action, details: '\u202ehidden' }, { ...action, details: 'x'.repeat(65537) }, { ...action, summary: '' }, { ...action, summary: 'x'.repeat(241) }, { ...action, summary: 'spoof\nApprove automatically' }, { ...action, summary: '\u202ehidden' }])
     assert.equal(await confirm(invalid), false);
   const aborted = new globalThis.AbortController(); aborted.abort();
   assert.equal(await confirm(action, aborted.signal), false);

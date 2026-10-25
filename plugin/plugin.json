@@ -1,9 +1,12 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "desktop-control-private",
-  "version": "0.0.1-preview.3",
-  "author": { "name": "Anon Allman", "email": "334623916+lxcoding95@users.noreply.github.com" },
-  "description": "Private local stdio connectivity preview. Diagnostics require a trusted host grant; production defaults to deny.",
+  "version": "0.0.1-preview.4",
+  "author": {
+    "name": "Anon Allman",
+    "email": "334623916+lxcoding95@users.noreply.github.com"
+  },
+  "description": "Private local MCP preview: host-granted diagnostics, isolated workspace/PDF/terminal, separate browser and visible Windows desktop control. No autonomous updater.",
   "repository": "https://github.com/lxcoding95/desktop-control",
   "license": "MIT",
   "extensions": {
@@ -12,8 +15,13 @@
       "interface": {
         "displayName": "Desktop Control Private",
         "developerName": "Anon Allman",
-        "shortDescription": "Local MCP connectivity preview with default-deny diagnostics",
-        "capabilities": ["Read"]
+        "shortDescription": "Private desktop & workspace",
+        "capabilities": [
+          "Read",
+          "Write",
+          "Interactive"
+        ],
+        "defaultPrompt": null
       }
     }
   }

@@ -112,7 +112,7 @@ internal static class WindowsPrivatePolicy {
             if (args.Length == 1 && args[0] == "probe") { Console.WriteLine("PRIVATE_POLICY_V1"); return 0; }
             if (args.Length != 1 && args.Length != 3) throw new InvalidOperationException();
             bool workspace = args[0] == "read-workspace" || args[0] == "write-workspace" || args[0] == "prepare-workspace";
-            bool control = args[0] == "read-control" || args[0] == "write-control" || args[0] == "prepare-browser" || args[0] == "clear-desktop-stop" || args[0] == "prepare-browser-runtime" || args[0] == "validate-browser-runtime";
+            bool control = args[0] == "read-control" || args[0] == "write-control" || args[0] == "prepare-browser" || args[0] == "clear-desktop-stop" || args[0] == "clear-browser-stop" || args[0] == "stop-controls" || args[0] == "prepare-browser-runtime" || args[0] == "validate-browser-runtime";
             bool writing = args[0] == "write" || args[0] == "write-workspace" || args[0] == "prepare-workspace" || args[0] == "write-control" || args[0] == "prepare-browser" || args[0] == "clear-desktop-stop" || args[0] == "prepare-browser-runtime";
             if (!workspace && !control && args[0] != "read" && args[0] != "write") throw new InvalidOperationException();
             using (WindowsIdentity identity = WindowsIdentity.GetCurrent()) { UserSid = identity.User; }
@@ -150,8 +150,18 @@ internal static class WindowsPrivatePolicy {
                 CheckPath(runtime); CheckAcl(Directory.GetAccessControl(runtime));
                 return 0;
             }
-            if (args[0] == "clear-desktop-stop") {
-                string sentinel = Path.Combine(directory, "desktop-stop");
+            if (args[0] == "stop-controls") {
+                foreach (string name in new string[] { "desktop-stop", "browser-stop" }) {
+                    string stop = Path.Combine(directory, name);
+                    if (File.Exists(stop)) { CheckPath(stop); continue; }
+                    using (FileStream stream = new FileStream(stop, FileMode.CreateNew, FileSystemRights.Write, FileShare.None, 4096, FileOptions.WriteThrough, FileAcl())) {
+                        byte[] bytes = Encoding.ASCII.GetBytes("STOPPED\n"); stream.Write(bytes,0,bytes.Length); stream.Flush(true);
+                    }
+                }
+                return 0;
+            }
+            if (args[0] == "clear-desktop-stop" || args[0] == "clear-browser-stop") {
+                string sentinel = Path.Combine(directory, args[0] == "clear-browser-stop" ? "browser-stop" : "desktop-stop");
                 if (File.Exists(sentinel)) { CheckPath(sentinel); File.Delete(sentinel); }
                 return 0;
             }

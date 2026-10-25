@@ -4,14 +4,15 @@ import type { ChildProcess } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
-import { createPrivateControlAuthority, provisionPrivateControl, provisionPrivateGrant, provisionPrivateWorkspace } from './bridge/private-grants.mts';
+import { createPrivateControlAuthority, provisionPrivateControl, provisionPrivateGrant, provisionPrivateWorkspace, stopPrivateControls } from './bridge/private-grants.mts';
 import type { PrivateControlCapability } from './bridge/private-grants.mts';
+import { createControlSequencer } from './bridge/control-sequencer.mts';
 
 type Args = Record<string, unknown>;
 type Controller = Record<string, (args?: Args) => Promise<unknown>>;
 interface BrowserModule { createBrowserController(options: { authorize(capability: PrivateControlCapability): Promise<unknown>; profileDirectory: string; onEmergencyStop(): Promise<void> }): Controller; }
 interface DesktopModule { createDesktopController(options: { authorize(capability: PrivateControlCapability): Promise<void>; onEmergencyStop(): Promise<void>; protectedProcessIds: number[]; requestTimeoutMs: number }): Controller; }
-interface SettingsModule { openPrivateSettings(): ChildProcess; confirmPrivateAction(action: { kind: 'desktop.input' | 'browser.interact'; summary: string }, signal?: AbortSignal): Promise<boolean>; }
+interface SettingsModule { openPrivateSettings(): ChildProcess; confirmPrivateAction(action: { kind: 'desktop.input' | 'browser.interact'; summary: string; details: string }, signal?: AbortSignal): Promise<boolean>; }
 const root = fileURLToPath(new URL(import.meta.url.endsWith('.mts') ? '../../../' : '../../../../', import.meta.url));
 const safeError = (code: string) => ({ isError: true as const, content: [{ type: 'text' as const, text: code }] });
 const png = z.strictObject({ mimeType: z.literal('image/png'), data: z.string().max(6 * 1024 * 1024) });
@@ -39,6 +40,7 @@ export function formatPrivateOutput(output: z.ZodType, result: unknown, image = 
 /** Private host integration. Local consent never creates or extends a grant. */
 export function registerPrivateControls(server: McpServer): () => Promise<void> {
   const authority = createPrivateControlAuthority();
+  const sequencer = createControlSequencer();
   let browser: Controller | undefined, desktop: Controller | undefined, settings: ChildProcess | undefined;
   let stopped = false;
   const load = (name: string) => import(pathToFileURL(path.join(root, 'packages', name, 'controller.mjs')).href) as Promise<unknown>;
@@ -50,64 +52,90 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
   async function stopDesktop() { const current = desktop; desktop = undefined; await current?.stop?.(); }
   async function stopBrowser() { const current = browser; browser = undefined; await current?.stop?.(); }
   async function stopAll() { await Promise.allSettled([stopDesktop(), stopBrowser()]); }
-  async function getBrowser() {
+  async function emergencyStop() {
+    // Invalidate queued work BEFORE any asynchronous browser/helper shutdown.
+    sequencer.interrupt();
+    try { stopPrivateControls(); provisionPrivateControl('revoke'); }
+    catch { stopped = true; } // Unpersistable revocation blocks this entire connection.
+    await stopAll();
+  }
+  const alive = (signal: AbortSignal) => { if (stopped || signal.aborted) throw Error('CANCELLED'); };
+  async function getBrowser(signal: AbortSignal) {
     if (!browser) {
       const access = await authorize('browser.interact');
       const module = await load('private-browser') as BrowserModule;
-      browser = module.createBrowserController({ authorize, profileDirectory: access.profileDirectory,
-        onEmergencyStop: async () => { provisionPrivateControl('revoke'); await stopAll(); } });
+      alive(signal);
+      const accepted = sequencer.current();
+      browser = module.createBrowserController({ authorize: capability => {
+        if (!sequencer.isCurrent(accepted)) throw Error('CANCELLED');
+        return authorize(capability);
+      }, profileDirectory: access.profileDirectory,
+        onEmergencyStop: emergencyStop });
     }
     return browser;
   }
-  async function getDesktop() {
+  async function getDesktop(signal: AbortSignal) {
     if (!desktop) {
       const module = await load('private-desktop') as DesktopModule;
-      desktop = module.createDesktopController({ authorize: async capability => { await authorize(capability); },
+      alive(signal);
+      const accepted = sequencer.current();
+      desktop = module.createDesktopController({ authorize: async capability => {
+        if (!sequencer.isCurrent(accepted)) throw Error('CANCELLED');
+        await authorize(capability);
+      },
         protectedProcessIds: settings?.pid ? [settings.pid] : [], requestTimeoutMs: 30000,
-        onEmergencyStop: async () => { provisionPrivateControl('revoke'); await stopAll(); } });
+        onEmergencyStop: emergencyStop });
     }
     return desktop;
   }
   function register(name: string, description: string, input: z.ZodType, output: z.ZodType,
-    capability: PrivateControlCapability | null, operation: (args: Args) => Promise<unknown>, confirmation = false, image = false) {
+    capability: PrivateControlCapability | null, operation: (args: Args, signal: AbortSignal) => Promise<unknown>, confirmation = false, image = false) {
     server.registerTool(name, { description, inputSchema: input, outputSchema: output,
       annotations: { readOnlyHint: !confirmation && capability?.endsWith('.read') === true, destructiveHint: confirmation } }, async (args, ctx) => {
-      if (stopped || ctx.mcpReq.signal.aborted) return safeError('CANCELLED');
-      try {
+      const bound = Object.freeze({ ...args as Args });
+      const urgent = ['desktop_control.stop_control', 'desktop_control.desktop_stop', 'desktop_control.browser_stop', 'desktop_control.open_settings'].includes(name);
+      try { return await sequencer.run(ctx.mcpReq.signal, async signal => {
+        alive(signal);
         if (capability) await authorize(capability);
         if (confirmation) {
           // Do not permit any automated input while the protected approval UI is open.
           await stopDesktop();
           const module = await load('private-settings') as SettingsModule;
-          if (!await module.confirmPrivateAction({ kind: capability === 'desktop.input' ? 'desktop.input' : 'browser.interact', summary: name }, ctx.mcpReq.signal))
+          alive(signal);
+          const details = JSON.stringify(bound, null, 2).replace(/[^\x20-\x7e\r\n]/g, character => '\\u' + character.charCodeAt(0).toString(16).padStart(4, '0'));
+          if (!await module.confirmPrivateAction({ kind: capability === 'desktop.input' ? 'desktop.input' : 'browser.interact', summary: name, details }, signal))
             return safeError('LOCAL_CONFIRMATION_REQUIRED');
           if (capability) await authorize(capability);
         }
-        if (ctx.mcpReq.signal.aborted) return safeError('CANCELLED');
+        alive(signal);
         const cancel = () => { void stopAll(); };
-        ctx.mcpReq.signal.addEventListener('abort', cancel, { once: true });
+        signal.addEventListener('abort', cancel, { once: true });
         let result: unknown;
-        try { result = await operation(args as Args); }
-        finally { ctx.mcpReq.signal.removeEventListener('abort', cancel); }
-        if (ctx.mcpReq.signal.aborted) return safeError('CANCELLED');
+        try { result = await operation(bound, signal); }
+        finally { signal.removeEventListener('abort', cancel); }
+        alive(signal);
         return formatPrivateOutput(output, result, image);
+      }, urgent);
       } catch (error) {
-        return safeError(error instanceof Error && ['PERMISSION_DENIED', 'PLATFORM_UNAVAILABLE', 'DESKTOP_STOPPED', 'ELEVATION_REQUIRED', 'PROTECTED_WINDOW'].includes(error.message) ? error.message : 'CONTROL_UNAVAILABLE');
+        return safeError(error instanceof Error && ['CANCELLED', 'PERMISSION_DENIED', 'PLATFORM_UNAVAILABLE', 'DESKTOP_STOPPED', 'ELEVATION_REQUIRED', 'PROTECTED_WINDOW'].includes(error.message) ? error.message : 'CONTROL_UNAVAILABLE');
       }
     });
   }
   const empty = z.strictObject({});
   const yes = (field: string) => z.strictObject({ [field]: z.literal(true) });
-  const callBrowser = (method: string) => async (args: Args) => {
-    const controller = await getBrowser();
+  const callBrowser = (method: string) => async (args: Args, signal: AbortSignal) => {
+    const controller = await getBrowser(signal);
+    alive(signal);
     if (!controller[method]) throw Error('CONTROL_UNAVAILABLE');
     return controller[method](args);
   };
-  const callDesktop = (method: string) => async (args: Args) => {
-    const controller = await getDesktop();
+  const callDesktop = (method: string) => async (args: Args, signal: AbortSignal) => {
+    const controller = await getDesktop(signal);
+    alive(signal);
     if (!controller[method]) throw Error('CONTROL_UNAVAILABLE');
     // Consent pauses/closes input. Re-activate only after its fresh host grant check.
     if (method !== 'start' && method !== 'screenshot') await controller.start?.();
+    alive(signal);
     return controller[method](args);
   };
   register('desktop_control.control_status', 'Minimal private package and grant state; never returns identity or paths.', empty,
@@ -139,7 +167,7 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
   register('desktop_control.browser_screenshot', 'Read a bounded private-browser PNG; may contain sensitive page content.', empty, png, 'browser.read', callBrowser('screenshot'), false, true);
   register('desktop_control.browser_tabs', 'List private browser tab IDs/origins.', empty, z.strictObject({ tabs: z.array(z.strictObject({ tabId: z.string().max(32), origin: z.string().max(4096), active: z.boolean() })).max(8) }), 'browser.read', callBrowser('tabs'));
   register('desktop_control.browser_new_tab', 'Open an approved-origin private tab after local confirmation.', z.strictObject({ url: z.string().max(4096) }), tab, 'browser.interact', callBrowser('newTab'), true);
-  register('desktop_control.browser_select_tab', 'Select a private browser tab.', z.strictObject({ tabId: z.string().max(32) }), tab, 'browser.interact', callBrowser('selectTab'));
+  register('desktop_control.browser_select_tab', 'Select a private browser tab.', z.strictObject({ tabId: z.string().max(32) }), z.strictObject({ tabId: z.string().max(32), active: z.literal(true) }), 'browser.interact', callBrowser('selectTab'));
   register('desktop_control.browser_close_tab', 'Close a private browser tab after local confirmation.', z.strictObject({ tabId: z.string().max(32) }), yes('closed'), 'browser.interact', callBrowser('closeTab'), true);
   register('desktop_control.browser_stop', 'Stop the private browser, including after grant revocation.', empty, yes('stopped'), null, async () => { await stopBrowser(); return { stopped: true }; });
   register('desktop_control.desktop_start', 'Start visible high-trust Windows desktop input: black cursor/banner, Esc stop. Requires local confirmation.', empty, yes('active'), 'desktop.input', callDesktop('start'), true);
@@ -151,5 +179,5 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
   register('desktop_control.desktop_stop', 'Stop desktop control and revoke the control policy; no approval needed.', empty, yes('stopped'), null, async () => {
     await stopDesktop(); provisionPrivateControl('revoke'); return { stopped: true };
   });
-  return async () => { stopped = true; await stopAll(); settings?.kill(); };
+  return async () => { stopped = true; sequencer.interrupt(); await stopAll(); settings?.kill(); };
 }
