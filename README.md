@@ -61,6 +61,10 @@ The AI will use its **own persistent browser profile**, separate from the user's
 
 Computer control is a high-trust capability. An unrestricted shell is **not contained** by a command blocklist or an allowed-directory configuration. Production designs must use OS-enforced isolation where a strong boundary is required. See [SECURITY.md](SECURITY.md) before reporting a vulnerability or experimenting with privileged execution.
 
+## GitHub automation and merge security
+
+GitHub auto-merge is enabled at repository level, but **it must not be enabled on an individual PR until mandatory reviews and stable required status checks are enforced** on the protected main branch. See [Auto-merge safety and release gates](docs/governance/AUTO-MERGE-SAFETY.md). The current quality and M03 workflows are independently tested on Draft branches; they are not evidence of a released application or an automatically approved merge.
+
 ## Contributing and community
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md), [SUPPORT.md](SUPPORT.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Use the issue templates for proposals or bug reports. Do not submit real credentials, private machine data, or security exploit details in public issues.
