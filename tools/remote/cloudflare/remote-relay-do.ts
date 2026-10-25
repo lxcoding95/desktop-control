@@ -10,6 +10,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { createDeviceTicketAuthority } from '../device-ticket.mjs';
 import { createDurableTicketStore } from '../durable-ticket-store.mjs';
+import { configuredPreviewOwner, isAllowedPreviewOwner } from '../preview-single-owner.mjs';
 import { parseDeviceAuthenticate, parseHealthResponse, parseAuthorizedDeviceLookup } from '../remote-relay-protocol.mjs';
 
 export const PROBE_RELAY_SHARD = 'remote-health-probe-v1';
@@ -17,6 +18,8 @@ export const PROBE_RELAY_SHARD = 'remote-health-probe-v1';
 type Env = {
   DEVICE_TICKET_HMAC_KEY?: string;
   ENABLE_REMOTE_HEALTH?: string;
+  PREVIEW_SINGLE_USER?: string;
+  PREVIEW_OWNER_ID?: string;
 };
 type PendingAttachment = { phase: 'pending'; until: number };
 type ReadyAttachment = {
@@ -98,7 +101,8 @@ export class RemoteHealthRelay extends DurableObject<Env> {
   }
 
   private enabled() {
-    return this.env.ENABLE_REMOTE_HEALTH === '1' && this.authority !== null;
+    return this.env.ENABLE_REMOTE_HEALTH === '1' && this.authority !== null &&
+      configuredPreviewOwner(this.env) !== null;
   }
 
   async fetch(request: Request): Promise<Response> {
@@ -123,7 +127,7 @@ export class RemoteHealthRelay extends DurableObject<Env> {
   }
 
   private async isPaired(a: ReadyAttachment): Promise<boolean> {
-    if (a.until <= Date.now()) return false;
+    if (a.until <= Date.now() || !isAllowedPreviewOwner(a.ownerId, this.env)) return false;
     const p = await this.ctx.storage.get('pairing:' + a.ownerId + ':' + a.deviceId);
     return paired(p, a);
   }
@@ -146,7 +150,8 @@ export class RemoteHealthRelay extends DurableObject<Env> {
     let verified: {ownerId: string;deviceId: string;expiresAt: number};
     try { verified = await this.authority.verifyDevice(auth.ticket); }
     catch { this.close(ws); return; }
-    if (verified.deviceId !== auth.deviceId) { this.close(ws); return; }
+    if (verified.deviceId !== auth.deviceId ||
+        !isAllowedPreviewOwner(verified.ownerId, this.env)) { this.close(ws); return; }
     const pair = await this.ctx.storage.get(
       'pairing:' + verified.ownerId + ':' + verified.deviceId
     );
@@ -215,6 +220,7 @@ export class RemoteHealthRelay extends DurableObject<Env> {
     } catch { return reject(400, 'Invalid request'); }
     const lookup = parseAuthorizedDeviceLookup(body);
     if (!lookup) return reject(400, 'Invalid request');
+    if (!isAllowedPreviewOwner(lookup.ownerId, this.env)) return reject(403, 'Not permitted');
     let ws: WebSocket | undefined;
     for (const sock of this.ctx.getWebSockets()) {
       const a = attachment(sock);
