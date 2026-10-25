@@ -62,6 +62,24 @@ with zipfile.ZipFile(archive_path) as archive:
     if 'deps.grants ?? DENY_ALL_GRANTS' not in archive.read('dist/packages/mcp-server/src/server.mjs').decode():
         raise ValueError('Production default-deny entry required')
     provenance = json.loads(archive.read('PROVENANCE.json'))
+    # Cross-check every user-visible metadata source before untrusted ZIP extraction.
+    # A checksum inventory proves consistency only within that ZIP, not authenticity.
+    codex_manifest = json.loads(archive.read('.codex-plugin/plugin.json'))
+    private_mcp = json.loads(archive.read('.mcp.json'))
+    if (manifest.get('name') != 'desktop-control-private' or
+            codex_manifest.get('name') != manifest['name'] or
+            codex_manifest.get('version') != manifest.get('version') or
+            codex_manifest.get('requires_local_executor') is not True or
+            private_mcp.get('mcpServers') != mcp.get('mcpServers') or
+            set(mcp['mcpServers']) != {'desktop-control'} or
+            mcp['mcpServers']['desktop-control'].get('command') != 'node' or
+            mcp['mcpServers']['desktop-control'].get('cwd') != '${PLUGIN_ROOT}'):
+        raise ValueError('Inconsistent plugin or MCP metadata')
+    if (not isinstance(provenance, dict) or provenance.get('dirty') is not False or
+            not isinstance(provenance.get('source_commit'), str) or
+            not re.fullmatch(r'[0-9a-f]{40}', provenance['source_commit']) or
+            provenance.get('plugin_version') != manifest.get('version')):
+        raise ValueError('Unverifiable package provenance')
     if len(provenance['dependencies']) != 3:
         raise ValueError('Unexpected dependency count')
     for dep in provenance['dependencies']:
