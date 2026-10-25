@@ -1,6 +1,6 @@
 # Desktop Control — Verbindlicher Projekt-Masterplan
 
-**Aktualisierter Orientierungsstand:** 2026-10-24 | S01 Architektur gemergt; S02 Windows/Linux-Regression + lokale OSS-Sicherheitsscans vom Owner bestanden auf [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **nicht gemergt**; unabhängiger semantischer Review und tatsächliche private ChatGPT-Verbindung **offen** | Lizenz des öffentlichen Kerns: MIT | Repository: https://github.com/lxcoding95/desktop-control
+**Aktualisierter Orientierungsstand:** 2026-10-24 | S01 Architektur gemergt; S02 Windows/Linux-Regression + lokale OSS-Sicherheitsscans vom Owner bestanden auf [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **nicht gemergt**; unabhängiger semantischer Review **offen**; eine tatsächliche private ChatGPT-Diagnoseverbindung mit anschließender Widerrufsprüfung wurde am 24.10.2026 gemäß [M01 Issue #28](https://github.com/lxcoding95/desktop-control/issues/28) nachgewiesen, aktuelle Host-/Plugin-Fassung noch nicht erneut überprüft | Lizenz des öffentlichen Kerns: MIT | Repository: https://github.com/lxcoding95/desktop-control
 
 > Dieses Dokument beschreibt Ziele, Entscheidungen und Gates. Es ist keine Behauptung, dass das Produkt bereits implementiert ist. Vorhandene GitHub-Daten (Commits, PRs, Issues und aktuelle Branches) haben Vorrang vor statischen Statusangaben. Für neue ChatGPT-Chats zwingend auch [CHAT-CONTINUITY.md](../governance/CHAT-CONTINUITY.md) lesen.
 
