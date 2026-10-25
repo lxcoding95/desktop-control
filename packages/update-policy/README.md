@@ -30,7 +30,19 @@ An OS-owned, **immutable** per-user launcher must own its public trust keys; no 
 
 ## Independent pre-integration blocker identified
 
-**SECURITY BLOCKER (unresolved in this draft):** `index.mjs` currently exposes `decideAccess(policy, ...)` where the caller can supply a structurally valid but **unsigned** policy object, and `verifyArtifact(bytes, artifact)` accepts an arbitrary checksum object that is not cryptographically tied to a verified signed policy. Both are useful pure helpers but **must never be called with MCP-supplied policy or untrusted update metadata** to grant or activate functionality. Before connecting an updater or MCP handler, require an opaque in-process proof obtained solely from `verifyPolicy` (or an equivalent single trusted verification-and-decision API), make the policy/metadata immutable, reject unverified inputs and add signed/unsigned substitution tests. Even proof objects alone do not replace OS-protected persistence, checking signed-policy expiry on every access, host grants or independently verified health receipts.
+**FIXED AT ISOLATED POLICY-API LEVEL — not released or host-enforced:** `verifyPolicy(envelope, trustedKeys, { previous, clock })` now returns a frozen ticket minted inside a module-private `WeakMap`. `decideAccess(ticket, versions)` and `verifyArtifact(bytes, ticket)` reject raw policy JSON, unsigned artifact checksum objects, cloned/crafted tickets, modified nested metadata and tickets whose protected clock has expired or moved backwards. The caller cannot set the decision time through a tool argument: each check reads the same clock bound at verification. Passing an untrusted clock or untrusted signing keys to `verifyPolicy` **still voids the trust boundary**, and a pure WeakMap cannot protect across process restarts. The caller must provide OS-protected trust anchors, trusted clock and persisted monotonic checkpoint, and the **MCP authorization handler must enforce** expiry and resource grants on every real call.
+
+**STILL OPEN — activation/installation trust:** `activation-machine.mjs` checks sequencing only; a malicious caller could fake `HEALTH_OK`, `SWITCH_OK` or the initial transaction descriptor unless these events originate from an independently protected local updater with verified OS/process receipts. Real signed artifact transport, platform installer, protected immutable runtime directories, rollback, fail-closed recovery, cross-platform testing and ChatGPT plugin refresh remain unimplemented. This draft cannot be deployed as a secure automatic updater.
+
+
+## 2026-10-25 signed-ticket correction and combined verification
+
+At PR #31 code HEAD prior to this documentation-only update, the exact GitHub blobs used in the local sandbox had IDs:
+
+- `index.mjs` `71fd8a579af16114ac61659acb99efb8590ef1a3`; `index.test.mjs` `4899aa4a8b5a0b309457c7c18bcf8eb083434c46`;
+- `activation-machine.mjs` `38bfd65c1325caded9530ec05496707998da2a86`; `activation-machine.test.mjs` `094821887c0814bb3622f3f5eb8e8b93e8ef649d`.
+
+These **four blob hashes matched independently reconstructed local files** by `git hash-object` in an isolated Linux container (Node.js 22.16.0), and `node --check` for the policy module passed. **Combined command `node --test index.test.mjs activation-machine.test.mjs`: 66 tests passed, 0 failed, 0 skipped**, including hostile unsigned policy / checksum substitution, mutable/forged proof attempts, clock rollback, signature expiry, successful signed data, batching semantics, and 14,641 short activation-event traces. No live MCP tool, native Windows verification, Docker installer, GitHub Actions check, background updater or OS security boundary was exercised. The test fixtures use ephemeral Ed25519 keys only.
 
 ## Next integration acceptance
 
