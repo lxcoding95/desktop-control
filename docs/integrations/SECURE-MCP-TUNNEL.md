@@ -4,7 +4,7 @@ Scope: **transport smoke-test only**. No real remote desktop access, no public d
 
 ## Decision — updated 2026-10-25 after owner cost constraint
 
-**Do not require an OpenAI Platform API key, paid tunnel, domain purchase, or subscription.** The previously investigated \`openai/tunnel-client\` is a reference only, not the selected deployment path. No tunnel-client installation or keys are necessary for the current local tests.
+**Do not require an OpenAI Platform API key, paid tunnel, domain purchase, or subscription.** The previously investigated `openai/tunnel-client` is a reference only, not the selected deployment path. No tunnel-client installation or keys are necessary for the current local tests.
 
 Desktop Commander demonstrates the relevant architecture: a local MIT-licensed device agent paired through OAuth Device Authorization / PKCE to a separately hosted Remote MCP server. Its documented free hosted tier allows 10,000 tool calls per month for *Desktop Commander itself*, not third-party Desktop Control devices. The hosted server's implementation is proprietary; do not assume it can be reused, pointed at our tools, or copied.
 
@@ -14,7 +14,7 @@ Verified upstream:
 - https://github.com/desktop-commander/remote-desktop-commander (public manifests/docs; hosted relay source unavailable)
 - https://desktopcommander.app/pricing/
 
-**Preferred candidate for a zero-billed prototype (not deployed):** Cloudflare Workers **Free**, its included \`.workers.dev\` HTTPS hostname, plus **SQLite-backed Durable Objects** for authenticated device sessions/coordination. Current Free quotas are enforced with errors rather than automatic paid overages; confirm account selection and current terms before deployment. This still requires the owner's explicit creation of a free Cloudflare account and authorization of publishing an HTTPS endpoint. Never enable a paid plan, paid add-on, billing upgrade or automatic overage. GitHub OAuth is an option for human sign-in (not a ChatGPT/OpenAI API key) but requires its own registered OAuth application and strict account/device binding.
+**Preferred candidate for a zero-billed prototype (not deployed):** Cloudflare Workers **Free**, its included `.workers.dev` HTTPS hostname, plus **SQLite-backed Durable Objects** for authenticated device sessions/coordination. Current Free quotas are enforced with errors rather than automatic paid overages; confirm account selection and current terms before deployment. This still requires the owner's explicit creation of a free Cloudflare account and authorization of publishing an HTTPS endpoint. Never enable a paid plan, paid add-on, billing upgrade or automatic overage. GitHub OAuth is an option for human sign-in (not a ChatGPT/OpenAI API key) but requires its own registered OAuth application and strict account/device binding.
 
 Relevant reusable OSS:
 - https://github.com/cloudflare/agents/tree/main/examples/mcp-server (MCP Streamable HTTP)
@@ -22,9 +22,9 @@ Relevant reusable OSS:
 - https://github.com/cloudflare/agents/blob/main/docs/agents/securing-mcp-servers.md (OAuth security)
 - https://developers.cloudflare.com/durable-objects/platform/pricing/ (Free-plan limits)
 
-Required components before any remote device tools: HTTPS Streamable HTTP connector for ChatGPT, OAuth 2.1 with PKCE, separate device pairing, outbound authenticated WebSocket/device connection, explicit account/device routing, request IDs and bounded timeouts, replay protection, audit, revoke, fail-closed local capabilities, and an immediate emergency stop. The single-tool health-only probe remains the first end-to-end test. Never publish or forward the production \`preview.5/start.mjs\` with 34 tools merely because a transport connects.
+Required components before any remote device tools: HTTPS Streamable HTTP connector for ChatGPT, OAuth 2.1 with PKCE, separate device pairing, outbound authenticated WebSocket/device connection, explicit account/device routing, request IDs and bounded timeouts, replay protection, audit, revoke, fail-closed local capabilities, and an immediate emergency stop. The single-tool health-only probe remains the first end-to-end test. Never publish or forward the production `preview.5/start.mjs` with 34 tools merely because a transport connects.
 
-Original official OpenAI tunnel-client exploration remains documented below solely as an **unselected alternative** and must not be interpreted as deployment authorization.
+OpenAI Platform tunnels were evaluated but rejected for the project's zero-paid-service constraint. The remaining sections cover only the selected free-tier candidate and local tests.
 
 ## First slice: read-only connection probe
 
@@ -38,36 +38,19 @@ This proves transport only, **not remote identity or remote desktop authorizatio
 node --test tools/remote/health-server.test.mjs
 ```
 
-The first independent Linux sandbox run passed 8/8 tests on Node 22.16.0. Run again in the actual Windows checkout before reporting Windows acceptance.
+Linux sandbox Node 22.16.0: 8/8 tests passed. Owner-provided clean Windows PowerShell output on 2026-10-25: 8/8 tests passed, exit 0. This is local stdio evidence only; remote ChatGPT end-to-end remains untested.
 
-## Operator-only tunnel test (not performed)
+## Operator-only free-tier remote test (NOT performed)
 
-Before proceeding, confirm (1) the current ChatGPT account/workspace supports custom remote MCP plugins and intended actions, (2) the OpenAI Platform organization has Tunnels Read/Manage or Read/Use as applicable, and (3) no unapproved paid service is activated. Create an authorized tunnel and a minimal **runtime** API key through:
+Before any public endpoint: the owner must explicitly select a **Cloudflare Workers Free** account. Verify current plan shows **Free** without adding any paid subscription, credit-card commitment, overage or paid add-on. Using the included `.workers.dev` hostname needs no domain purchase. A free-tier project is still internet-facing and requires comprehensive security review before even deploying the one-tool test.
 
-https://platform.openai.com/settings/organization/tunnels
+1. Develop the relay independently: authenticated OAuth 2.1 Streamable HTTP endpoint for ChatGPT and one outgoing authenticated Windows device connection; bind both to the same approved account/device; fail closed. Do not reuse the Desktop Commander hosted endpoint.
+2. Validate OAuth, device pairing, token revocation, replay/CSRF/SSRF defenses, expiry, rate limits, request deadlines and per-user isolation locally with positive and negative tests. No model tool can issue its own local grants.
+3. Once security checks and free-plan eligibility pass, deploy ONLY the static `desktop_control.remote_health` probe to the approved Free account. ChatGPT must see just this tool, returning `desktopAccess: false`.
+4. Test account/device disconnect, revoked authorization, device offline, and different-account denial. Then consider a separate reviewed remote permissions model for the existing local tool implementations.
+5. A Free provider may change its limits or suspend exhausted requests; **free-tier eligibility is not a guarantee of permanent availability**. Treat limit exhaustion as unavailable rather than silently upgrading.
 
-Download a verified Windows binary from the supported release linked there or https://github.com/openai/tunnel-client/releases . Never paste an API key into chat, GitHub, logs, shell command history or an argument; use an OS credential store or a local masked input and process-only environment. Do not run a downloaded binary until its publisher and checksum/signature have been checked. A tunnel ID is not the runtime key.
-
-The first binding MUST target **only**:
-
-```text
-node C:\Code\webprojekte\desktop-control\tools\remote\health-server.mjs
-```
-
-With a supported `tunnel-client` executable, validate Windows command quoting locally using:
-
-```text
-tunnel-client help quickstart
-tunnel-client init --sample sample_mcp_stdio_local --profile desktop-control-probe --tunnel-id <YOUR_ID> --mcp-command "<WINDOWS_NODE_AND_HEALTH_SERVER>"
-tunnel-client doctor --profile desktop-control-probe --explain
-tunnel-client run --profile desktop-control-probe
-```
-
-Do not treat these example commands as executed or validated on Windows. Keep exactly **one active tunnel-client instance per stdio tunnel ID**. The local `/healthz`, `/readyz`, `/health/mcp` and `/ui` endpoints are operator checks, not permission proofs. Configure ChatGPT Plugins → Add custom MCP server → Tunnel only after tunnel health and account eligibility are verified.
-
-### Required remote acceptance
-
-A real normal ChatGPT chat must discover precisely one `desktop_control.remote_health` tool, call it successfully, show `desktopAccess: false`, and find no files, terminal, browser or input tools. Also test tunnel disconnect/reconnect, cross-account denial and key revocation. No claim of completed remote ChatGPT integration before those tests.
+**No OpenAI Platform API key, no OpenAI Platform tunnel, no paid services, no auto-created cloud accounts, and no public exposure are authorized by the current implementation.** An OAuth client registration and ordinary free-host account authentication may eventually be necessary; keep their private credentials exclusively in supported secret stores, never in the repository, shell history or conversation. There is currently no live ChatGPT remote endpoint.
 
 ## Future full-tool gates — NOT IMPLEMENTED
 
