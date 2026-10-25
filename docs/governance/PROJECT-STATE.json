@@ -210,7 +210,7 @@
   },
   "latest_product_checkpoint": {
     "date_utc": "2026-10-25",
-    "scope": "read-only status reconciliation from GitHub and previous documented local test evidence; no formal session started",
+    "scope": "Verified GitHub PR and hosted Windows/Linux trials plus owner-provided clean Windows M03 run; no formal S03-S06 session started",
     "private_plugin_host_proof_issue": "https://github.com/lxcoding95/desktop-control/issues/28",
     "observed_positive_status_utc": "2026-10-24T23:03:23Z",
     "observed_revoke_then_denial_utc": "2026-10-24T23:03:41Z",
@@ -218,8 +218,15 @@
     "saved_private_plugin_preview": "0.0.1-preview.3 (snapshot only; not an installed updater)",
     "s02_status": "PR22 Draft; independent semantic security review and privacy scan open",
     "governance": "PR26 Draft, documentation freshness in progress",
-    "free_quality_automation": "PR30 Draft; staged/index scanner locally tested on Linux 19/19, native Windows and final review pending",
-    "m03_update": "PR31 Draft; isolated pure policy and FSM prototypes, no automatic runtime updater, signing infrastructure or actual Host P upgrade",
-    "security_gate": "SEC-GATE-001 still open, no regular GitHub Actions enabled"
+    "free_quality_automation": "PR30 Draft HEAD aa3d3f2a2e52209e3018d2d3b391806d2b7ee87b; GitHub Actions windows-2025 19/19 PASS and ubuntu-24.04 19/19 PASS, run 40152885725. No main integration or merge.",
+    "m03_update": "PR31 Draft HEAD f09bcbaff342c5e837d35b052fa4c54d05816263; GitHub Actions windows-2025 66/66 PASS and ubuntu-24.04 66/66 PASS, run 40153344621. Owner Windows Node24.21.0 66/66 at prior tested head. Pure policy/FSM only, no installed signed updater.",
+    "security_gate": "SEC-GATE-001 #1 and CI-GATE-001 #2 OPEN; two tokenless PR-only trials have zero external uses/actions. No regular CI merged to main, owner Actions settings current readback and independent final reviews pending.",
+    "redundant_pr32": "Closed unmerged after byte-identical proven guard/workflow moved to PR30.",
+    "historical_privacy": "Prior full-reachable audit reported zero detected credentials in 143 scanned nonempty commits, but public historical non-noreply committer email metadata and four potential personal-path blobs remain. Two email-patterns in latest tracked logs are upstream third-party copyright notices, not verified owner data. Full remediation pending.",
+    "public_copyright": "Existing public MIT grants copying/forks; PR26 new brand/copyright guidance distinguishes licensed source from independently signed official services and does not falsely claim a registered trademark.",
+    "verified_runs": {
+      "quality": "https://github.com/lxcoding95/desktop-control/actions/runs/40152885725",
+      "signed_policy": "https://github.com/lxcoding95/desktop-control/actions/runs/40153344621"
+    }
   }
 }
