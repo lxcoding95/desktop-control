@@ -87,6 +87,9 @@ jobs:
           npm audit --audit-level=high
 
       - name: Build and verify the unpublished local plugin candidate
+        # Keep native Windows grant-test failures visible while still checking the
+        # archive. This does not make the Windows acceptance gate green.
+        if: ${{ success() || (failure() && runner.os == 'Windows') }}
         shell: bash
         run: |
           set -euo pipefail
