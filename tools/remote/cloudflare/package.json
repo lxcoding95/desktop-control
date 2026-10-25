@@ -10,7 +10,8 @@
   "scripts": {
     "test:gate": "node --test ../oauth-health-gate.test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test:local:deny": "node smoke-local.mjs"
+    "test:local:deny": "node smoke-local.mjs",
+    "test:local:wss-deny": "node smoke-local-wss-deny.mjs"
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "1.2.4",
