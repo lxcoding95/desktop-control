@@ -1,0 +1,17 @@
+{
+  // TEMPLATE ONLY. Do not deploy. Requires a verified Workers Free account.
+  // Register a real OAuth KV namespace and matching HTTPS issuer first.
+  "name": "desktop-control-auth-disabled",
+  "main": "auth-worker.ts",
+  "compatibility_date": "2026-10-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [],
+  "kv_namespaces": [
+    {"binding": "OAUTH_KV", "id": "REPLACE_WITH_AUTH_KV_ID"}
+  ],
+  "vars": {
+    "AUTH_ISSUER": "https://REPLACE_WITH_AUTH_HOST.workers.dev",
+    "MCP_RESOURCE_URL": "https://REPLACE_WITH_MCP_HOST.workers.dev/mcp"
+  }
+}
