@@ -21,6 +21,12 @@ $path = Join-Path $sshDir 'desktop-control.txt'
 if (-not (Test-Path -LiteralPath $sshDir -PathType Container)) {
     New-Item -ItemType Directory -Path $sshDir -ErrorAction Stop | Out-Null
 }
+# Refuse junctions/reparse points so the private file cannot be redirected.
+$sshInfo = Get-Item -LiteralPath $sshDir -Force -ErrorAction Stop
+if (-not ($sshInfo -is [System.IO.DirectoryInfo]) -or
+    (($sshInfo.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0)) {
+    throw 'Unsafe redirected credential directory.'
+}
 if (Test-Path -LiteralPath $path) {
     throw 'CREDENTIALS_ALREADY_EXIST: Existing file has not been read or overwritten.'
 }
