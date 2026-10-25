@@ -7,9 +7,16 @@ const root = resolve(process.argv[2]);
 const meta = { 'io.modelcontextprotocol/protocolVersion': '2026-07-28', 'io.modelcontextprotocol/clientInfo': { name: 'private-archive-test', version: '1' }, 'io.modelcontextprotocol/clientCapabilities': {} };
 // Test-only explicit host injection. This file and its grant are never packaged.
 const hostFixture = `import {serveStdio} from '@modelcontextprotocol/server/stdio'; import {createServer} from './dist/packages/mcp-server/src/server.mjs'; import {localPrincipal} from './dist/packages/mcp-server/src/bridge/principal.mjs'; const principal=localPrincipal(); const expiresAt=Date.now()+60000; const grants={getGrants:()=>[{principal,capability:'diagnostics.read',resource:'local:desktop-control',revoked:false,expiresAt}]}; void serveStdio(()=>createServer({grants}));`;
-const privateState = process.argv[3];
+// GitHub-hosted Windows runners are deliberately elevated. Their permission
+// positive tests cannot represent a normal local user's medium-integrity token.
+// This dedicated mode only proves production DENY and must never count as a
+// positive host-grant or complete package acceptance.
+const deniedOnly = process.argv[3] === 'ci-denied-only';
+const privateState = deniedOnly ? undefined : process.argv[3];
 if (privateState && !['active', 'denied'].includes(privateState)) throw Error('Expected private state active or denied');
-for (const mode of ['production-denied', 'isolated-host-grant', 'production-restarted', ...(privateState ? ['private-profile'] : [])]) {
+const modes = deniedOnly ? ['production-denied', 'production-restarted'] :
+  ['production-denied', 'isolated-host-grant', 'production-restarted', ...(privateState ? ['private-profile'] : [])];
+for (const mode of modes) {
   const args = mode === 'isolated-host-grant' ? ['--input-type=module', '-e', hostFixture]
     : [mode === 'private-profile' ? 'start.mjs' : 'dist/packages/mcp-server/src/index.mjs'];
   const child = spawn(process.execPath, args, { cwd: root, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
