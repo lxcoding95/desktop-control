@@ -62,7 +62,7 @@ function createHealthMcpServer(
     if (!verified.props || verified.props.userId !== verified.userId) {
       return { isError: true, content: [{ type: 'text', text: 'PERMISSION_DENIED' }] };
     }
-    return await handleHealthTool({
+    const outcome = await handleHealthTool({
       authContext: { props: verified.props },
       authInfo: {
         clientId: verified.clientId,
@@ -71,8 +71,23 @@ function createHealthMcpServer(
       },
       deviceId,
       signal: context.mcpReq.signal,
-      dispatch: ({ ownerId, deviceId, signal }) => dispatchHealth(env, ownerId, deviceId, signal)
+      dispatch: ({ ownerId, deviceId, signal }: {
+        ownerId: string; deviceId: string; signal?: AbortSignal;
+      }) => dispatchHealth(env, ownerId, deviceId, signal)
     });
+    // MCP SDK v2 requires a discriminated content block. The JS gate's
+    // inferred { type: string } is too wide for CallToolResult.
+    // Normalize both outcomes while keeping the exact security-gated payload.
+    if (outcome.isError || !outcome.structuredContent) {
+      return {
+        isError: true,
+        content: [{ type: 'text' as const, text: outcome.content[0]?.text ?? 'INTERNAL_ERROR' }]
+      };
+    }
+    return {
+      content: [{ type: 'text' as const, text: JSON.stringify(outcome.structuredContent) }],
+      structuredContent: outcome.structuredContent
+    };
   });
   return server;
 }
