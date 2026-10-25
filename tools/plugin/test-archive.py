@@ -13,7 +13,7 @@ with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temp
     cases = ['valid', 'remote', 'no-local', 'fixture', 'missing-license', 'zero-dependencies', 'tamper', 'traversal', 'alias', 'case-alias', 'windows-device', 'oversize', 'long-component', 'backslash', 'space-suffix', 'dirty-provenance', 'wrong-commit', 'version-drift', 'metadata-name', 'mcp-drift']
     for case in cases:
         manifest = {'name': 'desktop-control-private', 'version': '0.0.1-test', 'extensions': {'com.openai': {'requires_local_executor': case != 'no-local'}}}
-        mcp = {'mcpServers': {'desktop-control': {'type': 'http' if case == 'remote' else 'stdio', 'args': ['${PLUGIN_ROOT}/start.mjs']}}}
+        mcp = {'mcpServers': {'desktop-control': {'type': 'http' if case == 'remote' else 'stdio', 'command': 'node', 'cwd': '${PLUGIN_ROOT}', 'args': ['${PLUGIN_ROOT}/start.mjs']}}}
         files = {'plugin.json': json.dumps(manifest).encode(), 'mcp.json': json.dumps(mcp).encode(),
                  '.codex-plugin/plugin.json': json.dumps({'name': 'desktop-control-private', 'version': '0.0.1-test', 'requires_local_executor': True}).encode(),
                  '.mcp.json': json.dumps({'mcpServers': mcp['mcpServers']}).encode(),
