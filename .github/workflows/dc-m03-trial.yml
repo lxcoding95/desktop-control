@@ -1,0 +1,58 @@
+# SEC-GATE-001 proof-only run. PR-only, with no repository token permissions,
+# no installed marketplace actions, no secrets, no write/deploy/release steps.
+name: Desktop Control - M03 policy test trial
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/dc-m03-trial.yml'
+      - 'packages/update-policy/**'
+
+permissions: {}
+
+concurrency:
+  group: dc-m03-trial-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  signed-policy-tests:
+    name: Signed policy tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    permissions: {}
+    steps:
+      - name: Fetch exact public PR merge commit without a token
+        shell: bash
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+          git init -q .
+          git remote add origin https://github.com/lxcoding95/desktop-control.git
+          git -c protocol.version=2 fetch -q --depth=1 --no-tags origin "refs/pull/${PR_NUMBER}/merge"
+          git -c advice.detachedHead=false checkout -q --detach FETCH_HEAD
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          [[ -z "$(git status --porcelain)" ]]
+
+      - name: Check Node runtime and scanner syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          node -e 'const [major, minor] = process.versions.node.split(".").map(Number); if (major < 22 || (major === 22 && minor < 16)) process.exit(1)'
+          node --check packages/update-policy/index.mjs
+          node --check packages/update-policy/index.test.mjs
+          node --check packages/update-policy/activation-machine.mjs
+          node --check packages/update-policy/activation-machine.test.mjs
+
+      - name: Run isolated positive and negative privacy tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test packages/update-policy/index.test.mjs packages/update-policy/activation-machine.test.mjs
