@@ -9,6 +9,8 @@ import { McpServer } from '@modelcontextprotocol/server';
 import { createMcpHandler } from 'agents/mcp/server';
 import { z } from 'zod';
 import { handleHealthTool } from '../oauth-health-gate.mjs';
+import { PROBE_RELAY_SHARD, RemoteHealthRelay } from './remote-relay-do';
+export { RemoteHealthRelay };
 
 type IdentityProps = { userId: string };
 interface Env {
@@ -36,12 +38,15 @@ async function dispatchHealth(env: Env, ownerId: string, deviceId: string, signa
   // No binding is provided in experimental config, so requests fail closed.
   if (env.ENABLE_REMOTE_HEALTH !== '1' || !env.REMOTE_RELAY)
     throw new Error('Device relay is unavailable');
-  const id = env.REMOTE_RELAY.idFromName('owner:' + ownerId);
+  // Temporary single-shard health-only prototype: every owner/device is
+  // independently authenticated inside the Durable Object. Not scalable for
+  // a production multi-user deployment without a reviewed shard strategy.
+  const id = env.REMOTE_RELAY.idFromName(PROBE_RELAY_SHARD);
   const stub = env.REMOTE_RELAY.get(id);
   const response = await stub.fetch('https://relay.internal/health', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ deviceId }),
+    body: JSON.stringify({ ownerId, deviceId }),
     signal
   });
   if (!response.ok) throw new Error('Device relay rejected request');
@@ -94,6 +99,19 @@ function createHealthMcpServer(
 
 export default {
   async fetch(request: Request, env: Env, executionCtx: ExecutionContext): Promise<Response> {
+    // Device handshake is separate from ChatGPT OAuth. The Durable Object
+    // verifies a one-use signed ticket against an approved pairing before
+    // accepting ANY remote health operation. Never proxy /health publicly.
+    const incoming = new URL(request.url);
+    if (incoming.pathname === '/device') {
+      if (env.ENABLE_REMOTE_HEALTH !== '1' || !env.REMOTE_RELAY ||
+          incoming.search || incoming.hash || request.method !== 'GET' ||
+          request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') {
+        return new Response('Device endpoint unavailable', { status: 503 });
+      }
+      const id = env.REMOTE_RELAY.idFromName(PROBE_RELAY_SHARD);
+      return env.REMOTE_RELAY.get(id).fetch(request);
+    }
     if (!validPublicUrl(env.AUTH_ISSUER, '/') || !validPublicUrl(env.RESOURCE_URL, '/mcp') ||
         !env.AUTH_SERVER) {
       return new Response('Service not configured', {
