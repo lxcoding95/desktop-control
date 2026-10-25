@@ -1,0 +1,9 @@
+{
+  "name": "@desktop-control/private-settings",
+  "version": "0.0.1",
+  "private": true,
+  "author": "Anon Allman",
+  "type": "module",
+  "exports": "./controller.mjs",
+  "scripts": { "build": "node controller.mjs --build", "start": "node controller.mjs --open", "test": "node --test test/*.test.mjs" }
+}

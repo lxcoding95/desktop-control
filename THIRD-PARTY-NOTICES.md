@@ -1,4 +1,28 @@
-# Third-party notices — experimental S02 runtime inventory
+# Third-party notices — private source candidate and historical S02 inventory
+
+## Expanded private runtime candidate — 2026-10-25
+
+The private source candidate adds the following locked packages to the historical S02 closure. Packaging retains complete installed package directories, including original license texts, copyrights, NOTICE files, bundled-source license sidecars and source headers. This section is an inventory of intended packaging inputs, **not proof that a new private version has been built, uploaded, installed or accepted**.
+
+| Package | Version | Declared license / preserved notices |
+| --- | --- | --- |
+| `@modelcontextprotocol/server` | 2.3.1 | Apache-2.0 metadata; original transition text preserves earlier MIT contributions |
+| `@modelcontextprotocol/core` | 2.3.1 | Same original transition terms |
+| `zod` | 4.6.7 | MIT, original LICENSE |
+| `pdf-lib` | 1.17.1 | MIT, original LICENSE.md |
+| `@pdf-lib/standard-fonts` | 1.0.0 | MIT, original LICENSE.md; font metric data retained |
+| `@pdf-lib/upng` | 1.0.1 | MIT, original LICENSE |
+| `pako` | 1.0.11 | `(MIT AND Zlib)` metadata; original LICENSE and source headers retained |
+| `tslib` | 1.14.1 | 0BSD, original LICENSE.txt and CopyrightNotice.txt |
+| `playwright-core` | 1.64.1 | Apache-2.0; original LICENSE, NOTICE, ThirdPartyNotices.txt and bundled `*.LICENSE` sidecars |
+
+Playwright contains a bundled WebP WASM codec. Its `lib/webp_codec.LICENSE` preserves libwebp BSD-3-Clause and Emscripten terms. `lib/utilsBundle.js.LICENSE` and `lib/serverRegistry.js.LICENSE` preserve the inlined dependency terms. These files must remain with the corresponding assets; the top-level Apache-2.0 declaration does not replace their terms. A nine-package lockfile SBOM does not enumerate every component in these bundles.
+
+Node, Docker, Windows/.NET and the separately installed pinned Chrome for Testing runtime are external prerequisites rather than bundled binaries. No browser executable is downloaded or included by this packaging path. Browser redistribution licensing remains open; a local trusted installer/installation receipt does not certify redistribution or upstream authenticity. Development dependencies, including MCP Inspector and Lightning CSS/MPL-2.0, are excluded from the selected runtime package. Inspector's original LICENSE also contains the MCP Apache/MIT transition text; its `SEE LICENSE IN LICENSE` metadata must not be treated as a standalone permissive-license identifier.
+
+Generate current platform-specific file hashes, package origins/integrities, missing-development-notice findings and a CycloneDX 1.6 runtime SBOM with `node tools/plugin/licenses-runtime.mjs`. See [the technical inventory](docs/research/PRIVATE-RUNTIME-LICENSES.md). Qualified legal review and final bundled-component completeness remain open release gates. Existing original S02 license text below is preserved unchanged.
+
+## Historical S02-only snapshot
 
 Snapshot2026-10-24. These original installed LICENSE texts and copyrights are retained for the narrow dependency closure verified by clean production-only npm installs: MCP Server2.3.1, MCP Core2.3.1, Zod4.6.7. Package sources/integrity, file hashes and platform-specific development inventories are in the S02 completion evidence. No third-party implementation was copied into the native token helper.
 

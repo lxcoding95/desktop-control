@@ -6,10 +6,18 @@ using System.Text;
 using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Principal;
+using System.Runtime.InteropServices;
 internal static class WindowsPrivatePolicy {
+    [StructLayout(LayoutKind.Sequential)] struct FileInformation {
+        public uint Attributes;
+        public System.Runtime.InteropServices.ComTypes.FILETIME Creation, Access, Write;
+        public uint Volume, SizeHigh, SizeLow, Links, IndexHigh, IndexLow;
+    }
+    [DllImport("kernel32.dll", SetLastError=true)] static extern bool GetFileInformationByHandle(IntPtr file, out FileInformation information);
     const int Limit = 16384;
     static readonly byte[] Entropy = Encoding.UTF8.GetBytes("desktop-control/private-diagnostics/policy/v1");
     static readonly byte[] WorkspaceEntropy = Encoding.UTF8.GetBytes("desktop-control/private-workspace/policy/v1");
+    static readonly byte[] ControlEntropy = Encoding.UTF8.GetBytes("desktop-control/private-control/policy/v1");
     static readonly SecurityIdentifier SystemSid = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null);
     static SecurityIdentifier UserSid;
     static bool TrustedAncestorIdentity(IdentityReference identity) {
@@ -82,13 +90,31 @@ internal static class WindowsPrivatePolicy {
         if (Encoding.UTF8.GetByteCount(value) > Limit) throw new InvalidOperationException();
         return value;
     }
+    static void WorkspaceLock(string directory, bool prepare) {
+        string file = Path.Combine(directory, "workspace-lock");
+        if (!File.Exists(file)) {
+            if (!prepare) throw new InvalidOperationException();
+            byte[] content = Encoding.ASCII.GetBytes("LOCK_V1");
+            using (FileStream stream = new FileStream(file, FileMode.CreateNew, FileSystemRights.Write, FileShare.None, 4096, FileOptions.WriteThrough, FileAcl())) {
+                stream.Write(content, 0, content.Length); stream.Flush(true);
+            }
+        }
+        CheckPath(file); CheckAcl(File.GetAccessControl(file));
+        using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+            FileInformation information;
+            if (!GetFileInformationByHandle(stream.SafeFileHandle.DangerousGetHandle(), out information) || information.Links != 1 || stream.Length != 7) throw new InvalidOperationException();
+            byte[] content = new byte[7];
+            if (stream.Read(content, 0, 7) != 7 || Encoding.ASCII.GetString(content) != "LOCK_V1") throw new InvalidOperationException();
+        }
+    }
     static int Main(string[] args) {
         try {
             if (args.Length == 1 && args[0] == "probe") { Console.WriteLine("PRIVATE_POLICY_V1"); return 0; }
             if (args.Length != 1 && args.Length != 3) throw new InvalidOperationException();
             bool workspace = args[0] == "read-workspace" || args[0] == "write-workspace" || args[0] == "prepare-workspace";
-            bool writing = args[0] == "write" || args[0] == "write-workspace" || args[0] == "prepare-workspace";
-            if (!workspace && args[0] != "read" && args[0] != "write") throw new InvalidOperationException();
+            bool control = args[0] == "read-control" || args[0] == "write-control" || args[0] == "prepare-browser" || args[0] == "clear-desktop-stop" || args[0] == "prepare-browser-runtime" || args[0] == "validate-browser-runtime";
+            bool writing = args[0] == "write" || args[0] == "write-workspace" || args[0] == "prepare-workspace" || args[0] == "write-control" || args[0] == "prepare-browser" || args[0] == "clear-desktop-stop" || args[0] == "prepare-browser-runtime";
+            if (!workspace && !control && args[0] != "read" && args[0] != "write") throw new InvalidOperationException();
             using (WindowsIdentity identity = WindowsIdentity.GetCurrent()) { UserSid = identity.User; }
             string profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             if (String.IsNullOrEmpty(profile)) throw new InvalidOperationException();
@@ -115,6 +141,31 @@ internal static class WindowsPrivatePolicy {
                 CheckPath(directory); Directory.SetAccessControl(directory, DirectoryAcl());
             }
             CheckPath(directory); CheckAcl(Directory.GetAccessControl(directory));
+            if (args[0] == "prepare-browser-runtime" || args[0] == "validate-browser-runtime") {
+                string runtime = Path.Combine(directory, "browser-runtime");
+                if (!Directory.Exists(runtime)) {
+                    if (args[0] != "prepare-browser-runtime") throw new InvalidOperationException();
+                    Directory.CreateDirectory(runtime, DirectoryAcl());
+                }
+                CheckPath(runtime); CheckAcl(Directory.GetAccessControl(runtime));
+                return 0;
+            }
+            if (args[0] == "clear-desktop-stop") {
+                string sentinel = Path.Combine(directory, "desktop-stop");
+                if (File.Exists(sentinel)) { CheckPath(sentinel); File.Delete(sentinel); }
+                return 0;
+            }
+            if (args[0] == "prepare-browser") {
+                string browser = Path.Combine(directory, "browser-profile");
+                if (!Directory.Exists(browser)) Directory.CreateDirectory(browser, DirectoryAcl());
+                CheckPath(browser); CheckAcl(Directory.GetAccessControl(browser));
+                return 0;
+            }
+            if (args[0] == "read-control") {
+                string browser = Path.Combine(directory, "browser-profile");
+                if (!Directory.Exists(browser)) throw new InvalidOperationException();
+                CheckPath(browser); CheckAcl(Directory.GetAccessControl(browser));
+            }
             if (args[0] == "prepare-workspace" || args[0] == "read-workspace") {
                 string workArea = Path.Combine(directory, "workspace");
                 if (!Directory.Exists(workArea)) {
@@ -122,10 +173,11 @@ internal static class WindowsPrivatePolicy {
                     Directory.CreateDirectory(workArea, DirectoryAcl());
                 }
                 CheckPath(workArea); CheckAcl(Directory.GetAccessControl(workArea));
+                WorkspaceLock(directory, args[0] == "prepare-workspace");
                 if (args[0] == "prepare-workspace") return 0;
             }
-            byte[] entropy = workspace ? WorkspaceEntropy : Entropy;
-            string file = Path.Combine(directory, workspace ? "workspace-policy" : "policy");
+            byte[] entropy = workspace ? WorkspaceEntropy : control ? ControlEntropy : Entropy;
+            string file = Path.Combine(directory, workspace ? "workspace-policy" : control ? "control-policy" : "policy");
             if (File.Exists(file)) { CheckPath(file); CheckAcl(File.GetAccessControl(file)); }
             if (!writing) {
                 using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read)) {

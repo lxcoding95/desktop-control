@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, chmodSync, writeFileSync, unlinkSync, symlinkSync, readFileSync, linkSync } from 'node:fs';
+import { mkdtempSync, rmSync, chmodSync, writeFileSync, unlinkSync, symlinkSync, readFileSync, linkSync, lstatSync } from 'node:fs';
 import { tmpdir, userInfo } from 'node:os';
 import path from 'node:path';
 import { createPrivateGrantTestHarness } from '../src/bridge/private-grants.mts';
@@ -64,6 +64,7 @@ test('Windows denies read and write beneath an ancestor mutable by another accou
     assert.ok(policy.principal);
     harness.writePolicy(policy);
     harness.prepareWorkspace();
+    harness.prepareBrowserRuntime();
     harness.writeWorkspacePolicy({ version: 1, principal: policy.principal, resource: 'local:desktop-control:workspace', capabilities: ['files.read'], expiresAt: policy.expiresAt, revoked: false });
     assert.equal(harness.store.getGrants().length, 1);
     // Inherit-only grants do not apply to the ancestor itself; private store is protected.
@@ -75,6 +76,8 @@ test('Windows denies read and write beneath an ancestor mutable by another accou
       assert.throws(() => harness.writePolicy(policy), /PRIVATE_POLICY_UNAVAILABLE/, `${rights} on ancestor must deny policy writes`);
       assert.equal(harness.workspaceAuthority.authorize('files.read'), null, `${rights} on ancestor must deny workspace access`);
       assert.throws(() => harness.prepareWorkspace(), /PRIVATE_POLICY_UNAVAILABLE/, `${rights} on ancestor must deny workspace preparation`);
+      assert.throws(() => harness.validateBrowserRuntime(), /PRIVATE_POLICY_UNAVAILABLE/, `${rights} on ancestor must deny runtime validation`);
+      assert.throws(() => harness.prepareBrowserRuntime(), /PRIVATE_POLICY_UNAVAILABLE/, `${rights} on ancestor must deny runtime preparation`);
     }
   } finally { removeFixture(directory); }
 });
@@ -133,5 +136,123 @@ test('workspace policy stays separate, validates exact capabilities, and observe
       writeFileSync(path.join(directory, 'policy'), cipher);
       assert.equal(h.store.getGrants().length, 0, 'workspace ciphertext cannot authorize diagnostic policy');
     }
+  } finally { removeFixture(directory); }
+});
+
+test('control policy validates principal, exact origins and capability bounds without diagnostic/workspace crossover', () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    assert.equal(h.controlAuthority.authorize('browser.read'), null);
+    h.prepareBrowser();
+    const policy = { version: 1, principal: localPrincipal(), resource: 'local:desktop-control:private-control', capabilities: ['browser.read', 'desktop.input'], allowedOrigins: ['https://example.com'], expiresAt: Date.now() + 900_000, revoked: false };
+    for (const change of [{ principal: 'wrong' }, { resource: 'local:desktop-control' }, { capabilities: [] }, { capabilities: ['browser.read', 'browser.read'] }, { capabilities: ['shell.exec'] }, { allowedOrigins: ['https://example.com/path'] }, { allowedOrigins: ['https://user@example.com'] }, { allowedOrigins: ['file:///'] }, { allowedOrigins: ['*'] }, { allowedOrigins: [] }, { expiresAt: Date.now() - 1 }, { expiresAt: Date.now() + 7_200_000 }, { revoked: true }, { profileDirectory: '/untrusted' }]) {
+      h.writeControlPolicy({ ...policy, ...change });
+      assert.equal(h.controlAuthority.authorize('browser.read'), null);
+    }
+    h.writeControlPolicy(policy);
+    const allowed = h.controlAuthority.authorize('browser.read');
+    assert.equal(Boolean(allowed), Boolean(policy.principal));
+    if (allowed) {
+      assert.deepEqual(allowed.allowedOrigins, ['https://example.com']);
+      allowed.allowedOrigins.push('https://untrusted.example');
+      assert.deepEqual(h.controlAuthority.authorize('browser.read')?.allowedOrigins, ['https://example.com']);
+      assert.equal(allowed.profileDirectory, path.join(directory, 'browser-profile'));
+    }
+    assert.equal(h.controlAuthority.authorize('browser.interact'), null);
+    assert.equal(h.store.getGrants().length, 0);
+    assert.equal(h.workspaceAuthority.authorize('files.write'), null);
+    h.writeControlPolicy({ ...policy, revoked: true });
+    assert.equal(h.controlAuthority.authorize('browser.read'), null);
+  } finally { removeFixture(directory); }
+});
+
+test('durable desktop stop denies only desktop until an explicit trusted local re-enable, and revoke remains separate', () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    const principal = localPrincipal();
+    if (!principal) { assert.throws(() => h.provisionControl('grant', ['desktop.read'])); return; }
+    assert.equal(h.provisionControl('grant', ['desktop.read', 'desktop.input', 'terminal.exec']).state, 'active');
+    assert.ok(h.controlAuthority.authorize('desktop.input'));
+    writeFileSync(path.join(directory, 'desktop-stop'), 'stopped', { mode: 0o600 });
+    assert.equal(h.controlAuthority.authorize('desktop.read'), null);
+    assert.equal(h.controlAuthority.authorize('desktop.input'), null);
+    assert.ok(h.controlAuthority.authorize('terminal.exec'));
+    assert.equal(h.provisionControl('status').desktopStopped, true);
+    assert.equal(h.controlAuthority.authorize('desktop.input'), null, 'status cannot clear stop');
+    assert.equal(h.provisionControl('grant', ['terminal.exec']).state, 'active');
+    assert.equal(h.provisionControl('status').desktopStopped, true, 'unrelated grant cannot clear stop');
+    assert.equal(h.provisionControl('grant', ['desktop.input']).state, 'active');
+    assert.ok(h.controlAuthority.authorize('desktop.input'));
+    assert.equal(h.provisionControl('revoke').state, 'revoked');
+    assert.equal(h.controlAuthority.authorize('desktop.input'), null);
+    for (const origins of [[], ['https://example.com/'], ['https://example.com', 'https://example.com']])
+      assert.throws(() => h.provisionControl('grant', ['browser.read'], origins), /PRIVATE_POLICY_UNAVAILABLE/);
+  } finally { removeFixture(directory); }
+});
+
+test('fixed browser runtime storage validates native identity, private permissions and rejects linked directories without granting', () => {
+  const directory = createFixture();
+  const outside = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    assert.throws(() => h.validateBrowserRuntime());
+    if (!localPrincipal()) { assert.throws(() => h.prepareBrowserRuntime()); return; }
+    const runtime = h.prepareBrowserRuntime();
+    assert.equal(runtime, path.join(directory, 'browser-runtime'));
+    assert.equal(h.validateBrowserRuntime(), runtime);
+    assert.equal(h.prepareBrowserRuntime(), runtime);
+    assert.equal(h.controlAuthority.authorize('browser.read'), null, 'preparation cannot grant');
+    if (process.platform !== 'win32') {
+      chmodSync(runtime, 0o755);
+      assert.throws(() => h.validateBrowserRuntime(), /PRIVATE_POLICY_UNAVAILABLE/);
+      assert.throws(() => h.prepareBrowserRuntime(), /PRIVATE_POLICY_UNAVAILABLE/, 'existing insecure directory is not silently repaired');
+      chmodSync(runtime, 0o700);
+    }
+    rmSync(runtime, { recursive: true });
+    symlinkSync(outside, runtime, process.platform === 'win32' ? 'junction' : 'dir');
+    assert.throws(() => h.validateBrowserRuntime(), /PRIVATE_POLICY_UNAVAILABLE/);
+    assert.throws(() => h.prepareBrowserRuntime(), /PRIVATE_POLICY_UNAVAILABLE/);
+    rmSync(runtime);
+  } finally { removeFixture(directory); removeFixture(outside); }
+});
+
+test('workspace uses a stable protected lock outside container-writable data and rejects missing, modified or linked locks', () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    h.prepareWorkspace();
+    const file = path.join(directory, 'workspace-lock');
+    const stat = lstatSync(file);
+    assert.ok(stat.isFile()); assert.equal(stat.nlink, 1);
+    assert.equal(readFileSync(file, 'ascii'), 'LOCK_V1');
+    assert.notEqual(path.dirname(file), path.join(directory, 'workspace'));
+    h.prepareWorkspace();
+    assert.equal(lstatSync(file).ino, stat.ino, 'repeat provisioning must retain the shared lock inode');
+    const policy = { version: 1, principal: localPrincipal(), resource: 'local:desktop-control:workspace', capabilities: ['files.read'], expiresAt: Date.now() + 900_000, revoked: false };
+    h.writeWorkspacePolicy(policy);
+    assert.equal(Boolean(h.workspaceAuthority.authorize('files.read')), Boolean(policy.principal));
+    writeFileSync(file, 'BADLOCK');
+    assert.equal(h.workspaceAuthority.authorize('files.read'), null);
+    assert.throws(() => h.prepareWorkspace(), /PRIVATE_POLICY_UNAVAILABLE/, 'invalid existing lock must not be silently replaced');
+    writeFileSync(file, 'LOCK_V1');
+    const alias = path.join(directory, 'lock-alias');
+    linkSync(file, alias);
+    assert.equal(h.workspaceAuthority.authorize('files.read'), null);
+    assert.throws(() => h.prepareWorkspace(), /PRIVATE_POLICY_UNAVAILABLE/, 'linked lock cannot be accepted');
+    unlinkSync(alias);
+    if (process.platform !== 'win32') {
+      chmodSync(file, 0o644);
+      assert.equal(h.workspaceAuthority.authorize('files.read'), null);
+      assert.throws(() => h.prepareWorkspace(), /PRIVATE_POLICY_UNAVAILABLE/);
+      chmodSync(file, 0o600);
+      unlinkSync(file);
+      writeFileSync(alias, 'LOCK_V1', { mode: 0o600 }); symlinkSync(alias, file);
+      assert.equal(h.workspaceAuthority.authorize('files.read'), null);
+      assert.throws(() => h.prepareWorkspace());
+      unlinkSync(file);
+    } else unlinkSync(file);
+    assert.equal(h.workspaceAuthority.authorize('files.read'), null, 'missing fixed lock denies even with a valid grant');
   } finally { removeFixture(directory); }
 });

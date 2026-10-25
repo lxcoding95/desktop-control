@@ -126,3 +126,8 @@ Clean testedsource38b5a9a526a6b82818d1dcf7c2011c2a8eec5b4f: Windows29unit/9proto
 
 [Full report](COMPLETION-VERIFICATION.md): source38b5a9a both clean fullmatrices pass29units; Win9protocol+2skip,Linux10protocol+1skip; both ci/verify/ls/audit/diff exit0. Native Windows normal/elevated, Linux root/bothUIDmismatches pass. License/notices/SPDX technical inventory complete; no legal/releasecertification. Initial Windows helper startup failure preserved plus corrected build-cache/probe evidence. Independent finalhead review now pending; PR Draft/project Blocked, no merge/session3–6. Same owner-required-time S02 authorization; no resets. Next exact action: reply/resolve verified4oldthreads, request independent review of frozen head, assess all new findings.
 
+
+## Private recovery checkpoint — 2026-10-25
+
+The owner's explicit selected S02–S06 private implementation authorization supersedes prior scope locks; no historical ledger or session counter is reset. First exact recovery timestamp03:35:08.6160525Z, earlier preflight unmetered. Current integration plan: docs/plans/2026-10-25-recovery-and-ai-browser.md. PR33/Issue28 carry checkpoints. New components and current integrated HEAD remain unaccepted pending full native/platform/host/security evidence. No merge/public release.
+

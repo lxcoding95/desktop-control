@@ -119,7 +119,7 @@
           "started_at_utc": "2026-10-22T18:36:44Z",
           "deadline_at_utc": "2026-10-22T19:11:44Z",
           "max_seconds": 2100,
-          "checkpoint_at_utc": "2026-10-22T19:00:11.0574622+00:00",
+          "checkpoint_at_utc": "2026-10-22T21:00:11.0574622+02:00",
           "charged_wall_seconds": 1588,
           "remaining_seconds_conservative": 0,
           "active_seconds_verified": null,
@@ -132,9 +132,9 @@
           "next_interval_authorized": false,
           "elapsed_wall_seconds_at_checkpoint": 1408,
           "publication_reserve_seconds": 180,
-          "publication_must_finish_by_utc": "2026-10-22T19:03:11.0574622+00:00",
+          "publication_must_finish_by_utc": "2026-10-22T21:03:11.0574622+02:00",
           "unused_seconds_surrendered": 512,
-          "verification_and_implementation_stopped_at_utc": "2026-10-22T19:00:11.0574622+00:00"
+          "verification_and_implementation_stopped_at_utc": "2026-10-22T21:00:11.0574622+02:00"
         },
         {
           "id": 3,
@@ -174,12 +174,12 @@
           "status": "checkpointed_acceptance_blocked",
           "baseline_head_sha": "4fc8092476b6d0386cb5fbd87d2b9c9adc7bca3a",
           "scope": "S02 source/security review, native OS identity requirements, license/notice compliance and independent review gaps; no S03-S06, no CI and no unverified merge",
-          "paused_at_utc": "2026-10-24T17:22:21.130Z",
+          "paused_at_utc": "2026-10-24T17:22:21.13Z",
           "test_evidence": "Fresh Windows verify exit0:26units,9protocol pass/1Linuxskip. Linux verify exit1:26units,8protocol pass/1fail/1Windowsskip; new socket assertion wrongly includes inherited Unix stdio sockets, diagnosis logged. New audit regressions both pass. npm audit exit1 high Zod4.6.5. Native root denial actual uid/euid0 zero adapter calls. Independent CodeRabbit COMMENTED review on tested e7792f1 completed17:32:12Z with4 actionable findings, no approval; see review receipt.",
           "last_known_head_sha": "Read live GitHub; documentation publication follows tested head",
           "next_exact_action": "Read EXTENSION-4-WORK-VERIFICATION.md and owner-verified remaining budget before any continuation. Resolve test oracle and Zod advisory; finish native identity, redistribution and independent review. No S03-S06/CI/Qodo/merge.",
-          "resumed_at_utc": "2026-10-24T17:25:36.4324424+00:00",
-          "resumed_deadline_at_utc": "2026-10-24T17:44:58.4324424+00:00",
+          "resumed_at_utc": "2026-10-24T19:25:36.4324424+02:00",
+          "resumed_deadline_at_utc": "2026-10-24T19:44:58.4324424+02:00",
           "checkpoint_at_utc": "2026-10-24T17:31:38.379Z",
           "elapsed_resumed_wall_seconds_rounded_up": 362,
           "publication_reserve_seconds": 180,
@@ -505,10 +505,28 @@
     "owner_explicit": true,
     "scope": "S02 only",
     "time_policy": "required_time_no_new_fixed_extension",
-    "started_at_utc": "2026-10-24T17:45:07.9371848+00:00",
+    "started_at_utc": "2026-10-24T19:45:07.9371848+02:00",
     "baseline_head": "ddff6d439b2795c2c54f292827bb1ca02b9e1322",
     "status": "technical_checks_pass_review_pending",
     "historical_time_accounts_preserved": true,
-    "last_checkpoint_at_utc": "2026-10-24T18:12:43.180Z"
+    "last_checkpoint_at_utc": "2026-10-24T18:12:43.18Z"
+  },
+  "private_recovery_20261025": {
+    "state": "integration_in_progress_not_accepted",
+    "actual_docker_checks": 11,
+    "independent_final_review": "pending",
+    "plan": "docs/plans/2026-10-25-recovery-and-ai-browser.md",
+    "new_batch_uploaded": false,
+    "baseline_commit": "26e5b32954e6a7826b31bcfcfa7e3fc0f60fb4cb",
+    "first_exact_checkpoint_utc": "2026-10-25T03:35:08.6160525Z",
+    "native_desktop_interactive_acceptance": "not_run",
+    "branch": "feat/private-diagnostics-plugin-20261025",
+    "required_checks": "not_configured",
+    "dedicated_chromium_acceptance": "not_run",
+    "plugin_uploaded_version": "0.0.1-preview.3",
+    "unattended_updater": "not_implemented",
+    "active_elapsed_seconds_verified": null,
+    "owner_scope": "selected_private_S02_S06_authorized_no_formal_session_reset",
+    "main_merge_performed": false
   }
 }
