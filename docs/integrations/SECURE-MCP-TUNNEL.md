@@ -106,3 +106,24 @@ npm run test:remote:integration
 The second command tests the relay and device together with **mock** identity verifiers and a simulated in-memory channel: Node.js 22.16.0 sandbox **24/24 tests passed** (16 relay + 8 device, including one request/response integration). Windows run is still pending. This is explicitly **NOT** real OAuth, TLS, a WebSocket connection, a Cloudflare deployment, or a ChatGPT cloud end-to-end result.
 
 Implementation boundary: The authenticated Cloudflare Streamable HTTP MCP endpoint, production OAuth provider, persistent device pairing/revocation and real outbound Windows WebSocket client are still missing. Do not publish the mock verifiers from test files as a production authentication mechanism. The only acceptable public test may return the static `remote-health-only` result after real account/device auth. Existing local permissions remain entirely separate.
+
+
+## Cryptographic single-use device tickets — implemented, NOT wired to cloud
+
+`tools/remote/device-ticket.mjs` is a provider-independent HMAC-SHA256 device ticket authority built on WebCrypto (Node.js and Cloudflare Workers-compatible). No extra runtime packages. A ticket can only be **issued after** a trusted `verifyEnrollment` callback finds a separately approved owner/device enrollment. The HMAC key MUST be at least 32 unpredictable bytes provided through a non-repository secrets system; it is not stored or emitted by the module. Signed tokens are valid for at most **60 seconds**.
+
+A successful `verifyDevice` requires authentic MAC, strict structured claims (owner/device/expiry/jti), current expiry, and an **atomic one-time** `consumeIssued` callback that confirms the registered owner/device binding and current pairing/revocation status. The trusted `recordIssued`, `verifyEnrollment`, and `consumeIssued` adapters are mandatory, fail closed on errors, and cannot be faked by values supplied by a model or remote client. This module contains no account creation, OAuth, remote WebSocket, or permission grant. A real database implementation must use transactions/consistent per-device Durable Object storage and restrict issuance to an explicit real-user-approved pairing flow.
+
+Run the pinned test on a working checkout:
+
+```powershell
+npm run test:remote:ticket
+```
+
+**Evidence**: Node v22.16.0 Linux sandbox: 12/12 tests passed for HMAC signature, tampering, short/long/malformed tickets, missing approval, expiry, one-time use/concurrent double consume, cross-secret denial, revoke and storage errors. Windows rerun of the exact GitHub commit remains pending. Existing `preview.5` local permission store and 34 privileged MCP tools are not connected to the remote ticket authority. No cloud endpoint is deployed.
+
+### Next controlled implementation step
+
+Connect `verifyEnrollment` / issued-ticket store / atomic consume callbacks to a reviewed SQLite-backed Durable Object, using Cloudflare's official `OAuthProvider` and `createMcpHandler` for the actual public Streamable HTTP MCP endpoint. The local Windows process must obtain the ticket through an approved user-interactive device flow, then initiate an outbound authenticated `wss://` connection. Verify owner/client scopes at both ingress and dispatch; never trust user-supplied ownerIds in JSON. If a Free-tier account and authenticated endpoint cannot be verified, remain default-off.
+
+Current upstream: https://github.com/cloudflare/agents/blob/main/docs/agents/mcp-servers.md (SDK v2 stateless handler), https://github.com/cloudflare/agents/blob/main/docs/agents/securing-mcp-servers.md (OAuthProvider), https://developers.cloudflare.com/durable-objects/best-practices/websockets/ (hibernating WebSockets), and https://developers.cloudflare.com/workers/platform/limits/ (Free quotas).
