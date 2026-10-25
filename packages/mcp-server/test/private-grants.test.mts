@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, chmodSync, writeFileSync, unlinkSync, symlinkSync, readFileSync, linkSync, lstatSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, chmodSync, writeFileSync, unlinkSync, symlinkSync, readFileSync, linkSync, lstatSync } from 'node:fs';
 import { tmpdir, userInfo } from 'node:os';
 import path from 'node:path';
 import { createPrivateGrantTestHarness } from '../src/bridge/private-grants.mts';
@@ -275,5 +275,22 @@ test('emergency host stop survives a fresh authority and only explicit matching 
     assert.ok(lstatSync(path.join(directory, 'desktop-stop')).isFile(), 'browser re-enable cannot clear desktop stop');
     restarted.provisionControl('grant', ['desktop.input']);
     assert.ok(restarted.controlAuthority.authorize('desktop.input'));
+  } finally { removeFixture(directory); }
+});
+
+test('partial local re-enable failure never activates either requested capability', () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    if (!localPrincipal()) return;
+    h.provisionControl('grant', ['desktop.input', 'browser.read'], ['https://example.com']);
+    h.stopControls();
+    const marker = path.join(directory, 'browser-stop');
+    unlinkSync(marker); mkdirSync(marker);
+    assert.throws(() => h.provisionControl('grant', ['desktop.input', 'browser.read'], ['https://example.com']), /PRIVATE_POLICY_UNAVAILABLE/);
+    assert.equal(h.controlAuthority.authorize('desktop.input'), null, 'successful first marker reset cannot activate desktop');
+    assert.equal(h.controlAuthority.authorize('browser.read'), null);
+    assert.equal(createPrivateGrantTestHarness(directory).controlAuthority.authorize('desktop.input'), null, 'fresh process sees revoked staged selection');
+    assert.equal(h.provisionControl('status').state, 'denied');
   } finally { removeFixture(directory); }
 });

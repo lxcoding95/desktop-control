@@ -313,11 +313,14 @@ function provisionControl(source: Storage, action: 'grant' | 'revoke' | 'status'
       (capabilities.some(c => c.startsWith('browser.')) && allowedOrigins.length === 0)))) throw Error('PRIVATE_POLICY_UNAVAILABLE');
   if (action === 'grant') prepareBrowser(testDirectory);
   const expiresAt = Date.now() + (action === 'grant' ? 900_000 : 0);
-  source.write(JSON.stringify({ version: 1, principal, resource: CONTROL_RESOURCE, capabilities: [...capabilities], allowedOrigins: [...allowedOrigins], expiresAt, revoked: action === 'revoke' }));
-  // Only this explicitly invoked local provisioning action may reset the durable stop.
-  // A failed reset leaves the valid policy stopped, never re-enables through MCP.
+  const replacement = { version: 1, principal, resource: CONTROL_RESOURCE, capabilities: [...capabilities], allowedOrigins: [...allowedOrigins], expiresAt, revoked: true };
+  // First revoke the replacement selection atomically. Partial marker reset must
+  // never expose a newly active subset when a later reset fails.
+  source.write(JSON.stringify(replacement));
+  // Only this explicitly invoked local provisioning action may reset durable stops.
   if (action === 'grant' && capabilities.some(c => c.startsWith('desktop.'))) clearDesktopStop(testDirectory);
   if (action === 'grant' && capabilities.some(c => c.startsWith('browser.'))) clearBrowserStop(testDirectory);
+  if (action === 'grant') source.write(JSON.stringify({ ...replacement, revoked: false }));
   return action === 'grant' ? { state: 'active', capabilities: [...capabilities], allowedOrigins: [...allowedOrigins], expiresAt, desktopStopped: false } : { state: 'revoked' };
 }
 export function provisionPrivateControl(action: 'grant' | 'revoke' | 'status', capabilities: readonly PrivateControlCapability[] = [], allowedOrigins: readonly string[] = []) {

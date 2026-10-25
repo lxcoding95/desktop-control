@@ -162,7 +162,12 @@ internal static class WindowsPrivatePolicy {
             }
             if (args[0] == "clear-desktop-stop" || args[0] == "clear-browser-stop") {
                 string sentinel = Path.Combine(directory, args[0] == "clear-browser-stop" ? "browser-stop" : "desktop-stop");
-                if (File.Exists(sentinel)) { CheckPath(sentinel); File.Delete(sentinel); }
+                FileAttributes attributes;
+                try { attributes = File.GetAttributes(sentinel); }
+                catch (FileNotFoundException) { return 0; }
+                catch (DirectoryNotFoundException) { return 0; }
+                if ((attributes & (FileAttributes.ReparsePoint | FileAttributes.Directory)) != 0) throw new InvalidOperationException();
+                File.Delete(sentinel);
                 return 0;
             }
             if (args[0] == "prepare-browser") {
