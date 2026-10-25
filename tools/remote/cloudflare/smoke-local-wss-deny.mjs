@@ -91,7 +91,12 @@ async function run() {
     compatibility_date: COMPAT_DATE,
     compatibility_flags: ['nodejs_compat'],
     workers_dev: false, routes: [],
-    vars: { ENABLE_REMOTE_HEALTH: '1', DEVICE_TICKET_HMAC_KEY: key },
+    vars: {
+      ENABLE_REMOTE_HEALTH: '1',
+      PREVIEW_SINGLE_USER: '1',
+      PREVIEW_OWNER_ID: 'local-smoke-test-owner',
+      DEVICE_TICKET_HMAC_KEY: key
+    },
     durable_objects: { bindings: [{ name: 'REMOTE_RELAY', class_name: 'RemoteHealthRelay' }] },
     migrations: [{ tag: 'local-wss-deny-v1', new_sqlite_classes: ['RemoteHealthRelay'] }]
   };
