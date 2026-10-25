@@ -5,13 +5,13 @@ import pathlib
 import re
 import sys
 import zipfile
+import unicodedata
 
 archive_path = pathlib.Path(sys.argv[1]).resolve()
 destination = pathlib.Path(sys.argv[2]).resolve()
 if destination.exists() or destination.is_symlink():
     raise ValueError('Use a new extraction directory')
 with zipfile.ZipFile(archive_path) as archive:
-    names = archive.namelist()
     runtime_names = {'@modelcontextprotocol/server', '@modelcontextprotocol/core', 'zod', 'pdf-lib', '@pdf-lib/standard-fonts', '@pdf-lib/upng', 'pako', 'tslib', 'playwright-core'}
     worker_names = {'pdf-lib', '@pdf-lib/standard-fonts', '@pdf-lib/upng', 'pako', 'tslib'}
     root_files = {'plugin.json', 'mcp.json', '.codex-plugin/plugin.json', '.mcp.json', 'start.mjs', 'grant.mjs', 'README.md',
@@ -33,18 +33,37 @@ with zipfile.ZipFile(archive_path) as archive:
                     'dist/private-workspace-runtime/package.json', 'dist/private-workspace-runtime/runtime-inventory.json'}:
             return True
         return package_member(name, 'node_modules/', runtime_names) or package_member(name, 'dist/private-workspace-runtime/node_modules/', worker_names)
-    if len(names) > 15000 or sum(info.file_size for info in archive.infolist()) > 200 * 1024 * 1024:
-        raise ValueError('Archive resource limit')
+    infos = archive.infolist()
+    names = [item.filename for item in infos]
+    # Bound extraction before reading any untrusted compressed bytes; this is an
+    # upload validator, not an installer with an unlimited decompression budget.
+    if (len(infos) > 12000 or archive_path.stat().st_size > 128 * 1024 * 1024 or
+            sum(item.file_size for item in infos) > 128 * 1024 * 1024):
+        raise ValueError('Archive budget exceeded')
     if len(names) != len(set(names)):
         raise ValueError('Duplicate archive entries')
-    if len(names) != len({name.casefold() for name in names}):
-        raise ValueError('Case-colliding portable archive entries')
-    for name in names:
+    canonical = set()
+    for item in infos:
+        name = item.filename
         path = pathlib.PurePosixPath(name)
-        if path.is_absolute() or '..' in path.parts or '\\' in name or ':' in name or path.as_posix() != name or any(ord(c) < 32 for c in name):
+        segments = name.split('/')
+        if (not name or name.startswith('/') or name.endswith('/') or
+                len(name) > 4096 or path.is_absolute() or
+                any(part in ('', '.', '..') or len(part) > 255 or
+                    part.endswith((' ', '.')) or
+                    re.fullmatch(r'(?i)(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?', part)
+                    for part in segments) or
+                '\\' in name or ':' in name or any(ord(c) < 32 or ord(c) == 127 for c in name)):
             raise ValueError('Unsafe archive member')
-        if ((archive.getinfo(name).external_attr >> 16) & 0o170000) != 0o100000:
+        folded = unicodedata.normalize('NFKC', name).casefold()
+        if folded in canonical:
+            raise ValueError('Cross-platform member alias')
+        canonical.add(folded)
+        if ((item.external_attr >> 16) & 0o170000) != 0o100000:
             raise ValueError('Non-regular archive member')
+        if (item.file_size > 32 * 1024 * 1024 or item.flag_bits & 1 or
+                (item.compress_size and item.file_size / item.compress_size > 1000)):
+            raise ValueError('Oversized, encrypted or overcompressed archive member')
         if not permitted(name):
             raise ValueError('Unapproved package member')
     required_files = root_files | package_files | {'source/WindowsToken.cs', 'source/WindowsPrivatePolicy.cs',
@@ -78,8 +97,24 @@ with zipfile.ZipFile(archive_path) as archive:
     if 'deps.grants ?? DENY_ALL_GRANTS' not in archive.read('dist/packages/mcp-server/src/server.mjs').decode():
         raise ValueError('Production default-deny entry required')
     provenance = json.loads(archive.read('PROVENANCE.json'))
-    if provenance.get('dirty') is not False or not re.fullmatch('[0-9a-f]{40}', provenance.get('source_commit', '')):
-        raise ValueError('Clean committed source provenance required')
+    # Cross-check every user-visible metadata source before untrusted ZIP extraction.
+    # A checksum inventory proves consistency only within that ZIP, not authenticity.
+    codex_manifest = json.loads(archive.read('.codex-plugin/plugin.json'))
+    private_mcp = json.loads(archive.read('.mcp.json'))
+    if (manifest.get('name') != 'desktop-control-private' or
+            codex_manifest.get('name') != manifest['name'] or
+            codex_manifest.get('version') != manifest.get('version') or
+            codex_manifest.get('requires_local_executor') is not True or
+            private_mcp.get('mcpServers') != mcp.get('mcpServers') or
+            set(mcp['mcpServers']) != {'desktop-control'} or
+            mcp['mcpServers']['desktop-control'].get('command') != 'node' or
+            mcp['mcpServers']['desktop-control'].get('cwd') != '${PLUGIN_ROOT}'):
+        raise ValueError('Inconsistent plugin or MCP metadata')
+    if (not isinstance(provenance, dict) or provenance.get('dirty') is not False or
+            not isinstance(provenance.get('source_commit'), str) or
+            not re.fullmatch(r'[0-9a-f]{40}', provenance['source_commit']) or
+            provenance.get('plugin_version') != manifest.get('version')):
+        raise ValueError('Unverifiable package provenance')
     if {dep['name'] for dep in provenance['dependencies']} != runtime_names or len(provenance['dependencies']) != len(runtime_names):
         raise ValueError('Unexpected runtime dependency closure')
     if set(provenance.get('worker_dependencies', {})) != worker_names:

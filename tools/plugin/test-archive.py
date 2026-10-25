@@ -13,6 +13,7 @@ worker = ['pdf-lib', '@pdf-lib/standard-fonts', '@pdf-lib/upng', 'pako', 'tslib'
 cases = ['valid', 'remote', 'no-local', 'fixture', 'missing-license', 'zero-dependencies', 'tamper', 'traversal',
          'extra-dependency', 'private-evidence', 'wrong-platform', 'missing-notice', 'bad-sbom', 'bad-license-hash', 'symlink', 'duplicate', 'noncanonical-path',
          'case-collision', 'missing-runtime', 'wrong-compat', 'worker-version', 'unlisted-transitive', 'sbom-version']
+cases += ['alias', 'case-alias', 'windows-device', 'oversize', 'long-component', 'backslash', 'space-suffix', 'dirty-provenance', 'wrong-commit', 'version-drift', 'metadata-name', 'mcp-drift']
 with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temporary:
     root = pathlib.Path(temporary)
     for case in cases:
@@ -23,7 +24,7 @@ with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temp
                  'dist/packages/mcp-server/src/server.mjs': b'deps.grants ?? DENY_ALL_GRANTS',
                  'dist/private-workspace-runtime/terminal.mjs': b'// synthetic fixture; never executed',
                  'PROVENANCE.json': json.dumps({'source_commit': 'a' * 40, 'platform': 'invalid' if case == 'wrong-platform' else 'linux',
-                    'dirty': False, 'dependencies': [] if case == 'zero-dependencies' else dependencies,
+                    'plugin_version': '0.0.1-test', 'dirty': False, 'dependencies': [] if case == 'zero-dependencies' else dependencies,
                     'worker_dependencies': {name: '1.0.0' for name in worker}}).encode()}
         for name in ['start.mjs', 'grant.mjs', 'README.md', 'LICENSE', 'THIRD-PARTY-NOTICES.md', 'source/WindowsToken.cs', 'source/WindowsPrivatePolicy.cs',
                      'packages/mcp-server/scripts/private-grant.mjs', 'packages/private-desktop/native/DesktopController.cs', 'packages/private-settings/native/PrivateSettings.cs',
@@ -71,6 +72,28 @@ with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temp
             files['skills/case.md'] = b'test-only marker'
         if case == 'missing-runtime':
             del files['dist/private-workspace-runtime/worker.mjs']
+        extras = {
+            'alias': {'data.txt': b'good', './data.txt': b'evil'},
+            'case-alias': {'README.txt': b'A', 'readme.txt': b'B'},
+            'windows-device': {'CON.txt': b'X'},
+            'oversize': {'large.dat': b'z' * (32 * 1024 * 1024 + 1)},
+            'long-component': {'x' * 256 + '.txt': b'x'},
+            'backslash': {'escape\\foo': b'x'},
+            'space-suffix': {'safe .txt ': b'y'},
+        }
+        files.update(extras.get(case, {}))
+        if case in ('dirty-provenance', 'wrong-commit', 'version-drift'):
+            source = json.loads(files['PROVENANCE.json'])
+            if case == 'dirty-provenance': source['dirty'] = True
+            elif case == 'wrong-commit': source['source_commit'] = 'not-a-git-sha'
+            else: source['plugin_version'] = '0.0.0-stale'
+            files['PROVENANCE.json'] = json.dumps(source).encode()
+        if case == 'metadata-name':
+            metadata = json.loads(files['.codex-plugin/plugin.json'])
+            metadata['name'] = 'unexpected-plugin'
+            files['.codex-plugin/plugin.json'] = json.dumps(metadata).encode()
+        if case == 'mcp-drift':
+            files['.mcp.json'] = json.dumps({'mcpServers': {'desktop-control': {'type': 'http'}}}).encode()
         inventory = {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}
         if case == 'tamper':
             files['plugin.json'] += b' '
