@@ -84,8 +84,7 @@ try {
     $privateKeyBytes = $null
     $rsa = $null
     try {
-        $passString = [Convert]::ToBase64String($pass).TrimEnd('=').
-            Replace('+','-').Replace('/','_')
+        $passString = [Convert]::ToBase64String($pass).TrimEnd('=').Replace('+','-').Replace('/','_')
         $passwordBytes = [Text.Encoding]::UTF8.GetBytes($passString)
         try { $protectedPassword = Protect-LocalBytes $passwordBytes }
         finally { [Security.Cryptography.CryptographicOperations]::ZeroMemory($passwordBytes) }
