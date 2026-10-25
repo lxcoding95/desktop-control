@@ -7,6 +7,8 @@ const SHA = /^[a-f0-9]{64}$/;
 const KEY_ID = /^[a-zA-Z0-9_-]{1,64}$/;
 const PLATFORMS = new Set(['win32-x64', 'win32-arm64', 'linux-x64', 'linux-arm64']);
 const MAX_METADATA = 16 * 1024;
+// A WeakMap is an in-process provenance seal only: no object/JSON can mint a ticket.
+const verifiedTickets = new WeakMap();
 function fail(code) { throw new Error(code); }
 function isObject(o) { return o !== null && typeof o === 'object' && !Array.isArray(o); }
 function exactKeys(value, required, optional = []) {
@@ -54,8 +56,7 @@ function parseTimestamp(s) {
 function validatePolicy(p) {
   exactKeys(p, ['schema', 'sequence', 'issuedAt', 'expiresAt', 'platform', 'minBridge', 'targetBridge', 'compatiblePlugins', 'contract', 'mandatory', 'artifact']);
   if (p.schema !== 1 || !Number.isSafeInteger(p.sequence) || p.sequence < 1 || !PLATFORMS.has(p.platform) || typeof p.mandatory !== 'boolean') fail('INVALID_POLICY');
-  versionParts(p.minBridge);
-  versionParts(p.targetBridge);
+  versionParts(p.minBridge); versionParts(p.targetBridge);
   if (compareVersions(p.targetBridge, p.minBridge) < 0) fail('INVALID_POLICY');
   if (!Array.isArray(p.compatiblePlugins) || p.compatiblePlugins.length < 1 || p.compatiblePlugins.length > 20 || new Set(p.compatiblePlugins).size !== p.compatiblePlugins.length) fail('INVALID_POLICY');
   for (const v of p.compatiblePlugins) versionParts(v);
@@ -66,8 +67,16 @@ function validatePolicy(p) {
   if (issued >= expires || expires - issued > 31 * 86400000) fail('INVALID_TIME');
   return { issued, expires };
 }
-
-/** Trust anchors are supplied by the protected launcher, never by the manifest. */
+function assertTrustedTicket(ticket, now) {
+  if (!isObject(ticket) || !verifiedTickets.has(ticket)) fail('UNVERIFIED_POLICY');
+  const { policy, verifiedAt, expires } = verifiedTickets.get(ticket);
+  if (!Number.isSafeInteger(now) || now < verifiedAt || now >= expires) fail('EXPIRED_OR_UNTRUSTED_CLOCK');
+  return policy;
+}
+/**
+ * Trust anchors and the previous checkpoint must be provided from protected local host state.
+ * This module cannot validate OS ownership, monotonic persistence or key provenance.
+ */
 export function verifyPolicy(envelope, trustedKeys, { previous = null, now = Date.now() } = {}) {
   exactKeys(envelope, ['format', 'keyId', 'payload', 'signature']);
   if (envelope.format !== 'dc-update-policy-v1' || !KEY_ID.test(envelope.keyId)) fail('INVALID_ENVELOPE');
@@ -90,19 +99,27 @@ export function verifyPolicy(envelope, trustedKeys, { previous = null, now = Dat
     if (!Number.isSafeInteger(previous.sequence) || !SHA.test(previous.digest) || !Number.isSafeInteger(previous.trustedTime) || now < previous.trustedTime) fail('INVALID_CHECKPOINT');
     if (policy.sequence < previous.sequence || (policy.sequence === previous.sequence && digest !== previous.digest)) fail('REPLAY_OR_EQUIVOCATION');
   }
-  return { policy, checkpoint: { sequence: policy.sequence, digest, trustedTime: now } };
+  // Exposed metadata remains immutable. The public properties cannot be used to
+  // forge a ticket: only objects minted here exist in the private WeakMap.
+  Object.freeze(policy.compatiblePlugins);
+  Object.freeze(policy.artifact);
+  Object.freeze(policy);
+  const checkpoint = Object.freeze({ sequence: policy.sequence, digest, trustedTime: now });
+  const ticket = Object.freeze({ policy, checkpoint });
+  verifiedTickets.set(ticket, { policy, verifiedAt: now, expires });
+  return ticket;
 }
-
-export function verifyArtifact(bytes, artifact) {
+/** Only hashes against artifact metadata bound to a verified signed ticket. */
+export function verifyArtifact(bytes, ticket, { now = Date.now() } = {}) {
+  const { artifact } = assertTrustedTicket(ticket, now);
   if (!Buffer.isBuffer(bytes)) fail('INVALID_ARTIFACT');
-  exactKeys(artifact, ['name', 'sha256', 'size']);
-  if (!SHA.test(artifact.sha256) || bytes.length !== artifact.size) return false;
+  if (bytes.length !== artifact.size) return false;
   const got = createHash('sha256').update(bytes).digest();
   return timingSafeEqual(got, Buffer.from(artifact.sha256, 'hex'));
 }
-
-export function decideAccess(policy, { bridgeVersion, pluginVersion, platform, contract }) {
-  validatePolicy(policy);
+/** Only decisions from previously verified, non-expired signed metadata. */
+export function decideAccess(ticket, { bridgeVersion, pluginVersion, platform, contract, now = Date.now() }) {
+  const policy = assertTrustedTicket(ticket, now);
   versionParts(bridgeVersion); versionParts(pluginVersion);
   if (policy.platform !== platform) return { state: 'REPAIR_ONLY', reason: 'PLATFORM_MISMATCH', allowed: RECOVERY_TOOLS };
   if (contract !== policy.contract) return { state: 'REPAIR_ONLY', reason: 'CONTRACT_MISMATCH', allowed: RECOVERY_TOOLS };
