@@ -107,6 +107,11 @@ jobs:
           const py = process.platform === 'win32' ? 'python' : 'python3';
           const extracted = join(process.env.RUNNER_TEMP, 'dc-plugin-extracted');
           execFileSync(py, ['tools/plugin/verify-archive.py', archive, extracted], {stdio:'inherit', timeout:120000});
-          execFileSync(process.execPath, ['tools/plugin/test-package.mjs', extracted], {stdio:'inherit', timeout:120000});
+          const smokeArgs = ['tools/plugin/test-package.mjs', extracted];
+          if (process.platform === 'win32') {
+            smokeArgs.push('ci-denied-only');
+            console.log('WINDOWS_ELEVATED_RUNNER: production denial smoke only; normal-user grant acceptance NOT RUN');
+          }
+          execFileSync(process.execPath, smokeArgs, {stdio:'inherit', timeout:120000});
           console.log('MCP package smoke PASS; candidate remains unpublished');
           JS
