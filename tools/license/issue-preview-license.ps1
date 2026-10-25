@@ -118,7 +118,27 @@ try {
     [IO.File]::WriteAllText($tmp,
         ($vault | ConvertTo-Json -Depth 10)+[Environment]::NewLine,
         [Text.UTF8Encoding]::new($false))
-    [IO.File]::Replace($tmp,$path,$null)
+    # Windows File.Replace requires a non-empty backup path on the
+    # owner's tested .NET runtime. The original protected vault becomes
+    # this backup until the replaced file has been checked.
+    $backup = Join-Path $directory ('.dc-vault-backup-' + [Guid]::NewGuid().ToString('N') + '.bak')
+    if (Test-Path -LiteralPath $backup) { throw 'Unsafe duplicate vault backup path.' }
+    [IO.File]::Replace($tmp,$path,$backup,$true)
+    $tmp = $null
+    # Verify the atomic replacement preserved owner-only ACLs.
+    $savedAcl = Get-Acl -LiteralPath $path
+    if (-not $savedAcl.AreAccessRulesProtected) {
+        throw 'Replaced credential file lost private permissions. Backup preserved.'
+    }
+    foreach ($rule in $savedAcl.Access) {
+        if ($rule.AccessControlType -eq 'Allow' -and
+            $rule.IdentityReference.Translate(
+                [Security.Principal.SecurityIdentifier]).Value -ne $identity.User.Value) {
+            throw 'Replaced credential file has an unauthorized reader. Backup preserved.'
+        }
+    }
+    # Only discard the old vault after successful replacement and ACL check.
+    Remove-Item -LiteralPath $backup -Force -ErrorAction Stop
     $tmp = $null
     Write-Output 'LOCAL_PREVIEW_LICENSE_ISSUED=TRUE'
     Write-Output 'ACTIVE_LICENSE_CAPACITY=1'
