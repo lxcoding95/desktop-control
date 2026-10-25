@@ -25,7 +25,7 @@ export function parseHealthResponse(frame) {
       frame.result.connected !== true ||
       frame.result.desktopAccess !== false ||
       frame.result.scope !== 'remote-health-only') return null;
-  return { id: frame.id, nonce: frame.nonce, result: { ...STATUS } };
+  return { type: 'remote.health.response', id: frame.id, nonce: frame.nonce, result: { ...STATUS } };
 }
 
 export function parseAuthorizedDeviceLookup(body) {
