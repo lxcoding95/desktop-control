@@ -9,7 +9,7 @@ const readResult = z.strictObject({
   schema: z.strictObject({ type: z.literal('object'), properties: empty }), values: empty,
   layout: z.array(z.strictObject({ kind: z.literal('group'), title: z.string().max(120),
     items: z.array(z.strictObject({ kind: z.literal('tool'), tool: z.enum([
-      'desktop_control.open_settings', 'desktop_control.stop_control', 'desktop_control.control_status'
+      'desktop_control.management', 'desktop_control.stop_control', 'desktop_control.control_status'
     ]), description: z.string().max(240) })).length(3)
   })).length(1)
 });

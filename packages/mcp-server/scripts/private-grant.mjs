@@ -3,7 +3,7 @@ import { Buffer } from 'node:buffer';
 import { provisionPrivateGrant, provisionPrivateWorkspace, provisionPrivateControl } from '../../../dist/packages/mcp-server/src/bridge/private-grants.mjs';
 const args = process.argv.slice(2);
 if (args.length !== 1 || !['grant', 'revoke', 'status', 'workspace-grant', 'workspace-revoke', 'workspace-status', 'control-grant', 'control-revoke', 'control-status'].includes(args[0])) {
-  console.error('Usage: private-grant.mjs grant|revoke|status|workspace-grant|workspace-revoke|workspace-status|control-grant|control-revoke|control-status (grants last 15 minutes)');
+  console.error('Usage: private-grant.mjs grant|revoke|status|workspace-grant|workspace-revoke|workspace-status|control-grant|control-revoke|control-status (new local grants persist until revoked; re-enabling a stopped controller requires explicit local confirmation)');
   process.exitCode = 2;
 } else {
   try {
@@ -13,8 +13,12 @@ if (args.length !== 1 || !['grant', 'revoke', 'status', 'workspace-grant', 'work
       process.stdin.setEncoding('utf8');
       for await (const chunk of process.stdin) { input += chunk; if (Buffer.byteLength(input) > 16_384) throw Error('LIMIT'); }
       const options = JSON.parse(input);
-      if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).sort().join(',') !== 'allowedOrigins,capabilities') throw Error('INVALID');
-      result = provisionPrivateControl('grant', options.capabilities, options.allowedOrigins);
+      if (!options || typeof options !== 'object' || Array.isArray(options) ||
+          !Object.hasOwn(options, 'allowedOrigins') || !Object.hasOwn(options, 'capabilities') ||
+          Object.keys(options).some(key => !['allowedOrigins', 'capabilities', 'reenableStopped'].includes(key)) ||
+          (Object.hasOwn(options, 'reenableStopped') && typeof options.reenableStopped !== 'boolean')) throw Error('INVALID');
+      result = provisionPrivateControl('grant', options.capabilities, options.allowedOrigins,
+        options.reenableStopped === true ? { reenableStopped: true } : {});
     } else if (args[0].startsWith('control-')) result = provisionPrivateControl(args[0].slice('control-'.length));
     else result = args[0].startsWith('workspace-') ? provisionPrivateWorkspace(args[0].slice('workspace-'.length)) : provisionPrivateGrant(args[0]);
     console.log(JSON.stringify(result));

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import type { ChildProcessWithoutNullStreams } from 'node:child_process';
 import type { createPrivateWorkspaceAuthority, PrivateWorkspaceCapability } from './private-grants.mts';
+import { privateAccessIsCurrent } from './private-grants.mts';
 
 export const WORKSPACE_IMAGE = 'node@sha256:6449e19d8184d84062525b6a7524def03146c2cb04a7f08b076680d0e8e4240a';
 const root = fileURLToPath(new URL(import.meta.url.endsWith('.mts') ? '../../../../' : '../../../../../', import.meta.url));
@@ -154,7 +155,7 @@ export function createWorkspaceExecutor(authority: Authority, runner: SandboxRun
       let workspace: string | undefined;
       for (const capability of capabilities) {
         const access = authority.authorize(capability);
-        if (!access || access.expiresAt <= Date.now() || (workspace && workspace !== access.workspace)) return null;
+        if (!access || !privateAccessIsCurrent(access) || (workspace && workspace !== access.workspace)) return null;
         workspace = access.workspace;
       }
       return workspace;

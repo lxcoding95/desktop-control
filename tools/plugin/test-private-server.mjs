@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 const root = resolve(process.argv[2] ?? '.');
 const meta = { 'io.modelcontextprotocol/protocolVersion': '2026-07-28', 'io.modelcontextprotocol/clientInfo': { name: 'private-integration-proof', version: '1' }, 'io.modelcontextprotocol/clientCapabilities': {} };
 const names = ['status', 'files_list', 'files_read', 'files_write', 'files_mkdir', 'files_remove', 'files_restore', 'pdf_create', 'terminal_run',
-  'control_status', 'open_settings', 'stop_control', 'settings_read', 'settings_update', 'browser_start', 'browser_navigate', 'browser_snapshot', 'browser_click', 'browser_fill', 'browser_key', 'browser_scroll', 'browser_screenshot', 'browser_tabs', 'browser_new_tab', 'browser_select_tab', 'browser_close_tab', 'browser_stop',
+  'control_status', 'open_settings', 'stop_control', 'settings_read', 'settings_update', 'management', 'browser_start', 'browser_navigate', 'browser_snapshot', 'browser_click', 'browser_fill', 'browser_key', 'browser_scroll', 'browser_screenshot', 'browser_tabs', 'browser_new_tab', 'browser_select_tab', 'browser_close_tab', 'browser_stop',
   'desktop_start', 'desktop_screenshot', 'desktop_move', 'desktop_click', 'desktop_key', 'desktop_type', 'desktop_stop'];
 const child = spawn(process.execPath, ['dist/packages/mcp-server/src/private.mjs'], { cwd: root, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
 const closed = once(child, 'close');
@@ -30,7 +30,7 @@ try {
   assert.ok((await request('server/discover')).result.supportedVersions.includes('2026-07-28')); pass('modern discovery');
   const list = (await request('tools/list')).result.tools;
   assert.deepEqual(list.map(t => t.name).sort(), names.map(name => 'desktop_control.' + name).sort());
-  assert.ok(list.every(t => t.inputSchema)); pass('exact 34-tool private contract');
+  assert.ok(list.every(t => t.inputSchema)); pass('exact 35-tool private contract');
   for (const [name, args] of [
     ['status', {}], ['files_read', { path: 'probe.txt' }], ['files_write', { path: 'probe.txt', data: 'x' }],
     ['terminal_run', { argv: ['node', '-e', 'process.exit(0)'] }], ['browser_start', {}], ['desktop_start', {}],

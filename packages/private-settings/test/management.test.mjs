@@ -8,7 +8,7 @@ test('host management exposes local settings and emergency stop without remote g
   assert.deepEqual(settings.schema, { type: 'object', properties: {} });
   assert.deepEqual(settings.values, {});
   const tools = settings.layout.flatMap(group => group.items.map(item => item.tool));
-  assert.deepEqual(tools, ['desktop_control.open_settings', 'desktop_control.stop_control', 'desktop_control.control_status']);
+  assert.deepEqual(tools, ['desktop_control.management', 'desktop_control.stop_control', 'desktop_control.control_status']);
   assert.equal(tools.some(name => /grant|install|update/.test(name)), false);
   settings.layout[0].items.length = 0;
   assert.equal(readManagementSettings().layout[0].items.length, 3, 'callers cannot mutate later responses');

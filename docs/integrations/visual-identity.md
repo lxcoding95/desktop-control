@@ -26,7 +26,8 @@ For the portable root `plugin.json`, use these existing interface fields under
 
 ```json
 {
-  "logo": "./assets/desktop-control.svg",
+  "category": "Developer Tools",
+  "logo": "./assets/desktop-control.png",
   "composerIcon": "./assets/desktop-control.png",
   "brandColor": "#2374DE",
   "brandColorDark": "#68D9F4"
@@ -40,12 +41,33 @@ icon works on both light and dark backgrounds, so separate `logoDark` and
 `composerIconDark` are unnecessary. Do not use inventively named icon fields.
 The public directory's selected developer identity is distinct from source
 `author.name`/`interface.developerName`; artwork does not change that identity.
+The official [submission normalization rules](https://developers.openai.com/plugins/deploy/submission-errors)
+state that directory developer names come from the selected verified identity,
+regardless of the name in a ZIP. This publication rule does not establish a
+per-personal-plugin override for the account creator label. Source retains
+**Anon Allman**; no global account-profile change, new identity verification or
+public publication is part of this private fix.
 
-This asset task does **not** modify manifests, packaging allowlists or the account
-listing. The coordinating implementation must add exact image paths to the build
-and archive verifier, inspect the packaged images, and verify the visible host
-after the next bundled update. Do not distribute `render-icon.ps1` or the tiny
-preview variants merely because they share the asset directory.
+### Source-only correction after preview.5
+
+Cloud preview.5 readback preserved the original SVG logo, PNG composer icon and
+Anon Allman source metadata, yet the account card still showed a generic icon.
+The canonical manifest omitted `category`, and the service-generated compatibility
+manifest defaulted it to `Other`. The official category rules explicitly support
+**Developer Tools** and default an omitted category to Other.
+
+Both source manifests now set `category: "Developer Tools"` and use the existing
+64px PNG for both logo fields as a bounded SVG-ingestion compatibility experiment.
+The original SVG remains unchanged as editable vector artwork; no image is added
+or regenerated for this correction. This does **not** prove that PNG fixes the
+cloud card. The next bundled release must be read back and the actual host/card
+visually checked before reporting icon or category rendering as fixed.
+
+This correction is source-only: package version and account release remain
+unchanged until the coordinating release process batches and verifies the update.
+Existing build/archive handling already includes both declared assets. Do not
+distribute `render-icon.ps1` or tiny preview variants merely because they share
+the asset directory.
 
 ## Verification on 2026-10-25
 
@@ -54,8 +76,8 @@ the four PNG sizes. No software installation is required.
 
 | File | Dimensions | Purpose |
 | --- | --- | --- |
-| `desktop-control.svg` |128×128 viewBox and numeric dimensions | Scalable listing logo |
-| `desktop-control.png` |64×64 | Composer or PNG-only picker; below10KiB |
+| `desktop-control.svg` |128×128 viewBox and numeric dimensions | Original scalable artwork, retained |
+| `desktop-control.png` |64×64 | Current source logo and composer icon; below10KiB |
 | `desktop-control-128.png` |128×128 | Larger raster alternative |
 | `desktop-control-32.png` |32×32 | Visual scale preview only; too small for manifest |
 | `desktop-control-16.png` |16×16 | Visual scale preview only; too small for manifest |

@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, rmSync, chmodSync, writeFileSync, unlinkSync, symlinkSync, readFileSync, linkSync, lstatSync } from 'node:fs';
 import { tmpdir, userInfo } from 'node:os';
 import path from 'node:path';
-import { createPrivateGrantTestHarness } from '../src/bridge/private-grants.mts';
+import { createPrivateGrantTestHarness, privateAccessIsCurrent, privateAccessIntersection } from '../src/bridge/private-grants.mts';
+import type { PrivateWorkspaceCapability } from '../src/bridge/private-grants.mts';
+import { isAuthorized } from '../src/bridge/policy.mts';
 import { localPrincipal } from '../src/bridge/principal.mts';
 import { execFileSync } from 'node:child_process';
 
@@ -15,6 +17,146 @@ function removeFixture(directory: string): void {
   assert.match(path.basename(resolved), /^DesktopControl-private-test-[A-Za-z0-9]+$/);
   rmSync(resolved, { recursive: true, force: true });
 }
+
+test('persistent v2 permissions survive fresh authorities and a distant clock, revoke freshly, and refuse unavailable native identity', t => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory), principal = localPrincipal();
+    if (!principal) {
+      assert.throws(() => h.provisionGrant('grant'), /PRIVATE_POLICY_UNAVAILABLE/);
+      assert.throws(() => h.provisionWorkspace('grant'), /PRIVATE_POLICY_UNAVAILABLE/);
+      assert.throws(() => h.provisionControl('grant', ['desktop.read']), /PRIVATE_POLICY_UNAVAILABLE/);
+      assert.equal(h.store.getGrants().length, 0); return;
+    }
+    const now = Date.now();
+    assert.equal(h.provisionGrant('grant').state, 'active');
+    assert.equal(h.provisionWorkspace('grant', ['files.read']).state, 'active');
+    assert.equal(h.provisionControl('grant', ['browser.read', 'desktop.read'], ['https://example.com']).state, 'active');
+    for (const persisted of [h.readPolicy(), h.readWorkspacePolicy(), h.readControlPolicy()]) {
+      const policy = persisted as Record<string, unknown>;
+      assert.equal(policy.version, 2); assert.deepEqual(policy.lifetime, { kind: 'until-revoked' });
+      assert.equal(Object.hasOwn(policy, 'expiresAt'), false, 'persistent policy contains no sentinel or artificial date');
+    }
+    t.mock.method(Date, 'now', () => now + 365 * 86_400_000);
+    const restarted = createPrivateGrantTestHarness(directory);
+    assert.equal(isAuthorized({ principal, capability: 'diagnostics.read', resource: 'local:desktop-control' }, restarted.store), true);
+    const workspace = restarted.workspaceAuthority.authorize('files.read'), control = restarted.controlAuthority.authorize('browser.read');
+    assert.ok(workspace); assert.ok(control);
+    assert.equal(privateAccessIsCurrent(workspace), true); assert.equal(privateAccessIsCurrent(control), true);
+    assert.equal(Object.hasOwn(workspace, 'expiresAt'), false); assert.equal(Object.hasOwn(control, 'expiresAt'), false);
+    assert.deepEqual(restarted.provisionGrant('status').lifetime, { kind: 'until-revoked' });
+    for (const capability of ['files.write', 'files.remove', 'pdf.create'] as const)
+      assert.equal(restarted.workspaceAuthority.authorize(capability), null, 'persistence does not broaden a read-only workspace selection');
+    assert.equal(restarted.controlAuthority.authorize('browser.interact'), null);
+    const childCode = `const {createPrivateGrantTestHarness}=await import(process.argv[1]);Date.now=()=>Number(process.argv[3]);const h=createPrivateGrantTestHarness(process.argv[2]);console.log(JSON.stringify({diagnostics:h.store.getGrants().length===1,workspace:Boolean(h.workspaceAuthority.authorize('files.read')),control:Boolean(h.controlAuthority.authorize('browser.read'))}));`;
+    const processProof: unknown = JSON.parse(execFileSync(process.execPath, ['--experimental-strip-types', '--input-type=module', '-e', childCode,
+      new URL('../src/bridge/private-grants.mts', import.meta.url).href, directory, String(now + 365 * 86_400_000)],
+    { encoding: 'utf8', windowsHide: true, timeout: 30_000, stdio: ['ignore', 'pipe', 'pipe'] }));
+    assert.deepEqual(processProof, { diagnostics: true, workspace: true, control: true }, 'a fresh real process reads persistent policies without renewal');
+    restarted.provisionGrant('revoke'); restarted.provisionWorkspace('revoke'); restarted.provisionControl('revoke');
+    assert.equal(h.store.getGrants().length, 0, 'previous authority observes fresh revocation');
+    assert.equal(h.workspaceAuthority.authorize('files.read'), null); assert.equal(h.controlAuthority.authorize('browser.read'), null);
+  } finally { removeFixture(directory); }
+});
+
+test('granular workspace grant rejects invalid selections without changing or revoking the existing read-only policy', () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory); if (!localPrincipal()) return;
+    h.provisionWorkspace('grant', ['files.read']);
+    const before = JSON.stringify(h.readWorkspacePolicy());
+    for (const value of [[], ['files.read', 'files.read'], ['terminal.exec'], ['files.read', 'files.write', 'files.remove', 'pdf.create', 'shell.exec']]) {
+      const capabilities = value as PrivateWorkspaceCapability[];
+      assert.throws(() => h.provisionWorkspace('grant', capabilities), /PRIVATE_POLICY_UNAVAILABLE/);
+      assert.throws(() => h.provisionWorkspace('revoke', capabilities), /PRIVATE_POLICY_UNAVAILABLE/);
+      assert.equal(JSON.stringify(h.readWorkspacePolicy()), before);
+    }
+    assert.ok(h.workspaceAuthority.authorize('files.read'));
+    for (const capability of ['files.write', 'files.remove', 'pdf.create'] as const) assert.equal(h.workspaceAuthority.authorize(capability), null);
+  } finally { removeFixture(directory); }
+});
+
+test('v2 policy lifetime is exact and refuses hybrid expiry, malformed lifetime, crossover, wrong identity and revocation', () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory), principal = localPrincipal();
+    if (!principal) return;
+    h.prepareWorkspace(); h.prepareBrowser();
+    const base = { version: 2, principal, lifetime: { kind: 'until-revoked' }, revoked: false };
+    const diagnostic = { ...base, capability: 'diagnostics.read', resource: 'local:desktop-control' };
+    const workspace = { ...base, capabilities: ['files.read'], resource: 'local:desktop-control:workspace' };
+    const control = { ...base, capabilities: ['browser.read'], allowedOrigins: ['https://example.com'], resource: 'local:desktop-control:private-control' };
+    const changes = [
+      { lifetime: undefined }, { lifetime: null }, { lifetime: {} }, { lifetime: [] }, { lifetime: 'until-revoked' },
+      { lifetime: { kind: 'forever' } }, { lifetime: { kind: 'timed', expiresAt: Date.now() + 900_000 } },
+      { lifetime: { kind: 'until-revoked', extra: true } }, { lifetime: { kind: 'until-revoked', expiresAt: Number.MAX_SAFE_INTEGER } },
+      { expiresAt: Number.MAX_SAFE_INTEGER }, { expiresAt: null }, { principal: 'wrong' }, { revoked: true },
+      { version: 1 }, { version: 3 }, { resource: 'untrusted' }, { extra: true }
+    ];
+    for (const change of changes) {
+      h.writePolicy({ ...diagnostic, ...change }); h.writeWorkspacePolicy({ ...workspace, ...change }); h.writeControlPolicy({ ...control, ...change });
+      assert.equal(h.store.getGrants().length, 0); assert.equal(h.workspaceAuthority.authorize('files.read'), null); assert.equal(h.controlAuthority.authorize('browser.read'), null);
+    }
+    h.writePolicy(diagnostic); h.writeWorkspacePolicy(workspace); h.writeControlPolicy(control);
+    assert.equal(h.store.getGrants().length, 1); assert.ok(h.workspaceAuthority.authorize('files.read')); assert.ok(h.controlAuthority.authorize('browser.read'));
+    h.writePolicy(workspace); h.writeWorkspacePolicy(control); h.writeControlPolicy(diagnostic);
+    assert.equal(h.store.getGrants().length, 0); assert.equal(h.workspaceAuthority.authorize('files.read'), null); assert.equal(h.controlAuthority.authorize('browser.read'), null);
+  } finally { removeFixture(directory); }
+});
+
+test('legacy v1 timed permissions expire unchanged and status never migrates their stored format', t => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory), principal = localPrincipal();
+    if (!principal) return;
+    h.prepareWorkspace(); h.prepareBrowser();
+    const now = Date.now(), expiresAt = now + 900_000;
+    h.writePolicy({ version: 1, principal, capability: 'diagnostics.read', resource: 'local:desktop-control', expiresAt, revoked: false });
+    h.writeWorkspacePolicy({ version: 1, principal, capabilities: ['files.read'], resource: 'local:desktop-control:workspace', expiresAt, revoked: false });
+    h.writeControlPolicy({ version: 1, principal, capabilities: ['desktop.read'], allowedOrigins: [], resource: 'local:desktop-control:private-control', expiresAt, revoked: false });
+    assert.equal(h.store.getGrants().length, 1); assert.ok(h.workspaceAuthority.authorize('files.read')); assert.ok(h.controlAuthority.authorize('desktop.read'));
+    assert.deepEqual(h.workspaceAuthority.authorize('files.read')?.lifetime, { kind: 'timed', expiresAt });
+    h.provisionGrant('status'); h.provisionWorkspace('status'); h.provisionControl('status');
+    t.mock.method(Date, 'now', () => expiresAt + 1);
+    const restarted = createPrivateGrantTestHarness(directory);
+    assert.equal(restarted.store.getGrants().length, 0); assert.equal(restarted.workspaceAuthority.authorize('files.read'), null); assert.equal(restarted.controlAuthority.authorize('desktop.read'), null);
+    assert.equal(restarted.provisionGrant('status').state, 'denied');
+    for (const persisted of [h.readPolicy(), h.readWorkspacePolicy(), h.readControlPolicy()]) {
+      const policy = persisted as Record<string, unknown>;
+      assert.equal(policy.version, 1); assert.equal(policy.expiresAt, expiresAt); assert.equal(Object.hasOwn(policy, 'lifetime'), false);
+    }
+  } finally { removeFixture(directory); }
+});
+
+test('persistent control permission does not clear Esc unless locally and explicitly re-enabled', () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory); if (!localPrincipal()) return;
+    h.provisionControl('grant', ['browser.read', 'desktop.input'], ['https://example.com']); h.stopControls();
+    h.provisionControl('grant', ['browser.read', 'desktop.input'], ['https://example.com']);
+    const restarted = createPrivateGrantTestHarness(directory);
+    assert.equal(restarted.controlAuthority.authorize('browser.read'), null); assert.equal(restarted.controlAuthority.authorize('desktop.input'), null);
+    assert.equal(restarted.provisionControl('status').desktopStopped, true);
+    restarted.provisionControl('grant', ['browser.read'], ['https://example.com'], { reenableStopped: true });
+    assert.ok(restarted.controlAuthority.authorize('browser.read')); assert.equal(restarted.controlAuthority.authorize('desktop.input'), null);
+    assert.ok(lstatSync(path.join(directory, 'desktop-stop')).isFile());
+    restarted.provisionControl('grant', ['desktop.input'], [], { reenableStopped: true }); assert.ok(restarted.controlAuthority.authorize('desktop.input'));
+  } finally { removeFixture(directory); }
+});
+
+test('access lifetime checks and intersections preserve legacy timed bounds without implicit or hybrid persistence', () => {
+  const now = Date.now(), persistent = { lifetime: { kind: 'until-revoked' } } as const;
+  const legacy = { expiresAt: now + 1000 }, timed = { lifetime: { kind: 'timed', expiresAt: now + 500 }, expiresAt: now + 500 } as const;
+  for (const access of [persistent, legacy, timed]) assert.equal(privateAccessIsCurrent(access, now), true);
+  for (const access of [{}, { lifetime: undefined, expiresAt: now + 1000 }, { lifetime: null, expiresAt: now + 1000 },
+    { lifetime: { kind: 'until-revoked', extra: true } }, { ...persistent, expiresAt: Number.MAX_SAFE_INTEGER },
+    { expiresAt: Infinity }, { expiresAt: now }, { ...timed, expiresAt: now + 1000 }]) assert.equal(privateAccessIsCurrent(access, now), false);
+  assert.equal(privateAccessIsCurrent(persistent, NaN), false);
+  assert.deepEqual(privateAccessIntersection(persistent, persistent, now), persistent);
+  assert.deepEqual(privateAccessIntersection(persistent, legacy, now), { lifetime: { kind: 'timed', expiresAt: legacy.expiresAt }, expiresAt: legacy.expiresAt });
+  assert.deepEqual(privateAccessIntersection(legacy, timed, now), timed);
+  assert.equal(privateAccessIntersection(legacy, timed, now + 501), null);
+});
 
 test('private policy fails closed, reads fresh, and revokes a native principal', () => {
   const directory = createFixture();
@@ -183,7 +325,7 @@ test('durable desktop stop denies only desktop until an explicit trusted local r
     assert.equal(h.controlAuthority.authorize('desktop.input'), null, 'status cannot clear stop');
     assert.equal(h.provisionControl('grant', ['terminal.exec']).state, 'active');
     assert.equal(h.provisionControl('status').desktopStopped, true, 'unrelated grant cannot clear stop');
-    assert.equal(h.provisionControl('grant', ['desktop.input']).state, 'active');
+    assert.equal(h.provisionControl('grant', ['desktop.input'], [], { reenableStopped: true }).state, 'active');
     assert.ok(h.controlAuthority.authorize('desktop.input'));
     assert.equal(h.provisionControl('revoke').state, 'revoked');
     assert.equal(h.controlAuthority.authorize('desktop.input'), null);
@@ -270,10 +412,10 @@ test('emergency host stop survives a fresh authority and only explicit matching 
     assert.equal(restarted.controlAuthority.authorize('desktop.input'), null);
     restarted.provisionControl('status');
     assert.equal(restarted.controlAuthority.authorize('browser.read'), null);
-    restarted.provisionControl('grant', ['browser.read'], ['https://example.com']);
+    restarted.provisionControl('grant', ['browser.read'], ['https://example.com'], { reenableStopped: true });
     assert.ok(restarted.controlAuthority.authorize('browser.read'));
     assert.ok(lstatSync(path.join(directory, 'desktop-stop')).isFile(), 'browser re-enable cannot clear desktop stop');
-    restarted.provisionControl('grant', ['desktop.input']);
+    restarted.provisionControl('grant', ['desktop.input'], [], { reenableStopped: true });
     assert.ok(restarted.controlAuthority.authorize('desktop.input'));
   } finally { removeFixture(directory); }
 });
@@ -287,7 +429,7 @@ test('partial local re-enable failure never activates either requested capabilit
     h.stopControls();
     const marker = path.join(directory, 'browser-stop');
     unlinkSync(marker); mkdirSync(marker);
-    assert.throws(() => h.provisionControl('grant', ['desktop.input', 'browser.read'], ['https://example.com']), /PRIVATE_POLICY_UNAVAILABLE/);
+    assert.throws(() => h.provisionControl('grant', ['desktop.input', 'browser.read'], ['https://example.com'], { reenableStopped: true }), /PRIVATE_POLICY_UNAVAILABLE/);
     assert.equal(h.controlAuthority.authorize('desktop.input'), null, 'successful first marker reset cannot activate desktop');
     assert.equal(h.controlAuthority.authorize('browser.read'), null);
     assert.equal(createPrivateGrantTestHarness(directory).controlAuthority.authorize('desktop.input'), null, 'fresh process sees revoked staged selection');

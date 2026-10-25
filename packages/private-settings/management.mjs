@@ -7,7 +7,7 @@ export function readManagementSettings() {
   return {
     schema: { type: 'object', properties: {} }, values: {},
     layout: [{ kind: 'group', title: 'Desktop Control management', items: [
-      { kind: 'tool', tool: 'desktop_control.open_settings', description: 'Open local permissions and versions. Opening never grants access.' },
+      { kind: 'tool', tool: 'desktop_control.management', description: 'Open management inside ChatGPT. Opening never grants access.' },
       { kind: 'tool', tool: 'desktop_control.stop_control', description: 'Stop browser and desktop automation immediately.' },
       { kind: 'tool', tool: 'desktop_control.control_status', description: 'Read installed plugin version and current grant state.' }
     ] }]

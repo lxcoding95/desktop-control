@@ -37,7 +37,11 @@ test('private host settings advertise safe actions and cannot provision grants',
     assert.deepEqual(result.schema, { type: 'object', properties: {} });
     assert.deepEqual(result.values, {});
     const actions = result.layout.flatMap(group => group.items.map(item => item.tool));
-    assert.deepEqual(actions, ['desktop_control.open_settings', 'desktop_control.stop_control', 'desktop_control.control_status']);
+    assert.deepEqual(actions, ['desktop_control.management', 'desktop_control.stop_control', 'desktop_control.control_status']);
+    const opened = await call('management', {});
+    assert.deepEqual(opened.result.structuredContent, { view: 'management', grantsChanged: false });
+    const view = await request('resources/read', { uri: 'ui://desktop-control/management' });
+    assert.equal(view.result.contents[0].mimeType, 'text/html;profile=mcp-app');
     assert.deepEqual((await call('settings_update', { set: {} })).result.structuredContent, { values: {} });
     for (const args of [{ set: { 'desktop.input': true } }, { set: {}, grant: true }, { set: [] }, {}]) {
       const response = await call('settings_update', args);

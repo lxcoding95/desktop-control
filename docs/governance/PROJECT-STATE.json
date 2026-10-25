@@ -523,14 +523,13 @@
     "branch": "feat/private-diagnostics-plugin-20261025",
     "required_checks": "not_configured",
     "dedicated_chromium_acceptance": "not_run",
-    "plugin_uploaded_version": "0.0.1-preview.4",
-    "plugin_release_id": "pluginrel_6adde3dfd1f48191b179271f49428165",
-    "uploaded_source_head": "5817093949ece2a7451588020397ccb85d6eccb3",
+    "plugin_uploaded_version": "0.0.1-preview.5",
+    "uploaded_source_head": "847bf6aef517e1f6f17f86c4b10a08e76338cdf2",
     "host_call_verified_at_utc": "2026-10-25T11:37:00Z",
     "host_call_time_precision": "minute approximate; tool transcript is authoritative",
-    "host_observed_package_version": "0.0.1-preview.4",
+    "host_observed_package_version": "0.0.1-preview.5",
     "host_observed_grants": "all_denied_no_new_grants",
-    "host_settings_tool": "opened_real_installed_preview4_window",
+    "host_settings_tool": "opened_real_installed_preview5_window",
     "windows_clean_recheck_20261025": {
       "head": "5817093949ece2a7451588020397ccb85d6eccb3",
       "elevated": false,
@@ -548,7 +547,7 @@
     "active_elapsed_seconds_verified": null,
     "owner_scope": "selected_private_S02_S06_authorized_no_formal_session_reset",
     "main_merge_performed": false,
-    "next_bundle_version": "0.0.1-preview.5",
+    "next_bundle_version": "unassigned_until_verified_batch",
     "updater_fixture_windows": {
       "tests": 16,
       "pass": 15,
@@ -565,7 +564,10 @@
     "docker_mcp_profile": "desktop-control_core_only_local_tested",
     "docker_image_id": "sha256:11c6f85d8ca36069d0b7b08a4cc4114b505ba9a95bdbff840d0bd58389b49e91",
     "stale_local_marketplace": "removed_via_supported_cli_other_config_unchanged",
-    "last_checkpoint_utc": "2026-10-25T12:06:00Z",
-    "checkpoint_time_precision": "minute approximate; command and matrix receipts contain exact times"
+    "last_checkpoint_utc": "2026-10-25T22:26:34.039462+00:00",
+    "checkpoint_time_precision": "minute approximate; command and matrix receipts contain exact times",
+    "next_batch": "persistent_grants_and_in_app_management_uncommitted_recovery_validation_in_progress",
+    "remote_integration": "PR34_4be071c_default_off_health_only_not_deployed",
+    "license": "one_existing_owner_DPAPI_staging_license_remote_health_only_do_not_reinitialize"
   }
 }

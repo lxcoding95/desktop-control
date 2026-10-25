@@ -32,6 +32,7 @@ for (const name of ['private-browser', 'private-desktop', 'private-settings']) {
 for (const file of ['runtime.mjs', 'indicator.mjs']) copy(`packages/private-browser/${file}`);
 copy('packages/mcp-server/scripts/private-grant.mjs');
 copy('packages/private-settings/management.mjs');
+copy('packages/private-settings/management.html');
 copy('packages/private-desktop/native/DesktopController.cs');
 copy('packages/private-settings/native/PrivateSettings.cs');
 copy('plugin/skills', 'skills');

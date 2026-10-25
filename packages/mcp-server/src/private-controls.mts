@@ -4,7 +4,7 @@ import type { ChildProcess } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
-import { createPrivateControlAuthority, provisionPrivateControl, provisionPrivateGrant, provisionPrivateWorkspace, stopPrivateControls } from './bridge/private-grants.mts';
+import { createPrivateControlAuthority, provisionPrivateControl, provisionPrivateGrant, provisionPrivateWorkspace, stopPrivateControls, privateAccessIsCurrent } from './bridge/private-grants.mts';
 import type { PrivateControlCapability } from './bridge/private-grants.mts';
 import { createControlSequencer } from './bridge/control-sequencer.mts';
 
@@ -46,7 +46,7 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
   const load = (name: string) => import(pathToFileURL(path.join(root, 'packages', name, 'controller.mjs')).href) as Promise<unknown>;
   const authorize = (capability: PrivateControlCapability) => {
     const access = authority.authorize(capability);
-    if (!access || access.expiresAt <= Date.now()) throw Error('PERMISSION_DENIED');
+    if (!access || !privateAccessIsCurrent(access)) throw Error('PERMISSION_DENIED');
     return Promise.resolve(access);
   };
   async function stopDesktop() { const current = desktop; desktop = undefined; await current?.stop?.(); }

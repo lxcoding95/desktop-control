@@ -15,7 +15,8 @@
       "interface": {
         "displayName": "Desktop Control",
         "developerName": "Anon Allman",
-        "logo": "./assets/desktop-control.svg",
+        "category": "Developer Tools",
+        "logo": "./assets/desktop-control.png",
         "composerIcon": "./assets/desktop-control.png",
         "brandColor": "#2374DE",
         "brandColorDark": "#68D9F4",

@@ -1,4 +1,5 @@
 import { execFileSync, spawn } from 'node:child_process';
+import { Buffer } from 'node:buffer';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -34,6 +35,11 @@ export function openPrivateSettings() {
   return child;
 }
 
+const literalObject = (value, keys) => value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype
+  && Reflect.ownKeys(value).length === keys.length && keys.every(key => {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    return descriptor && Object.hasOwn(descriptor, 'value') && descriptor.enumerable;
+  });
 function validAction(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
     && Object.keys(value).sort().join(',') === 'details,kind,summary'
@@ -47,12 +53,45 @@ function validAction(value) {
     });
 }
 
-/** Test-only dependency seam. Production callers use confirmPrivateAction below. */
-export function createPrivateActionConfirmerForTest(spawnImpl, timeoutMs = 60_000) {
+const controls = ['browser.read', 'browser.interact', 'desktop.read', 'desktop.input', 'terminal.exec'];
+const workspaceCapabilities = ['files.read', 'files.write', 'files.remove', 'pdf.create'];
+function literalArray(value, maximum, validate) {
+  return Array.isArray(value) && Object.getPrototypeOf(value) === Array.prototype && value.length <= maximum
+    && Reflect.ownKeys(value).length === value.length + 1 && Array.from({ length: value.length }, (_, index) => {
+      const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+      return descriptor && Object.hasOwn(descriptor, 'value') && descriptor.enumerable && validate(descriptor.value);
+    }).every(Boolean) && new Set(value).size === value.length;
+}
+function permissionMessage(proposal) {
+  try {
+    if (!literalObject(proposal, ['controls', 'allowedOrigins', 'diagnostics', 'workspaceCapabilities', 'reenableStopped', 'lifetime']) ||
+      !literalArray(proposal.controls, 5, item => controls.includes(item)) ||
+      !literalArray(proposal.workspaceCapabilities, 4, item => workspaceCapabilities.includes(item)) ||
+      !literalArray(proposal.allowedOrigins, 20, origin => {
+        if (typeof origin !== 'string' || origin.length > 512 || !/^[\x20-\x7e]+$/.test(origin)) return false;
+        try { const url = new URL(origin); return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password && url.origin === origin && url.hostname.length > 0; }
+        catch { return false; }
+      }) || (proposal.controls.some(capability => capability.startsWith('browser.')) && proposal.allowedOrigins.length === 0) ||
+      typeof proposal.diagnostics !== 'boolean' || typeof proposal.reenableStopped !== 'boolean' ||
+      !literalObject(proposal.lifetime, ['kind']) || proposal.lifetime.kind !== 'until-revoked') return null;
+    // Serialize a fresh literal snapshot before waiting; later caller mutation cannot alter consent.
+    const details = JSON.stringify({ controls: [...proposal.controls], allowedOrigins: [...proposal.allowedOrigins],
+      diagnostics: proposal.diagnostics, workspaceCapabilities: [...proposal.workspaceCapabilities],
+      reenableStopped: proposal.reenableStopped, lifetime: { kind: 'until-revoked' } }, null, 2);
+    if (Buffer.byteLength(details, 'utf8') > 8192) return null;
+    return { kind: 'permissions.grant', summary: 'Persistent Desktop Control permissions: until revoked', details };
+  } catch { return null; }
+}
+function validPermissionMessage(message) {
+  if (!literalObject(message, ['kind', 'summary', 'details']) || message.kind !== 'permissions.grant' ||
+    message.summary !== 'Persistent Desktop Control permissions: until revoked' || typeof message.details !== 'string') return false;
+  try { return permissionMessage(JSON.parse(message.details))?.details === message.details; } catch { return false; }
+}
+function createNativeConfirmer(spawnImpl, timeoutMs, validate) {
   if (typeof spawnImpl !== 'function' || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 60_000) throw Error('INVALID_INPUT');
   let pending = false;
   return async (action, signal) => {
-    if (!validAction(action) || signal?.aborted || pending) return false;
+    if (!validate(action) || signal?.aborted || pending) return false;
     pending = true;
     return new Promise(resolve => {
       let child, timer, finished = false, terminated = false;
@@ -79,11 +118,30 @@ export function createPrivateActionConfirmerForTest(spawnImpl, timeoutMs = 60_00
     });
   };
 }
-const confirmAction = createPrivateActionConfirmerForTest(spawn);
+/** Test-only dependency seam; never pass a test spawn implementation from MCP input. */
+export function createPrivateActionConfirmerForTest(spawnImpl, timeoutMs = 60_000) {
+  return createNativeConfirmer(spawnImpl, timeoutMs, validAction);
+}
+/** Test-only seam for exact permission proposals; this never provisions a grant. */
+export function createPrivatePermissionConfirmerForTest(spawnImpl, timeoutMs = 60_000) {
+  const confirm = createNativeConfirmer(spawnImpl, timeoutMs, validPermissionMessage);
+  return (proposal, signal) => {
+    const message = permissionMessage(proposal);
+    return message ? confirm(message, signal) : Promise.resolve(false);
+  };
+}
+// Shared production mutex: permission proposals cannot overlap browser/desktop prompts.
+const confirmDialog = createNativeConfirmer(spawn, 60_000, message => validAction(message) || validPermissionMessage(message));
 /** Conservative per-input local confirmation, never a persistent grant or MCP self-approval. */
 export async function confirmPrivateAction(action, signal) {
+  if (process.platform !== 'win32' || !validAction(action)) return false;
+  return confirmDialog(action, signal);
+}
+/** Bound persistent permission consent only; the trusted host must separately apply the approved snapshot. */
+export async function confirmPrivatePermissionProposal(proposal, signal) {
   if (process.platform !== 'win32') return false;
-  return confirmAction(action, signal);
+  const message = permissionMessage(proposal);
+  return message ? confirmDialog(message, signal) : false;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

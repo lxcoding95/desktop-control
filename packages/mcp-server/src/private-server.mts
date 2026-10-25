@@ -1,10 +1,11 @@
 import * as z from 'zod/v4';
 import { createServer } from './server.mts';
-import { createPrivateGrantStore, createPrivateWorkspaceAuthority, createPrivateControlAuthority } from './bridge/private-grants.mts';
+import { createPrivateGrantStore, createPrivateWorkspaceAuthority, createPrivateControlAuthority, privateAccessIntersection } from './bridge/private-grants.mts';
 import { createWorkspaceExecutor } from './bridge/workspace.mts';
 import type { PrivateWorkspaceCapability } from './bridge/private-grants.mts';
 import { registerPrivateControls } from './private-controls.mts';
 import { registerPrivateSettings } from './private-settings.mts';
+import { registerManagementApp } from './management-app.mts';
 
 const relative = z.string().min(1).max(512);
 const sha = z.string().regex(/^[0-9a-f]{64}$/);
@@ -21,7 +22,9 @@ export function createPrivateServer() {
   const terminal = createWorkspaceExecutor({ authorize(capability) {
     const control = controls.authorize('terminal.exec');
     const workspace = workspaceAuthority.authorize(capability);
-    return control && workspace ? { ...workspace, expiresAt: Math.min(control.expiresAt, workspace.expiresAt) } : null;
+    if (!control || !workspace) return null;
+    const lifetime = privateAccessIntersection(control, workspace);
+    return lifetime ? { workspace: workspace.workspace, ...lifetime } : null;
   } });
   function register<Input extends z.ZodRawShape, Output extends z.ZodRawShape>(
     name: string, op: string, capabilities: readonly PrivateWorkspaceCapability[], input: Input, output: Output, readOnly: boolean,
@@ -56,6 +59,7 @@ export function createPrivateServer() {
   }, { exitCode: z.number().int(), stdout: z.string().max(65536), stderr: z.string().max(65536) }, false, terminal);
   const stopControls = registerPrivateControls(server);
   registerPrivateSettings(server);
+  registerManagementApp(server);
   const close = server.close.bind(server);
   server.close = async () => { await stopControls(); await close(); };
   return server;

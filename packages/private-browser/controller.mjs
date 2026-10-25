@@ -10,6 +10,21 @@ const fail = (message) => Object.assign(new Error(message), { safeBrowserError: 
 const denied = () => fail('Browser permission denied.');
 const LIMIT = 32768;
 
+/** Authority callbacks may return an explicit persistent grant; absence never means forever. */
+export function validBrowserAccessLifetime(grant, now = Date.now()) {
+  if (!grant || typeof grant !== 'object' || !Number.isSafeInteger(now) || now < 0) return false;
+  const current = expiry => Number.isSafeInteger(expiry) && expiry > now;
+  if (!Object.hasOwn(grant, 'lifetime')) {
+    if (!Object.hasOwn(grant, 'expiresAt')) return false;
+    return current(typeof grant.expiresAt === 'number' ? grant.expiresAt : Date.parse(grant.expiresAt));
+  }
+  const lifetime = grant.lifetime;
+  if (!lifetime || Object.getPrototypeOf(lifetime) !== Object.prototype) return false;
+  if (lifetime.kind === 'until-revoked') return Object.keys(lifetime).join(',') === 'kind' && !Object.hasOwn(grant, 'expiresAt');
+  return lifetime.kind === 'timed' && Object.keys(lifetime).sort().join(',') === 'expiresAt,kind' &&
+    current(lifetime.expiresAt) && (!Object.hasOwn(grant, 'expiresAt') || grant.expiresAt === lifetime.expiresAt);
+}
+
 export function normalizeBrowserUrl(value, allowPrivateOrigins = false) {
   if (typeof value !== 'string' || value.length > 4096) throw denied();
   let url;
@@ -63,8 +78,7 @@ export function createBrowserController({ authorize, profileDirectory = join(hom
   async function check(capability, origin) {
     try {
       const grant = await authorize(capability, origin);
-      const expiry = typeof grant?.expiresAt === 'number' ? grant.expiresAt : Date.parse(grant?.expiresAt);
-      if (!Number.isFinite(expiry) || expiry <= Date.now() || !Array.isArray(grant?.allowedOrigins) || !grant.allowedOrigins.length || grant.allowedOrigins.length > 20) throw denied();
+      if (!validBrowserAccessLifetime(grant) || !Array.isArray(grant?.allowedOrigins) || !grant.allowedOrigins.length || grant.allowedOrigins.length > 20) throw denied();
       const origins = grant.allowedOrigins.map(value => {
         const parsed = normalizeBrowserUrl(value, allowPrivateOrigins);
         if (parsed.origin !== value) throw denied();

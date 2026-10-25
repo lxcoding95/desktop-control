@@ -19,7 +19,7 @@ with zipfile.ZipFile(archive_path) as archive:
     native_files = {'dist/native/windows-token.exe', 'dist/native/windows-private-policy.exe', 'dist/private-desktop/desktop-controller.exe', 'dist/private-settings/private-settings.exe'}
     package_files = {'packages/mcp-server/scripts/private-grant.mjs', 'packages/private-desktop/native/DesktopController.cs', 'packages/private-settings/native/PrivateSettings.cs'}
     package_files |= {'packages/private-browser/runtime.mjs', 'packages/private-browser/indicator.mjs', 'packages/private-settings/management.mjs',
-                      'assets/desktop-control.svg', 'assets/desktop-control.png'}
+                      'assets/desktop-control.svg', 'assets/desktop-control.png', 'packages/private-settings/management.html'}
     package_files |= {f'packages/{package}/{file}' for package in ['private-browser', 'private-desktop', 'private-settings'] for file in ['controller.mjs', 'package.json']}
     def package_member(name, prefix, allowed):
         return any(name.startswith(prefix + dependency + '/') for dependency in allowed)
