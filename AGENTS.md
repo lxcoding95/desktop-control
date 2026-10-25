@@ -1,6 +1,6 @@
 # Desktop Control — repository working agreement
 
-**Live status checkpoint (2026-10-24):** `main` holds architecture/governance only; local S02 MCP-core code exists on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **not merged**. Owner-run Windows/Linux regression and pinned OSS security scans PASS (current test details in [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6)); independent semantic review and real ChatGPT-private plugin integration **PENDING**. S01 done (PR #21); S03–S06 not started. Exactly 2/6 reserved sessions started; owner-approved between-session **documentation/governance** work does not start, recharge or extend one.
+**Live status checkpoint (2026-10-24):** `main` holds architecture/governance only; local S02 MCP-core code exists on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **not merged**. Owner-run Windows/Linux regression and pinned OSS security scans PASS (current test details in [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6)); independent semantic review **PENDING**. A real private ChatGPT local diagnostic grant/allow/revoke/deny cycle was previously evidenced in [Issue #28](https://github.com/lxcoding95/desktop-control/issues/28), but no current product release or full host end-to-end matrix is approved. S01 done (PR #21); S03–S06 not started. Exactly 2/6 reserved sessions started; owner-approved between-session **documentation/governance** work does not start, recharge or extend one.
 
 ## Authoritative context
 
@@ -14,7 +14,7 @@
 
 Public outcomes are organized as **M01–M06 and M07+** under [product milestones](docs/governance/PRODUCT-MILESTONES.md), with real acceptance evidence and non-destructive milestone migration. Six historical sessions S01–S06 remain recorded in [session plan](docs/governance/SESSION-PLAN.md). Use [public information and freshness policy](docs/governance/PUBLIC-INFORMATION-POLICY.md): no secrets, personal paths, confidential development or unredacted logs in a public commit/issue, even on a draft branch. Before claiming a milestone is active in GitHub, verify its actual object, membership and Project view.
 
-Owner-approved non-session **architecture/governance** changes can be prepared as separate protected-main PRs; they do not authorize S03–S06 product runtime development. Never assume an automation is running merely because a process is documented.
+Owner-approved **selected private integration and runtime prototyping outside formal sessions** is now tracked through [M01 #28](https://github.com/lxcoding95/desktop-control/issues/28) and [M03 #29](https://github.com/lxcoding95/desktop-control/issues/29); this does **not** start any formal S03–S06 development session, permit unreviewed OS permissions, or authorize a public release. Never assume an automation is running merely because a process is documented.
 
 ## Binding GitHub autonomy standard
 
