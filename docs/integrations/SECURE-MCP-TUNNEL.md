@@ -148,3 +148,18 @@ Next: Windows gate tests and isolated npm typecheck, then implement free-tier SQ
 `tools/remote/durable-ticket-store.test.mjs` exercises 12 positive and negative cases, including missing approval, cross-account separation, one-time consumption, concurrent double-claim, stale consent revision and storage failure. The script `npm run test:remote:durable` has been registered in `npm run verify`. **This new test suite has not yet been executed on the owner's Windows system and the full verify pipeline has not been run.** The in-memory transactional fake is test-only; production requires a real SQLite-backed Durable Object.
 
 The adapter **cannot create or approve** pairings. A separate human-verified login/consent flow must supply persistent approval records; do not accept a model/client-provided `ownerId` as proof of authorization. There is no deployed OAuth endpoint or live WebSocket channel. Code stays default-off pending security review and actual Windows compilation and tests.
+
+
+## Outbound WSS device-side transport — implemented as a standalone health-only prototype
+
+The new `tools/remote/outbound-device-client.mjs` creates a **client-side WebSocket** (using Node 22+ native WebSocket) only after an injected, user-approval-backed `ticketProvider` returns a one-use ticket. This provider is a mandatory external trust dependency and is **not implemented or automatically invoked** by a public tool. It opens no listening port, never persists or logs the ticket, and sends the ticket only in a **WSS message**, not in the URL or shell command arguments.
+
+The endpoint is pinned to a separately trusted exact `*.workers.dev` hostname, `wss:` scheme and `/device` path; query strings, embedded credentials, mismatched hosts and nonstandard ports are rejected. The client expects an explicit server-ready acknowledgment with its per-session challenge and pinned device ID before accepting any remote health requests. It uses the existing default-deny `createDeviceHealthChannel` filter; there is no terminal, filesystem, browser, mouse or general MCP tool forwarding. Unknown commands terminate the channel. Timeouts, connect errors, operator stop, replayed health nonces and attempted one-time-ticket reuse are handled without automatic reconnect.
+
+```powershell
+npm run test:remote:outbound
+```
+
+**Sandbox evidence:** Node v22.16.0: 15/15 mock WebSocket transport tests passed. The exact GitHub module's git blob hash matches the tested local module; the GitHub test file must also be verified on the owner's Windows checkout. No real TLS handshake to a remote Cloudflare Worker, ticket exchange, device proof-of-possession, server-side WSS upgrade handler, or ChatGPT integration has occurred. Do not consider a reflected server challenge a substitute for trustworthy TLS plus server-side ticket validation.
+
+**Blocking production integration:** the server-side Durable Object WebSocket endpoint must authenticate the one-use device ticket in the context of an approved user/device pairing, bind the established socket to the correct owner, device and revocation state, and persist safe session attachments across hibernation. The user-facing consent/login and OAuth-protected MCP endpoint remain disabled. Current Cloudflare guidance prefers `DurableObjectState.acceptWebSocket` with hibernation: https://developers.cloudflare.com/durable-objects/best-practices/websockets/ . The owner's 34-tool local MCP plugin remains completely separate.
