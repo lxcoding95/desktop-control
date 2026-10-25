@@ -54,3 +54,23 @@ This will install dependencies *locally* and create `package-lock.json`. Until t
 - Later, entirely separate per-device and per-capability local authorization for filesystem/terminal/browser/desktop. **Do not attach `preview.5/start.mjs` to this relay**.
 
 An SDK HTTP wrapper and successfully compiling code do not prove security, identity or remote availability. This prototype is intentionally non-public.
+
+
+## Local workerd runtime smoke (default-deny; not yet executed)
+
+The additional `wrangler.mcp.local-smoke.jsonc` is **only a local test fixture**: it binds an isolated SQLite-backed Durable Object so the actual production Worker bundle can be started, but explicitly sets `ENABLE_REMOTE_HEALTH=0`, no OAuth service binding, no secrets, `workers_dev=false` and no public routes. **Do not deploy the fixture.**
+
+`smoke-local.mjs` uses the already installed, pinned `wrangler@4.145.0` CLI to launch `wrangler dev --local` on **127.0.0.1 only**, with its temporary state under the OS temporary directory. It does **not** accept any other bind address, and removes inherited Cloudflare/Wrangler credential environment variables. The script terminates its own spawned process tree and clears the scratch state. It makes five local HTTP requests and requires exact status/body denial for unauthenticated `/device`, `/device?ticket=...`, `/mcp`, `/health`, and `/oauth/token`. The expected completion marker is `RESULT=WORKER_LOCAL_DENY_PASSED`.
+
+After the reviewed packages are already installed in the isolated `tools/remote/cloudflare` working copy:
+
+```powershell
+npm run typecheck
+npm run test:local:deny
+```
+
+The new local test is deliberately **not** part of the root `npm run verify` since that root workflow does not install or pin the isolated Worker project's dependency lock yet. Do not run `wrangler dev --remote` or `wrangler deploy`: those contact cloud infrastructure and are not authorized by this smoke test.
+
+**Security warning:** Cloudflare notes Miniflare/workerd local development is **not a hardened sandbox**. Test only project code already reviewed and controlled; do not run untrusted Worker scripts on a sensitive desktop, and use an isolated virtual environment for stronger containment. Source: https://developers.cloudflare.com/workers/testing/ .
+
+Local smoke acceptance is only evidence that a disabled Worker starts and denies untrusted requests. It does not prove genuine OAuth issuance, pairing, WSS ticket consumption, Cloudflare hosted availability or successful ChatGPT connectivity. Those remain separate blockers and cannot be declared complete.
