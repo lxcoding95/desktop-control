@@ -18,8 +18,10 @@ internal static class OwnedDesktopFixture {
   static int Clicks;
   static readonly JavaScriptSerializer Json=new JavaScriptSerializer();
   static readonly object Output=new object();
+  static readonly HashSet<int> KnownHelpers=new HashSet<int>();
   delegate bool EnumProc(IntPtr window,IntPtr parameter);
   [StructLayout(LayoutKind.Sequential)] struct Point {public int X,Y;}
+  [StructLayout(LayoutKind.Sequential)] struct NativeRect {public int Left,Top,Right,Bottom;}
   [StructLayout(LayoutKind.Sequential)] struct IconInfo {public bool IsIcon;public uint HotX,HotY;public IntPtr Mask,Color;}
   [StructLayout(LayoutKind.Sequential)] struct INPUT {public uint Type;public InputUnion U;}
   [StructLayout(LayoutKind.Explicit)] struct InputUnion {[FieldOffset(0)] public MOUSEINPUT Mouse;[FieldOffset(0)] public KEYBDINPUT Key;}
@@ -39,6 +41,9 @@ internal static class OwnedDesktopFixture {
   [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc callback,IntPtr parameter);
   [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr parent,EnumProc callback,IntPtr parameter);
   [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr window);
+  [DllImport("user32.dll",EntryPoint="GetWindowLongPtrW")] static extern IntPtr GetWindowLongPtr(IntPtr window,int index);
+  [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr window,out NativeRect rectangle);
+  [DllImport("user32.dll")] static extern uint GetDpiForWindow(IntPtr window);
   [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr window,out uint pid);
   [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetWindowText(IntPtr window,StringBuilder buffer,int maximum);
   [DllImport("user32.dll")] static extern uint SendInput(uint count,INPUT[] input,int size);
@@ -83,6 +88,33 @@ internal static class OwnedDesktopFixture {
     },IntPtr.Zero);
     return new {visible=found};
   }
+  static object ProbeEdges(int pid) {
+    if(pid<=0) throw new Exception("INVALID_HELPER_PID");
+    try {using(Process helper=Process.GetProcessById(pid)) {if(!helper.ProcessName.Equals("desktop-controller",StringComparison.OrdinalIgnoreCase)) throw new Exception("INVALID_HELPER_PID");KnownHelpers.Add(pid);}}
+    catch(ArgumentException) {if(!KnownHelpers.Contains(pid)) throw new Exception("INVALID_HELPER_PID");}
+    int count=0;bool clickThrough=true,nonActivating=true,geometry=true;Dictionary<string,int> monitors=new Dictionary<string,int>();
+    EnumWindows((window,unused)=>{
+      uint owner;GetWindowThreadProcessId(window,out owner);if(owner!=(uint)pid || !IsWindowVisible(window)) return true;
+      StringBuilder title=new StringBuilder(128);GetWindowText(window,title,128);
+      const string prefix="Desktop Control edge ";if(!title.ToString().StartsWith(prefix,StringComparison.Ordinal)) return true;
+      count++;long style=GetWindowLongPtr(window,-20).ToInt64();
+      clickThrough=clickThrough && (style&0x00080020)==0x00080020;
+      nonActivating=nonActivating && (style&0x08000088)==0x08000088;
+      NativeRect rectangle;int side;
+      if(!GetWindowRect(window,out rectangle) || !Int32.TryParse(title.ToString().Substring(prefix.Length),out side) || side<0 || side>3) {geometry=false;return true;}
+      Rectangle actual=Rectangle.FromLTRB(rectangle.Left,rectangle.Top,rectangle.Right,rectangle.Bottom);
+      Rectangle screen=Screen.FromRectangle(actual).Bounds;uint dpi=GetDpiForWindow(window);
+      int thickness=Math.Min(Math.Max(4,Math.Min(12,(int)Math.Round(6.0*dpi/96.0))),Math.Min(screen.Width,screen.Height)/4);
+      Rectangle expected=side==0?new Rectangle(screen.Left,screen.Top,screen.Width,thickness):side==1?new Rectangle(screen.Left,screen.Bottom-thickness,screen.Width,thickness):side==2?new Rectangle(screen.Left,screen.Top+thickness,thickness,screen.Height-2*thickness):new Rectangle(screen.Right-thickness,screen.Top+thickness,thickness,screen.Height-2*thickness);
+      if(dpi<48 || dpi>960 || actual!=expected) geometry=false;
+      string key=screen.ToString();int mask;monitors.TryGetValue(key,out mask);
+      if((mask&(1<<side))!=0) geometry=false;monitors[key]=mask|(1<<side);
+      return true;
+    },IntPtr.Zero);
+    bool complete=monitors.Count==Screen.AllScreens.Length;
+    foreach(int mask in monitors.Values) if(mask!=15) complete=false;
+    return new {count=count,monitors=Screen.AllScreens.Length,clickThrough=clickThrough,nonActivating=nonActivating,geometryValid=geometry,completeScreens=complete};
+  }
   static object Execute(Dictionary<string,object> request) {
     string action=(string)request["action"];
     if(action=="focus") return Focus((string)request["control"]);
@@ -90,6 +122,7 @@ internal static class OwnedDesktopFixture {
     if(action=="counts") return new {clicks=Clicks,textLength=TextBox.Text.Length};
     if(action=="cursor") return CursorFingerprint();
     if(action=="banner") return ProbeBanner((int)request["pid"]);
+    if(action=="edges") return ProbeEdges((int)request["pid"]);
     if(action=="escape") {
       RequireForeground();
       INPUT[] input={new INPUT{Type=1,U=new InputUnion{Key=new KEYBDINPUT{Key=27}}},new INPUT{Type=1,U=new InputUnion{Key=new KEYBDINPUT{Key=27,Flags=2}}}};

@@ -14,7 +14,7 @@ before(() => {
   directory = mkdtempSync(path.join(tmpdir(), 'desktop-control-native-contract-'));
   probe = path.join(directory, 'probe.exe');
   execFileSync('C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe', ['/nologo', '/target:exe',
-    '/reference:System.Windows.Forms.dll', `/out:${probe}`, fileURLToPath(new URL('./NativeContractProbe.cs', import.meta.url))],
+    '/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll', `/out:${probe}`, fileURLToPath(new URL('./NativeContractProbe.cs', import.meta.url))],
   { windowsHide: true, timeout: 30_000, stdio: 'pipe' });
 });
 after(() => {
@@ -26,6 +26,12 @@ after(() => {
 
 test('native banner uses nonactivating window flags without showing a window', windowsOnly, () => {
   execFileSync(probe, [defaultHelperPath, 'banner'], { windowsHide: true, timeout: 15000, stdio: 'pipe' });
+});
+test('native four-edge indicator has DPI geometry, soft blue alpha, click-through flags and deterministic disposal without activation', windowsOnly, () => {
+  execFileSync(probe, [defaultHelperPath, 'edges'], { windowsHide: true, timeout: 15000, stdio: 'pipe' });
+});
+test('native display-change failure latches input before filesystem/pipe/UI work and forces shutdown when marshalling fails', windowsOnly, () => {
+  execFileSync(probe, [defaultHelperPath, 'display-failure'], { windowsHide: true, timeout: 15000, stdio: 'pipe' });
 });
 test('native partial-input recovery emits only corresponding release events', windowsOnly, () => {
   execFileSync(probe, [defaultHelperPath, 'releases'], { windowsHide: true, timeout: 15000, stdio: 'pipe' });

@@ -125,6 +125,12 @@ test('OPT-IN owned Windows fixture: input, banner, cursor, EOF, watchdog and dur
       const first = controller(); assert.equal((await first.start()).active, true);
       assert.notEqual((await fixture.request('cursor')).hash, baseline);
       assert.equal((await fixture.request('banner', { pid: helper.pid })).visible, true);
+      const firstPid = helper.pid;
+      const edges = await fixture.request('edges', { pid: firstPid });
+      assert.equal(edges.count, edges.monitors * 4);
+      assert.equal(edges.clickThrough, true); assert.equal(edges.nonActivating, true);
+      assert.equal(edges.geometryValid, true); assert.equal(edges.completeScreens, true);
+      t.diagnostic('Four native blue edges observed on ' + edges.monitors + ' actual monitor(s); no additional monitor hardware claimed.');
       await first.click({ x: button.x, y: button.y });
       await waitFor(async () => (await fixture.request('counts')).clicks === 1);
       await fixture.request('focus', { control: 'textbox' });
@@ -133,18 +139,24 @@ test('OPT-IN owned Windows fixture: input, banner, cursor, EOF, watchdog and dur
       await waitFor(async () => (await fixture.request('counts')).textLength === ownedText.length);
       await first.stop();
       await waitFor(async () => (await fixture.request('cursor')).hash === baseline);
+      await waitFor(async () => (await fixture.request('edges', { pid: firstPid })).count === 0);
       assert.equal(emergencies, 0);
       // 2. Force only the captured helper PID; its independent watchdog must restore cursor resources.
       await fixture.request('focus', { control: 'button' });
       const second = controller(); await second.start();
       assert.notEqual((await fixture.request('cursor')).hash, baseline);
+      const secondPid = helper.pid;
+      assert.equal((await fixture.request('edges', { pid: secondPid })).count, edges.monitors * 4);
       const ownedHelper = helper; assert.ok(ownedHelper.pid > 0); ownedHelper.kill();
       await waitFor(async () => (await fixture.request('cursor')).hash === baseline);
+      await waitFor(async () => (await fixture.request('edges', { pid: secondPid })).count === 0);
       await second.stop();
       // 3. Only the independent fixture may inject Escape. The product hook must persist/revoke/deny.
       await fixture.request('focus', { control: 'textbox' });
       const third = controller(); await third.start();
       assert.equal((await fixture.request('banner', { pid: helper.pid })).visible, true);
+      const thirdPid = helper.pid;
+      assert.equal((await fixture.request('edges', { pid: thirdPid })).count, edges.monitors * 4);
       await fixture.request('escape');
       await Promise.race([emergency, delay(5000).then(() => { throw Error('ESCAPE_CALLBACK_TIMEOUT'); })]);
       assert.equal(emergencies, 1);
@@ -156,6 +168,7 @@ test('OPT-IN owned Windows fixture: input, banner, cursor, EOF, watchdog and dur
       await assert.rejects(() => denied.start(), /PERMISSION_DENIED/);
       assert.equal(launches, beforeDenied);
       await waitFor(async () => (await fixture.request('cursor')).hash === baseline);
+      await waitFor(async () => (await fixture.request('edges', { pid: thirdPid })).count === 0);
     } finally {
       for (const value of controllers) await cleanup(() => value.stop(), 'CONTROLLER_CLEANUP_FAILED');
       if (ownsGrant) {

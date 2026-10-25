@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -19,6 +20,82 @@ internal sealed class ControlBanner : Form {
   }
 }
 
+// Original indicator surface: one tiny, click-through, nonactivating layered window per edge.
+internal sealed class ControlEdge : Form {
+  internal readonly int Side;
+  [StructLayout(LayoutKind.Sequential)] struct NativePoint {public int X,Y;public NativePoint(int x,int y){X=x;Y=y;}}
+  [StructLayout(LayoutKind.Sequential)] struct NativeSize {public int Width,Height;public NativeSize(int width,int height){Width=width;Height=height;}}
+  [StructLayout(LayoutKind.Sequential,Pack=1)] struct Blend {public byte Operation,Flags,Alpha,Format;}
+  [DllImport("user32.dll")] static extern IntPtr GetDC(IntPtr window);
+  [DllImport("user32.dll")] static extern int ReleaseDC(IntPtr window,IntPtr dc);
+  [DllImport("gdi32.dll")] static extern IntPtr CreateCompatibleDC(IntPtr dc);
+  [DllImport("gdi32.dll")] static extern bool DeleteDC(IntPtr dc);
+  [DllImport("gdi32.dll")] static extern IntPtr SelectObject(IntPtr dc,IntPtr value);
+  [DllImport("gdi32.dll")] static extern bool DeleteObject(IntPtr value);
+  [DllImport("user32.dll",SetLastError=true)] static extern bool UpdateLayeredWindow(IntPtr window,IntPtr screen,ref NativePoint location,ref NativeSize size,IntPtr surface,ref NativePoint origin,uint colorKey,ref Blend blend,uint flags);
+  internal ControlEdge(Rectangle bounds,int side) {
+    if(side<0 || side>3) throw new Exception("INDICATOR_GEOMETRY_FAILED");
+    Side=side;FormBorderStyle=FormBorderStyle.None;TopMost=true;ShowInTaskbar=false;
+    StartPosition=FormStartPosition.Manual;AutoScaleMode=AutoScaleMode.None;Bounds=bounds;
+    Text="Desktop Control edge "+side;SetStyle(ControlStyles.Selectable,false);
+  }
+  protected override bool ShowWithoutActivation {get{return true;}}
+  protected override CreateParams CreateParams {
+    get {CreateParams value=base.CreateParams;value.ExStyle|=0x080800A0;return value;}
+  }
+  protected override void WndProc(ref Message message) {
+    if(message.Msg==0x84) {message.Result=new IntPtr(-1);return;} // HTTRANSPARENT
+    if(message.Msg==0x21) {message.Result=new IntPtr(3);return;} // MA_NOACTIVATE
+    base.WndProc(ref message);
+  }
+  internal static int Thickness(uint dpi) {
+    if(dpi<48 || dpi>960) throw new Exception("INDICATOR_DPI_UNAVAILABLE");
+    return Math.Max(4,Math.Min(12,(int)Math.Round(6.0*dpi/96.0)));
+  }
+  internal static Rectangle[] Geometry(Rectangle screen,uint dpi) {
+    if(screen.Width<4 || screen.Height<4 || screen.Width>131072 || screen.Height>131072) throw new Exception("INDICATOR_GEOMETRY_FAILED");
+    int thickness=Math.Min(Thickness(dpi),Math.Min(screen.Width,screen.Height)/4);
+    return new[]{new Rectangle(screen.Left,screen.Top,screen.Width,thickness),
+      new Rectangle(screen.Left,screen.Bottom-thickness,screen.Width,thickness),
+      new Rectangle(screen.Left,screen.Top+thickness,thickness,screen.Height-2*thickness),
+      new Rectangle(screen.Right-thickness,screen.Top+thickness,thickness,screen.Height-2*thickness)};
+  }
+  internal static Bitmap Surface(int width,int height,int side) {
+    if(side<0 || side>3 || width<=0 || height<=0 || width>131072 || height>131072 || (long)width*height>1572864) throw new Exception("INDICATOR_GEOMETRY_FAILED");
+    Bitmap result=new Bitmap(width,height,PixelFormat.Format32bppPArgb);
+    try {
+      using(Graphics graphics=Graphics.FromImage(result)) {
+        graphics.CompositingMode=CompositingMode.SourceCopy;
+        int thickness=side<2?height:width;
+        for(int distance=0;distance<thickness;distance++) {
+          double fade=1.0-distance/(double)Math.Max(1,thickness-1);
+          using(SolidBrush brush=new SolidBrush(Color.FromArgb((int)Math.Round(96*fade*fade),35,134,255))) {
+            if(side<2) graphics.FillRectangle(brush,0,side==0?distance:height-1-distance,width,1);
+            else graphics.FillRectangle(brush,side==2?distance:width-1-distance,0,1,height);
+          }
+        }
+      }
+      return result;
+    } catch {result.Dispose();throw;}
+  }
+  internal void PaintSurface() {
+    using(Bitmap bitmap=Surface(Width,Height,Side)) {
+      IntPtr screen=GetDC(IntPtr.Zero),memory=IntPtr.Zero,image=IntPtr.Zero,previous=IntPtr.Zero;
+      try {
+        if(screen==IntPtr.Zero || (memory=CreateCompatibleDC(screen))==IntPtr.Zero) throw new Exception("INDICATOR_RENDER_FAILED");
+        image=bitmap.GetHbitmap(Color.FromArgb(0));previous=SelectObject(memory,image);
+        if(image==IntPtr.Zero || previous==IntPtr.Zero || previous==new IntPtr(-1)) throw new Exception("INDICATOR_RENDER_FAILED");
+        NativePoint location=new NativePoint(Left,Top),origin=new NativePoint(0,0);NativeSize size=new NativeSize(Width,Height);
+        Blend blend=new Blend{Operation=0,Flags=0,Alpha=255,Format=1};
+        if(!UpdateLayeredWindow(Handle,screen,ref location,ref size,memory,ref origin,0,ref blend,2)) throw new Exception("INDICATOR_RENDER_FAILED");
+      } finally {
+        if(previous!=IntPtr.Zero && previous!=new IntPtr(-1) && memory!=IntPtr.Zero) SelectObject(memory,previous);
+        if(image!=IntPtr.Zero) DeleteObject(image);if(memory!=IntPtr.Zero) DeleteDC(memory);if(screen!=IntPtr.Zero) ReleaseDC(IntPtr.Zero,screen);
+      }
+    }
+  }
+}
+
 internal static class DesktopController {
   const uint SPI_SETCURSORS = 0x0057;
   static readonly string StopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".desktop-control-private", "desktop-stop");
@@ -26,7 +103,16 @@ internal static class DesktopController {
   static readonly HashSet<int> Protected = new HashSet<int>();
   static readonly object OutputLock = new object();
   static Form Banner;
-  static volatile bool Active, Stopping;
+  static readonly List<ControlEdge> Edges=new List<ControlEdge>();
+  static bool DisplayChangeSubscribed;
+  static readonly EventHandler DisplayChanging=(sender,args)=>{
+    if(!Active) return;
+    EmergencyTransition(PersistEmergency,ReportEmergency,
+      cleanup=>Banner.BeginInvoke(cleanup),()=>{Stop(false);Application.Exit();},
+      ()=>{try {RestoreCursor();} finally {Environment.Exit(2);}});
+  };
+  static volatile bool Active, Stopping, EmergencyLatched;
+  static int EmergencyReported;
   static IntPtr Hook;
   static HookProc HookCallback = KeyboardHook;
   static Process Watchdog;
@@ -42,6 +128,7 @@ internal static class DesktopController {
   [StructLayout(LayoutKind.Sequential)] struct KEYBDINPUT { public ushort vk,scan; public uint flags,time; public UIntPtr extra; }
   delegate IntPtr HookProc(int code, IntPtr message, IntPtr data);
   [DllImport("user32.dll",SetLastError=true)] static extern bool SetProcessDpiAwarenessContext(IntPtr context);
+  [DllImport("user32.dll")] static extern uint GetDpiForWindow(IntPtr window);
   [DllImport("user32.dll")] static extern uint SendInput(uint count, INPUT[] inputs,int size);
   [DllImport("user32.dll")] static extern IntPtr SetWindowsHookEx(int id,HookProc proc,IntPtr module,uint thread);
   [DllImport("user32.dll")] static extern bool UnhookWindowsHookEx(IntPtr hook);
@@ -89,7 +176,7 @@ internal static class DesktopController {
       try {if(Integrity(token)>8192) throw new Exception("ELEVATION_REQUIRED");} finally{CloseHandle(token);} }
     } catch(Exception ex) {if(ex.Message=="ELEVATION_REQUIRED" || ex.Message=="PROTECTED_WINDOW") throw; throw new Exception("TARGET_UNAVAILABLE");}
   }
-  static void RequireActive() { if(Stopping || File.Exists(StopFile)) throw new Exception("DESKTOP_STOPPED"); if(!Active) throw new Exception("DESKTOP_NOT_ACTIVE"); }
+  static void RequireActive() { if(Stopping || EmergencyLatched || File.Exists(StopFile)) throw new Exception("DESKTOP_STOPPED"); if(!Active) throw new Exception("DESKTOP_NOT_ACTIVE"); }
   static INPUT[] ReleaseInputs(INPUT[] inputs) {
     List<INPUT> releases=new List<INPUT>();
     foreach(INPUT input in inputs) {
@@ -148,13 +235,41 @@ internal static class DesktopController {
       Watchdog=Process.Start(info); if(!ready.WaitOne(5000) || Watchdog.HasExited) throw new Exception("WATCHDOG_UNAVAILABLE");
     }
   }
+  static void ShowIndicators() {
+    Screen[] screens=Screen.AllScreens;
+    if(screens.Length<1 || screens.Length>16) throw new Exception("INDICATOR_GEOMETRY_FAILED");
+    foreach(Screen screen in screens) {
+      uint dpi;
+      using(ControlEdge probe=new ControlEdge(new Rectangle(screen.Bounds.Left,screen.Bounds.Top,1,1),0)) dpi=GetDpiForWindow(probe.Handle);
+      Rectangle[] bounds=ControlEdge.Geometry(screen.Bounds,dpi);
+      for(int side=0;side<4;side++) {
+        ControlEdge edge=new ControlEdge(bounds[side],side);Edges.Add(edge);
+        edge.PaintSurface();edge.Show();
+      }
+    }
+    Microsoft.Win32.SystemEvents.DisplaySettingsChanging+=DisplayChanging;DisplayChangeSubscribed=true;
+    Banner.Show();
+  }
+  static void CloseIndicators() {
+    if(DisplayChangeSubscribed) {Microsoft.Win32.SystemEvents.DisplaySettingsChanging-=DisplayChanging;DisplayChangeSubscribed=false;}
+    foreach(ControlEdge edge in Edges) {try {edge.Hide();edge.Dispose();} catch { /* Continue restoring every other owned surface. */ }}
+    Edges.Clear();
+  }
+  static void PersistEmergency() {try {File.WriteAllText(StopFile,"STOPPED\n");} catch { /* In-memory latch and process shutdown still refuse input. */ }}
+  static void ReportEmergency() {if(Interlocked.Exchange(ref EmergencyReported,1)==0) Emit(new {@event="emergencyStop"});}
+  static void EmergencyTransition(Action persist,Action notify,Action<Action> marshal,Action cleanup,Action shutdown) {
+    // A display event can run off the UI thread: close input BEFORE persistence or marshalling.
+    EmergencyLatched=true;Active=false;
+    try {persist();} catch { /* Shutdown/deny does not depend on a healthy filesystem. */ }
+    try {notify();} catch { /* Closed stdout cannot keep native input alive. */ }
+    try {marshal(cleanup);} catch {shutdown();}
+  }
   static void Stop(bool emergency) {
     if(Stopping) return; Stopping=true; Active=false;
-    if(emergency) {try {File.WriteAllText(StopFile,"STOPPED\n");} catch { /* Still stop in memory and exit. Host policy must fail closed. */ }
-      Emit(new { @event="emergencyStop" });}
+    if(emergency) {EmergencyLatched=true;PersistEmergency();ReportEmergency();}
     // Each admitted SendInput batch pairs all downs/ups; no key/button remains held between calls.
     if(Hook!=IntPtr.Zero) {UnhookWindowsHookEx(Hook);Hook=IntPtr.Zero;}
-    if(CursorTouched) {RestoreCursor();CursorTouched=false;} if(Banner!=null) Banner.Hide();
+    if(CursorTouched) {RestoreCursor();CursorTouched=false;} CloseIndicators();if(Banner!=null) Banner.Hide();
   }
   static IntPtr KeyboardHook(int code,IntPtr message,IntPtr data) {
     if(code>=0 && Active && Marshal.ReadInt32(data)==27 && (message==(IntPtr)0x100 || message==(IntPtr)0x104)) {
@@ -167,12 +282,12 @@ internal static class DesktopController {
   static object Execute(Dictionary<string,object> request) {
     string action=Text(request,"action");
     if(action=="stop") {Stop(false); Banner.BeginInvoke((Action)(()=>Application.Exit())); return new { stopped=true };}
-    if(Stopping || File.Exists(StopFile)) throw new Exception("DESKTOP_STOPPED");
+    if(Stopping || EmergencyLatched || File.Exists(StopFile)) throw new Exception("DESKTOP_STOPPED");
     if(action=="start") {
       if(Active) return new {active=true}; CheckEnvironment();
       // Require host to have prepared the fixed, ACL-protected directory; never self-provision.
       if(!Directory.Exists(Path.GetDirectoryName(StopFile))) throw new Exception("HOST_POLICY_REQUIRED");
-      StartResources(StartWatchdog,()=>SetWindowsHookEx(13,HookCallback,GetModuleHandle(null),0),BlackCursor,()=>Banner.Show(),
+      StartResources(StartWatchdog,()=>SetWindowsHookEx(13,HookCallback,GetModuleHandle(null),0),BlackCursor,ShowIndicators,
         ()=>{Stop(false);Banner.BeginInvoke((Action)(()=>Application.Exit()));});
       return new {active=true};
     }
