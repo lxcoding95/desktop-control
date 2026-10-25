@@ -7,7 +7,7 @@
 - **Product milestone IDs `M01`, `M02`, … `M50+` are unbounded.** Each new milestone groups coherent user-visible deliverables and their acceptance evidence. Do not equate a milestone with a single session, issue, PR, calendar period or GitHub completion percentage.
 - **Exactly six reserved development sessions `S01`–`S06` remain unchanged**, with issues [#5–#10](https://github.com/lxcoding95/desktop-control/issues/5) (one issue per session) as historical/time-accounting records. S01 completed; S02 [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22) is not independently accepted; S03–S06 have not started. Authorizing documentation planning never starts a development session.
 - The existing GitHub milestone objects currently track session history. **Do not rename, close, delete or reassign them in place** until the full membership inventory, replacement product milestones, owner permission and migration rollback are verified. A newly proposed `M01` is **not** the preexisting GitHub milestone whose numeric ID is 1.
-- Public `M` entries here are **planned canonical product labels**, not automatically created GitHub Milestones. Milestone objects and Project v2 views require separately verified GitHub UI/API mutations.
+- Public `M` identifiers are **canonical product labels**. A current GitHub readback shows Issue #28 assigned to milestone object **#7**; that establishes one object assignment but **does not verify that every M01–M06 milestone and private Project-v2 view was created or migrated correctly**. Preserve prior session milestone objects and independently verify all memberships through [Issue #25](https://github.com/lxcoding95/desktop-control/issues/25).
 
 ## Product delivery register
 
