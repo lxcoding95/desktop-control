@@ -1,0 +1,52 @@
+# SEC-GATE-001 pilot: no marketplace actions, token rights, secrets, writes, release or upload.
+name: Desktop Control - private plugin archive safety trial
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'tools/plugin/**'
+      - '.github/workflows/dc-plugin-archive-trial.yml'
+
+permissions: {}
+
+concurrency:
+  group: dc-plugin-archive-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  archive-validator:
+    name: Archive rejection suite (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    permissions: {}
+    steps:
+      - name: Fetch PR merge commit anonymously and verify SHA
+        shell: bash
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+          git init -q .
+          git remote add origin https://github.com/lxcoding95/desktop-control.git
+          git -c protocol.version=2 fetch -q --depth=1 --no-tags origin "refs/pull/${PR_NUMBER}/merge"
+          git -c advice.detachedHead=false checkout -q --detach FETCH_HEAD
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          [[ -z "$(git status --porcelain)" ]]
+
+      - name: Verify Python and execute archive rejection suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            python --version
+            python tools/plugin/test-archive.py
+          else
+            python3 --version
+            python3 tools/plugin/test-archive.py
+          fi
