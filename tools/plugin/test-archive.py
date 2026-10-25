@@ -10,7 +10,7 @@ import zipfile
 validator = pathlib.Path(__file__).with_name('verify-archive.py')
 with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temporary:
     root = pathlib.Path(temporary)
-    cases = ['valid', 'remote', 'no-local', 'fixture', 'missing-license', 'zero-dependencies', 'tamper', 'traversal']
+    cases = ['valid', 'remote', 'no-local', 'fixture', 'missing-license', 'zero-dependencies', 'tamper', 'traversal', 'alias', 'case-alias', 'windows-device', 'oversize', 'long-component', 'backslash', 'space-suffix']
     for case in cases:
         manifest = {'version': '0.0.1-test', 'extensions': {'com.openai': {'requires_local_executor': case != 'no-local'}}}
         mcp = {'mcpServers': {'desktop-control': {'type': 'http' if case == 'remote' else 'stdio', 'args': ['${PLUGIN_ROOT}/start.mjs']}}}
@@ -24,6 +24,16 @@ with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temp
             files['test/grant.mjs'] = b'test-only marker'
         if case == 'traversal':
             files['../escape'] = b'test-only marker'
+        extras = {
+            'alias': {'data.txt': b'good', './data.txt': b'evil'},
+            'case-alias': {'README.txt': b'A', 'readme.txt': b'B'},
+            'windows-device': {'CON.txt': b'X'},
+            'oversize': {'large.dat': b'z' * (32 * 1024 * 1024 + 1)},
+            'long-component': {'x' * 256 + '.txt': b'x'},
+            'backslash': {'escape\\foo': b'x'},
+            'space-suffix': {'safe .txt ': b'y'},
+        }
+        files.update(extras.get(case, {}))
         inventory = {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}
         if case == 'tamper':
             files['plugin.json'] += b' '
