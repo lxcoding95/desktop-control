@@ -4,21 +4,45 @@ import json
 import pathlib
 import sys
 import zipfile
+import re
+import unicodedata
 
 archive_path = pathlib.Path(sys.argv[1]).resolve()
 destination = pathlib.Path(sys.argv[2]).resolve()
 if destination.exists():
     raise ValueError('Use a new extraction directory')
 with zipfile.ZipFile(archive_path) as archive:
-    names = archive.namelist()
+    infos = archive.infolist()
+    names = [item.filename for item in infos]
+    # Bound extraction before reading any untrusted compressed bytes; this is an
+    # upload validator, not an installer with an unlimited decompression budget.
+    if (len(infos) > 12000 or archive_path.stat().st_size > 128 * 1024 * 1024 or
+            sum(item.file_size for item in infos) > 128 * 1024 * 1024):
+        raise ValueError('Archive budget exceeded')
     if len(names) != len(set(names)):
         raise ValueError('Duplicate archive entries')
-    for name in names:
+    canonical = set()
+    for item in infos:
+        name = item.filename
         path = pathlib.PurePosixPath(name)
-        if path.is_absolute() or '..' in path.parts or '\\' in name or ':' in name:
+        segments = name.split('/')
+        if (not name or name.startswith('/') or name.endswith('/') or
+                len(name) > 4096 or path.is_absolute() or
+                any(part in ('', '.', '..') or len(part) > 255 or
+                    part.endswith((' ', '.')) or
+                    re.fullmatch(r'(?i)(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?', part)
+                    for part in segments) or
+                '\\' in name or ':' in name or any(ord(c) < 32 or ord(c) == 127 for c in name)):
             raise ValueError('Unsafe archive member')
-        if ((archive.getinfo(name).external_attr >> 16) & 0o170000) != 0o100000:
+        folded = unicodedata.normalize('NFKC', name).casefold()
+        if folded in canonical:
+            raise ValueError('Cross-platform member alias')
+        canonical.add(folded)
+        if ((item.external_attr >> 16) & 0o170000) != 0o100000:
             raise ValueError('Non-regular archive member')
+        if (item.file_size > 32 * 1024 * 1024 or item.flag_bits & 1 or
+                (item.compress_size and item.file_size / item.compress_size > 1000)):
+            raise ValueError('Oversized, encrypted or overcompressed archive member')
     inventory = json.loads(archive.read('FILES.sha256.json'))
     if set(names) != set(inventory) | {'FILES.sha256.json'}:
         raise ValueError('Inventory differs from archive')
