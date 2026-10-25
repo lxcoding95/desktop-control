@@ -127,3 +127,16 @@ npm run test:remote:ticket
 Connect `verifyEnrollment` / issued-ticket store / atomic consume callbacks to a reviewed SQLite-backed Durable Object, using Cloudflare's official `OAuthProvider` and `createMcpHandler` for the actual public Streamable HTTP MCP endpoint. The local Windows process must obtain the ticket through an approved user-interactive device flow, then initiate an outbound authenticated `wss://` connection. Verify owner/client scopes at both ingress and dispatch; never trust user-supplied ownerIds in JSON. If a Free-tier account and authenticated endpoint cannot be verified, remain default-off.
 
 Current upstream: https://github.com/cloudflare/agents/blob/main/docs/agents/mcp-servers.md (SDK v2 stateless handler), https://github.com/cloudflare/agents/blob/main/docs/agents/securing-mcp-servers.md (OAuthProvider), https://developers.cloudflare.com/durable-objects/best-practices/websockets/ (hibernating WebSockets), and https://developers.cloudflare.com/workers/platform/limits/ (Free quotas).
+
+
+## Split-Worker HTTPS MCP candidate — implemented as default-off source (2026-10-25)
+
+New files under `tools/remote/cloudflare/` implement the **current October 2026** Cloudflare OAuth split architecture from MIT upstream, rather than its obsolete demo static identity flow:
+- `auth-worker.ts`: `OAuthAuthorizationServer`, but **/authorize explicitly denies** all enrollment until a reviewed interactive account sign-in exists. Never trust client-provided account/user claims or provision a demo identity.
+- `mcp-worker.ts`: `OAuthResourceServer` validates a bearer token via Service Binding, and `createMcpHandler` from `agents/mcp/server` provides stateless Streamable HTTP for the **only** exposed remote health tool. It validates owner matching and `remote.health` scope, returning `DEVICE_UNAVAILABLE` until the actual paired relay backend is ready.
+- `oauth-health-gate.mjs`: strict authenticated owner/device authorization and bounded, non-identifying tool result, backed by `oauth-health-gate.test.mjs` negative cases.
+- Exactly version-pinned dependencies in an isolated `cloudflare/package.json`, independent of local plugin `preview.5`. The `wrangler.*.example.jsonc` templates disable `workers_dev`, have **no routes** and do not bind a real Durable Object.
+
+Tests: `npm run test:remote:oauth-gate` added to the root `verify` command; **Windows/Linux execution and Workers typecheck are pending** as of this commit. Current package has no lockfile and has not passed a supply-chain audit; no Cloudflare account/deployment is connected. Compilation, OAuth provider integration, HTTP Inspector and ChatGPT end-to-end still require independent verification. See [cloudflare/README.md](../../tools/remote/cloudflare/README.md).
+
+Next: Windows gate tests and isolated npm typecheck, then implement free-tier SQLite Durable Object durable pairing + live outbound device WebSocket, add real user authentication/consent without hardcoded identities. Do not enable Worker URL or `ENABLE_REMOTE_HEALTH` before the relevant gates. There is **no live remote ChatGPT connection yet**.
