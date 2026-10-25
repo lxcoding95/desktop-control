@@ -154,7 +154,7 @@ export class RemoteHealthRelay extends DurableObject<Env> {
     if (!record(pair) || !validId(pair.revision)) { this.close(ws); return; }
     const authenticated: ReadyAttachment = {
       phase: 'ready', ownerId: verified.ownerId, deviceId: verified.deviceId,
-      pairingRevision: pair.revision, until: Math.min(verified.expiresAt, pair.expiresAt as number)
+      pairingRevision: pair.revision, until: pair.expiresAt as number
     };
     if (!await this.isPaired(authenticated)) { this.close(ws); return; }
     for (const other of this.ctx.getWebSockets()) {
@@ -163,6 +163,9 @@ export class RemoteHealthRelay extends DurableObject<Env> {
       if (a?.phase === 'ready' && a.ownerId === authenticated.ownerId &&
           a.deviceId === authenticated.deviceId) this.close(other);
     }
+    // The 60-second ticket is only for initial authentication. Once
+    // consumed, the WSS session is bounded by approved pairing expiry
+    // and checked for revocation on each privileged (health-only) event.
     ws.serializeAttachment(authenticated);
     ws.send(JSON.stringify({
       type: 'remote.device.ready', deviceId: verified.deviceId, challenge: frame.challenge
