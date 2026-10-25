@@ -55,10 +55,13 @@ try {
     $keyBytes = [Convert]::FromBase64String($vault.license.signing_private_pkcs8_dpapi)
     $privateKeyBytes = [Security.Cryptography.ProtectedData]::Unprotect(
         $keyBytes,$null,[Security.Cryptography.DataProtectionScope]::CurrentUser)
-    $rsa = [Security.Cryptography.RSA]::Create()
-    $bytesRead = 0
-    $rsa.ImportPkcs8PrivateKey($privateKeyBytes,[ref]$bytesRead)
-    if ($bytesRead -ne $privateKeyBytes.Length -or $rsa.KeySize -lt 3072) {
+    # CNG import accepts byte[] directly under Windows and avoids
+    # PowerShell's ReadOnlySpan/ref overload binding ambiguity.
+    $cng = [Security.Cryptography.CngKey]::Import(
+        $privateKeyBytes,[Security.Cryptography.CngKeyBlobFormat]::Pkcs8PrivateBlob
+    )
+    $rsa = [Security.Cryptography.RSACng]::new($cng)
+    if ($rsa.KeySize -lt 3072) {
         throw 'Invalid local private license signer.'
     }
 
