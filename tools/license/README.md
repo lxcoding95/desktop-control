@@ -34,3 +34,13 @@ Once the owner has obtained real Cloudflare API credentials through verified off
 MIT grants recipients the right to copy, modify and run the publicly distributed source with the required notices. Authentication protects OUR official service, identities, pairing records, issuer keys, signed official packages and branding; it CANNOT prevent a developer from modifying and self-hosting a public MIT fork. Preventing use of published source would require separately approved future licensing/distribution choices and assessment of contributor rights, not fake DRM. No license change or paid service authorized.
 
 All changes remain unmerged on Draft PR #34, with no hosted deployment, no creation of Cloudflare accounts, no secret file changes from GitHub, and no historic development session advancement.
+
+## Windows verification and atomic-save correction (2026-10-25)
+
+Owner tested exact commit `53267fa67c21dab98b048c8ddec689edb4310d43`: 19/19 signed-license and one-seat security tests PASS (`LICENSE_TESTS=PASSED`).
+Previously empty Windows owner `.ssh` vault successfully initialized: `LOCAL_VAULT_INITIALIZED=TRUE`, `SECRETS_DPAPI_ENCRYPTED=TRUE`, capacity 1, no secret output. **Do not bootstrap twice.**
+Local preview license issuance FAILED at final vault write with `File.Replace(..., $null)` raising `The path is empty`; no license success marker was received. This is not an issued license confirmation.
+
+Corrections on the feature branch: `tools/license/issue-preview-license.ps1` and `tools/remote/set-preview-vault-secret.ps1` use a unique nonempty backup path and the four-argument Windows `File.Replace` overload; verify the owner-only ACL before deleting the old-vault backup. If replacement or ACL checking fails, a recoverable backup remains. No secrets are printed or committed.
+
+**Windows retest of the corrected write path is pending.** Retest should check only the non-secret `license.issued`/`license.grant` flags before invoking issuer, must never run owner bootstrap again and must not reveal vault content.
