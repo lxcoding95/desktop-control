@@ -52,13 +52,14 @@ function parseTimestamp(s) {
   return n;
 }
 function validatePolicy(p) {
-  exactKeys(p, ['schema', 'sequence', 'issuedAt', 'expiresAt', 'platform', 'minBridge', 'targetBridge', 'compatiblePlugins', 'mandatory', 'artifact']);
+  exactKeys(p, ['schema', 'sequence', 'issuedAt', 'expiresAt', 'platform', 'minBridge', 'targetBridge', 'compatiblePlugins', 'contract', 'mandatory', 'artifact']);
   if (p.schema !== 1 || !Number.isSafeInteger(p.sequence) || p.sequence < 1 || !PLATFORMS.has(p.platform) || typeof p.mandatory !== 'boolean') fail('INVALID_POLICY');
   versionParts(p.minBridge);
   versionParts(p.targetBridge);
   if (compareVersions(p.targetBridge, p.minBridge) < 0) fail('INVALID_POLICY');
   if (!Array.isArray(p.compatiblePlugins) || p.compatiblePlugins.length < 1 || p.compatiblePlugins.length > 20 || new Set(p.compatiblePlugins).size !== p.compatiblePlugins.length) fail('INVALID_POLICY');
   for (const v of p.compatiblePlugins) versionParts(v);
+  if (typeof p.contract !== 'string' || !/^[A-Za-z0-9._-]{1,64}$/.test(p.contract)) fail('INVALID_POLICY');
   exactKeys(p.artifact, ['name', 'sha256', 'size']);
   if (typeof p.artifact.name !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,100}$/.test(p.artifact.name) || p.artifact.name.includes('..') || !SHA.test(p.artifact.sha256) || !Number.isSafeInteger(p.artifact.size) || p.artifact.size < 1 || p.artifact.size > 512 * 1024 * 1024) fail('INVALID_ARTIFACT');
   const issued = parseTimestamp(p.issuedAt), expires = parseTimestamp(p.expiresAt);
@@ -100,10 +101,11 @@ export function verifyArtifact(bytes, artifact) {
   return timingSafeEqual(got, Buffer.from(artifact.sha256, 'hex'));
 }
 
-export function decideAccess(policy, { bridgeVersion, pluginVersion, platform }) {
+export function decideAccess(policy, { bridgeVersion, pluginVersion, platform, contract }) {
   validatePolicy(policy);
   versionParts(bridgeVersion); versionParts(pluginVersion);
   if (policy.platform !== platform) return { state: 'REPAIR_ONLY', reason: 'PLATFORM_MISMATCH', allowed: RECOVERY_TOOLS };
+  if (contract !== policy.contract) return { state: 'REPAIR_ONLY', reason: 'CONTRACT_MISMATCH', allowed: RECOVERY_TOOLS };
   if (!policy.compatiblePlugins.includes(pluginVersion)) return { state: 'REPAIR_ONLY', reason: 'PLUGIN_UPDATE_REQUIRED', allowed: RECOVERY_TOOLS };
   if (compareVersions(bridgeVersion, policy.targetBridge) > 0) return { state: 'REPAIR_ONLY', reason: 'UNEXPECTED_BRIDGE_VERSION', allowed: RECOVERY_TOOLS };
   const needsUpdate = compareVersions(bridgeVersion, policy.targetBridge) < 0;
