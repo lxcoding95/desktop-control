@@ -67,6 +67,8 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md), [SUPPOR
 
 ## Licensing and attribution
 
-Project-authored source and documents are licensed under [MIT](LICENSE), unless a file explicitly states otherwise. Third-party code retains its original license and notices; see the [reuse policy](docs/governance/REUSE-LICENSES.md). This project is independent of Desktop Commander and other referenced projects, and does not claim affiliation.
+Project-authored source and documents are licensed under [MIT](LICENSE), unless a file explicitly states otherwise.
+
+The MIT license **permits copying, redistribution and forks**; it is not a copy-prevention mechanism. [Copyright and official project identity](docs/governance/COPYRIGHT-AND-PROJECT-IDENTITY.md) explains what belongs in the public repository and what remains separate from the source code. Third-party code retains its original license and notices; see the [reuse policy](docs/governance/REUSE-LICENSES.md). This project is independent of Desktop Commander and other referenced projects, and does not claim affiliation.
 
 Maintained by the repository owner and contributors; contributors and reviewers are credited only for work actually performed.
