@@ -1,5 +1,7 @@
 // Desktop Control M03 update-policy prototype. Pure decisions only: NO install/network/I/O.
 import { createHash, createPublicKey, timingSafeEqual, verify as verifySignature } from 'node:crypto';
+import { Buffer } from 'node:buffer';
+import { TextDecoder } from 'node:util';
 
 export const RECOVERY_TOOLS = Object.freeze(['desktop_control.version', 'desktop_control.doctor', 'desktop_control.update', 'desktop_control.revoke', 'desktop_control.logout', 'desktop_control.emergency_stop']);
 const VERSION = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;

@@ -4,6 +4,7 @@ import { createPrivateGrantStore, createPrivateWorkspaceAuthority, createPrivate
 import { createWorkspaceExecutor } from './bridge/workspace.mts';
 import type { PrivateWorkspaceCapability } from './bridge/private-grants.mts';
 import { registerPrivateControls } from './private-controls.mts';
+import { registerPrivateSettings } from './private-settings.mts';
 
 const relative = z.string().min(1).max(512);
 const sha = z.string().regex(/^[0-9a-f]{64}$/);
@@ -54,6 +55,7 @@ export function createPrivateServer() {
     argv: z.tuple([z.enum(['node', 'npm', 'git', 'sh'])]).rest(z.string().max(32768)).refine(args => args.length <= 64)
   }, { exitCode: z.number().int(), stdout: z.string().max(65536), stderr: z.string().max(65536) }, false, terminal);
   const stopControls = registerPrivateControls(server);
+  registerPrivateSettings(server);
   const close = server.close.bind(server);
   server.close = async () => { await stopControls(); await close(); };
   return server;

@@ -131,3 +131,13 @@ Clean testedsource38b5a9a526a6b82818d1dcf7c2011c2a8eec5b4f: Windows29unit/9proto
 
 The owner's explicit selected S02–S06 private implementation authorization supersedes prior scope locks; no historical ledger or session counter is reset. First exact recovery timestamp03:35:08.6160525Z, earlier preflight unmetered. Current integration plan: docs/plans/2026-10-25-recovery-and-ai-browser.md. PR33/Issue28 carry checkpoints. New components and current integrated HEAD remain unaccepted pending full native/platform/host/security evidence. No merge/public release.
 
+
+## Interrupted-work continuation — 2026-10-25 11:35 UTC checkpoint
+
+A separate clean clone of PR33 HEAD `5817093949ece2a7451588020397ccb85d6eccb3` was tested under an actual ordinary Windows token (`Elevated=False`), Node24.21.0/npm12.2.0. `npm ci --ignore-scripts` and `npm run verify` each exit0. Aggregate124tests:117pass,0fail,7skip,0cancelled. Worktree clean afterwards. Only the sanitized summary is posted to PR33 comment6397144100; raw logs remain local. The earlier elevated hosted run is still a failed run, not silently replaced.
+
+The existing account plugin is preview.4, release `pluginrel_6adde3dfd1f48191b179271f49428165`. In the actual desktop app, the Personal directory showed the account entry plus an older local entry. Installing the account entry made its real tools available: `control_status` reports preview.4/win32 with diagnostics/workspace/controls denied; `status` returns PERMISSION_DENIED; `open_settings` opened the real installed preview.4 native window. No additional grants were created. This is host connectivity and default-deny evidence, not acceptance of privileged operations.
+
+Existing PR31 policy/FSM merged normally into the private feature branch (not main), merge9ec243963ec0bd4b1325863aab99d4bcee53a7bc;66localpolicy tests pass/0fail/0skip. No autonomous updater activation is claimed. A protected local signed-inbox/health/rollback implementation is in progress. Docker support is a separate dedicated local container/profile, without host mounts or changes to other project profiles. PR33 remains Draft; main, old ledgers, formal session count, security and license gates remain unchanged. Visible branding/management improvements are pending the next verified bundle.
+
+Exact previous interruption end/start cannot be reconstructed from this chat gap; no continuous active duration is invented. First new exact checkpoint recorded by commands:2026-10-25T11:35:16.2028505Z. Earlier commands in this continuation precede that timestamp and remain unmetered.

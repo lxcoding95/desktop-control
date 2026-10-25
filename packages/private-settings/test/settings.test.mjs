@@ -21,6 +21,19 @@ test('settings helper verifies real normal interactive token without opening a U
   }
 });
 
+test('native settings reports actual package metadata and honest update state without changing rights', { skip: process.platform !== 'win32' }, () => {
+  const binary = buildPrivateSettings();
+  const cli = fileURLToPath(new URL('../../mcp-server/scripts/private-grant.mjs', import.meta.url));
+  const result = spawnSync(binary, ['--info', cli], { windowsHide: true, timeout: 10_000, encoding: 'utf8' });
+  assert.equal(result.error, undefined);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /Desktop Control - Anon Allman/);
+  assert.match(result.stdout, /Plugin P: \d+\.\d+\.\d+/);
+  assert.match(result.stdout, /Automatic Bridge updates: not active in this build/);
+  assert.doesNotMatch(result.stdout, /Desktop Control Private|[A-Z]:\\Users\\|S-1-5-/);
+  assert.equal(result.stderr, '');
+});
+
 test('local grant CLI rejects unknown paths, extra arguments and unbounded/malformed grant inputs', () => {
   const cli = fileURLToPath(new URL('../../mcp-server/scripts/private-grant.mjs', import.meta.url));
   for (const [args, input] of [

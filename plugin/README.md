@@ -1,4 +1,4 @@
-# Desktop Control Private — private source candidate
+# Desktop Control — local source candidate
 
 Developer: **Anon Allman**. The actual package version is in `plugin.json` and `PROVENANCE.json`. Source implementation, archive creation, account upload, local installation and running host version are separate states; none implies the next.
 

@@ -1,4 +1,4 @@
-# Owner-private local permission window
+# Desktop Control local settings
 
 `node packages/private-settings/controller.mjs --build` builds the original WinForms helper using the existing Windows Framework compiler. `--open` displays it. `openPrivateSettings()` returns the child process: the desktop controller integrator **must protect this exact process ID before allowing further input**, including every concurrently open settings process. The framework window class is not the `DesktopControlPrivateSettings` prefix, so class-prefix detection alone is insufficient.
 
@@ -16,7 +16,7 @@ node packages/mcp-server/scripts/private-grant.mjs control-status
 node packages/mcp-server/scripts/private-grant.mjs control-revoke
 ```
 
-This component currently provides policy status, diagnostics/workspace grants and selected browser/desktop/isolated-terminal grants. Update/rollback status, per-account/window grants, audit history, Linux GUI, translations, installer and full accessibility/interactive acceptance are pending. A successful build or policy test is not proof of a tested visible UI or host integration.
+This component provides policy status, diagnostics/workspace grants and selected browser/desktop/isolated-terminal grants. **Versions & updates** reads the adjacent manifest's plugin P version and explicitly identifies independent Bridge B reporting and automatic activation as unavailable until integrated. Per-account/window grants, audit history, Linux GUI, translations and installer remain pending. A successful build or policy test is not proof of a tested visible UI or host integration. The action-only host settings contract and its current acceptance limits are documented in [plugin management](../../docs/integrations/plugin-management.md).
 
 ## Conservative per-action approval
 

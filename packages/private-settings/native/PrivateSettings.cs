@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
@@ -49,13 +50,34 @@ internal sealed class PrivateSettings : Form {
     readonly FlowLayoutPanel Buttons = new FlowLayoutPanel();
     bool Busy;
 
+    static string PackageVersion(string cli) {
+        try {
+            string root = new DirectoryInfo(Path.GetDirectoryName(cli)).Parent.Parent.Parent.FullName;
+            string manifest = Path.Combine(root, "plugin.json");
+            if (!File.Exists(manifest)) manifest = Path.Combine(root, "plugin", "plugin.json");
+            var file = new FileInfo(manifest);
+            if (!file.Exists || file.Length > 16384) return "unknown";
+            var data = new JavaScriptSerializer { MaxJsonLength = 16384, RecursionLimit = 12 }.DeserializeObject(File.ReadAllText(manifest)) as Dictionary<string, object>;
+            string version = data != null && data.ContainsKey("version") ? data["version"] as string : null;
+            return version != null && Regex.IsMatch(version, @"\A[0-9]{1,8}\.[0-9]{1,8}\.[0-9]{1,8}(?:-[A-Za-z0-9.-]{1,80})?\z") ? version : "unknown";
+        } catch { return "unknown"; }
+    }
+    static string VersionDetails(string cli) {
+        return "Desktop Control - Anon Allman" + Environment.NewLine +
+            "Plugin P: " + PackageVersion(cli) + Environment.NewLine +
+            "Bridge B: packaged runtime; independent active version not yet reported" + Environment.NewLine +
+            "Automatic Bridge updates: not active in this build" + Environment.NewLine +
+            "Account upload, installed plugin and running bridge are separate states. Opening settings changes no rights.";
+    }
+
     PrivateSettings(string node, string cli) {
         Node = node; Cli = cli;
-        Text = "Desktop Control Private — Permissions";
+        Text = "Desktop Control — Settings";
         AccessibleName = "Desktop Control local permission settings";
         StartPosition = FormStartPosition.CenterScreen; MinimumSize = new Size(680, 680); Size = new Size(760, 740);
         AutoScaleMode = AutoScaleMode.Dpi;
-        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 8, Padding = new Padding(18) };
+        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 9, Padding = new Padding(18) };
+        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 125));
@@ -64,20 +86,22 @@ internal sealed class PrivateSettings : Form {
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 110));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        layout.Controls.Add(new Label { Text = "Desktop Control Private · Anon Allman", AutoSize = true, Font = new Font(Font, FontStyle.Bold) });
+        layout.Controls.Add(new Label { Text = "Desktop Control · Anon Allman", AutoSize = true, Font = new Font(Font, FontStyle.Bold) });
+        layout.Controls.Add(new Label { Text = "Plugin P: " + PackageVersion(cli) + " · Automatic Bridge updates: not active", AutoSize = true, MaximumSize = new Size(690, 0), AccessibleName = "Installed plugin and update status" });
         layout.Controls.Add(new Label { Text = "Grant only capabilities you intend to allow. Grants last 15 minutes. Desktop access can read and control your interactive session; Esc stops desktop access. Terminal is isolated in the separately approved workspace.", AutoSize = true, MaximumSize = new Size(690, 0) });
         Checks.Dock = DockStyle.Fill; Checks.CheckOnClick = true; Checks.AccessibleName = "Requested capabilities"; Checks.Items.AddRange(Capabilities); layout.Controls.Add(Checks);
         layout.Controls.Add(new Label { Text = "Browser: exact allowed HTTP(S) origins, one per line (example: https://example.com). No wildcard or account-specific permission is implemented.", AutoSize = true, MaximumSize = new Size(690, 0) });
         Origins.Multiline = true; Origins.ScrollBars = ScrollBars.Vertical; Origins.Dock = DockStyle.Fill; Origins.MaxLength = 10240; Origins.AccessibleName = "Allowed browser origins"; layout.Controls.Add(Origins);
         Buttons.Dock = DockStyle.Fill; Buttons.WrapContents = true;
         AddButton("Refresh status", "status", null);
+        AddButton("Versions & updates", "versions", null);
         AddButton("Grant selected controls / re-enable desktop", "control-grant", null);
         AddButton("Revoke ALL controls", "control-revoke", null);
         AddButton("Grant diagnostics", "grant", null); AddButton("Revoke diagnostics", "revoke", null);
         AddButton("Grant workspace files/PDF", "workspace-grant", null); AddButton("Revoke workspace", "workspace-revoke", null);
         layout.Controls.Add(Buttons);
         Status.Multiline = true; Status.ReadOnly = true; Status.Dock = DockStyle.Fill; Status.ScrollBars = ScrollBars.Vertical; Status.AccessibleName = "Protected local permission status"; layout.Controls.Add(Status);
-        layout.Controls.Add(new Label { Text = "No rights are changed until you click Grant/Revoke. Opening this window never approves an MCP request. Updates, account controls and Linux GUI are not implemented here.", AutoSize = true, MaximumSize = new Size(690, 0) });
+        layout.Controls.Add(new Label { Text = "No rights are changed until you click Grant/Revoke. Opening this window never approves an MCP request. Esc stops desktop control. Account controls and Linux GUI are not implemented here.", AutoSize = true, MaximumSize = new Size(690, 0) });
         Controls.Add(layout);
         Shown += async delegate { await RefreshStatus(); };
     }
@@ -86,6 +110,7 @@ internal sealed class PrivateSettings : Form {
         button.Click += async delegate {
             if (Busy) return;
             if (action == "status") { await RefreshStatus(); return; }
+            if (action == "versions") { Status.Text = VersionDetails(Cli); return; }
             string payload = null;
             if (action == "control-grant") {
                 var selected = new List<string>(); foreach (object item in Checks.CheckedItems) selected.Add((string)item);
@@ -152,6 +177,9 @@ internal sealed class PrivateSettings : Form {
         try {
             if (!NormalInteractiveUser()) return 2;
             if (args.Length == 1 && args[0] == "--probe") return 0;
+            if (args.Length == 2 && args[0] == "--info" && Path.IsPathRooted(args[1]) && File.Exists(args[1])) {
+                Console.WriteLine(VersionDetails(args[1])); return 0;
+            }
             if (args.Length == 1 && args[0] == "--confirm-action") {
                 Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
                 return ConfirmAction();

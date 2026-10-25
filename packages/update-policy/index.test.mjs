@@ -55,3 +55,4 @@ test('caller cannot override access clock via context arguments',()=>{let now=NO
 test('unavailable or throwing clock fails closed',()=>{throws(()=>verify(envelope(),{clock:()=>{throw new Error('clock source includes secret')}}),'UNTRUSTED_CLOCK');throws(()=>verify(envelope(),{clock:null}),'UNTRUSTED_CLOCK');const t=verify(envelope(),{clock:()=>NOW});assert.equal(decideAccess(t,ctx()).state,'READY');});
 test('malformed ticket null, array, boxed primitive, Object.create fail closed',()=>{for(const t of [null,{},[],new String('x'),Object.create(null)])throws(()=>decideAccess(t,ctx()),'UNVERIFIED_POLICY');});
 test('signed future expiry boundary is exclusive',()=>{let now=NOW;const t=verify(envelope(),{clock:()=>now});now=Date.parse(base().expiresAt)-1;assert.equal(decideAccess(t,ctx()).state,'READY');now=Date.parse(base().expiresAt);throws(()=>decideAccess(t,ctx()),'EXPIRED_OR_UNTRUSTED_CLOCK');});
+import { Buffer } from 'node:buffer';

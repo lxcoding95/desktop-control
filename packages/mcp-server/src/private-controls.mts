@@ -90,7 +90,9 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
   }
   function register(name: string, description: string, input: z.ZodType, output: z.ZodType,
     capability: PrivateControlCapability | null, operation: (args: Args, signal: AbortSignal) => Promise<unknown>, confirmation = false, image = false) {
-    server.registerTool(name, { description, inputSchema: input, outputSchema: output,
+    const titles: Record<string, string> = { 'desktop_control.open_settings': 'Permissions and versions',
+      'desktop_control.stop_control': 'Stop browser and desktop control', 'desktop_control.control_status': 'Version and permission status' };
+    server.registerTool(name, { ...(titles[name] ? { title: titles[name] } : {}), description, inputSchema: input, outputSchema: output,
       annotations: { readOnlyHint: !confirmation && capability?.endsWith('.read') === true, destructiveHint: confirmation } }, async (args, ctx) => {
       const bound = Object.freeze({ ...args as Args });
       const urgent = ['desktop_control.stop_control', 'desktop_control.desktop_stop', 'desktop_control.browser_stop', 'desktop_control.open_settings'].includes(name);

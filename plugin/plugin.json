@@ -6,23 +6,24 @@
     "name": "Anon Allman",
     "email": "334623916+lxcoding95@users.noreply.github.com"
   },
-  "description": "Private local MCP preview: host-granted diagnostics, isolated workspace/PDF/terminal, separate browser and visible Windows desktop control. No autonomous updater.",
+  "description": "Local MCP preview: host-approved diagnostics, isolated workspace/PDF/terminal, separate browser and visible Windows desktop control. Signed Bridge updates are not active.",
   "repository": "https://github.com/lxcoding95/desktop-control",
   "license": "MIT",
   "extensions": {
     "com.openai": {
       "requires_local_executor": true,
       "interface": {
-        "displayName": "Desktop Control Private",
+        "displayName": "Desktop Control",
         "developerName": "Anon Allman",
-        "shortDescription": "Private desktop & workspace",
+        "shortDescription": "Desktop tools & workspace",
         "capabilities": [
           "Read",
           "Write",
           "Interactive"
         ],
         "defaultPrompt": null
-      }
+      },
+      "onboardingSkill": "./skills/private-control/SKILL.md"
     }
   }
 }

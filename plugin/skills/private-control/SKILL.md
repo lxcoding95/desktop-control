@@ -1,6 +1,6 @@
 ---
 name: private-control
-description: Use Desktop Control Private for locally approved workspace operations, its separate Desktop-Control-Browser, and visible Windows desktop control; check grants, local confirmation and emergency stop before acting.
+description: Use Desktop Control for locally approved workspace operations, its separate Desktop-Control-Browser, and visible Windows desktop control; check grants, local confirmation and emergency stop before acting.
 ---
 
 Start with `desktop_control.control_status` and the harmless diagnostic status tool. Missing or expired permissions are a refusal, not a reason to retry input or invent a grant. `desktop_control.open_settings` opens the trusted local permission window and pauses automation; it never approves itself. Ask the user to choose the intended capabilities/origins locally. Do not automate approval of this plugin's own permission window through Desktop Control.

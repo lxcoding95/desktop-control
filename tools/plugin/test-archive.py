@@ -15,6 +15,7 @@ cases = ['valid', 'remote', 'no-local', 'fixture', 'missing-license', 'zero-depe
          'case-collision', 'missing-runtime', 'wrong-compat', 'worker-version', 'unlisted-transitive', 'sbom-version']
 cases += ['alias', 'case-alias', 'windows-device', 'oversize', 'long-component', 'backslash', 'space-suffix', 'dirty-provenance', 'wrong-commit', 'version-drift', 'metadata-name', 'mcp-drift']
 cases += ['windows-question-alias', 'windows-quote', 'windows-angle', 'windows-pipe', 'windows-star', 'windows-superscript-device', 'windows-console-device']
+cases += ['missing-management']
 with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temporary:
     root = pathlib.Path(temporary)
     for case in cases:
@@ -29,7 +30,7 @@ with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temp
                     'worker_dependencies': {name: '1.0.0' for name in worker}}).encode()}
         for name in ['start.mjs', 'grant.mjs', 'README.md', 'LICENSE', 'THIRD-PARTY-NOTICES.md', 'source/WindowsToken.cs', 'source/WindowsPrivatePolicy.cs',
                      'packages/mcp-server/scripts/private-grant.mjs', 'packages/private-desktop/native/DesktopController.cs', 'packages/private-settings/native/PrivateSettings.cs',
-                     'packages/private-browser/runtime.mjs', 'packages/private-browser/indicator.mjs',
+                     'packages/private-browser/runtime.mjs', 'packages/private-browser/indicator.mjs', 'packages/private-settings/management.mjs',
                      'dist/packages/mcp-server/src/private.mjs', 'dist/packages/mcp-server/src/index.mjs',
                      'dist/private-workspace-runtime/operations.mjs', 'dist/private-workspace-runtime/worker.mjs', 'dist/private-workspace-runtime/package.json']:
             files[name] = b'test-only structural fixture'
@@ -73,6 +74,8 @@ with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temp
             files['skills/case.md'] = b'test-only marker'
         if case == 'missing-runtime':
             del files['dist/private-workspace-runtime/worker.mjs']
+        if case == 'missing-management':
+            del files['packages/private-settings/management.mjs']
         extras = {
             'alias': {'data.txt': b'good', './data.txt': b'evil'},
             'case-alias': {'README.txt': b'A', 'readme.txt': b'B'},
