@@ -6,7 +6,7 @@
 
 - **Spezifiziert** = genehmigte/entworfene Architektur, nicht implementiert.
 - **Historisch nachgewiesen** = früherer echter Hosttest; heutige Installation nicht dadurch belegt.
-- **Draft getestet** = Code/Test auf PR-Branch, weder abgenommen noch in \`main\` gemergt.
+- **Draft getestet** = Code/Test auf PR-Branch, weder abgenommen noch in `main` gemergt.
 - **Teilprototyp** = begrenzte Implementierung, keine vollständige Client→OS-Abnahme.
 - **Geplant** = Sollzustand.
 - **Blockiert** = erforderliche Security-, Review- oder Releasefreigabe fehlt.
@@ -14,7 +14,7 @@
 
 ## 1. Produkt und lokale Vertrauensgrenzen
 
-\`\`\`mermaid
+```mermaid
 flowchart LR
   USER["Benutzer: Grants, Widerruf und Not-Aus<br/>Status: UI geplant"]
   AI["ChatGPT / MCP-Client<br/>Status: M01 Diagnose historisch"]
@@ -34,13 +34,13 @@ flowchart LR
   B --> FS & WEB & DESK
   FS & WEB & DESK -->|OS-API, Rechte| OS
   B --> AUDIT
-\`\`\`
+```
 
 **Grenze:** Client, Webseiten und Dateiinhalte sind keine vertrauenswürdigen Quellen für lokale Rechte. Browser-Sessions sind getrennt, lokale privilegierte Befehle benötigen die Zustimmung der tatsächlich betroffenen OS-Identität. Kein zweiter KI-Agent und keine verpflichtende Cloud in der privaten Local-first-Phase. [Architektur](OVERVIEW.md) · [Threat Model](THREAT-MODEL.md) · [Browser ADR](ADR-0002-AI-BROWSER.md).
 
 ## 2. Produktmeilensteine und ihre Abnahme
 
-\`\`\`mermaid
+```mermaid
 flowchart LR
  M01["M01 – Private MCP-Verbindung<br/>Historischer Grant / Revoke E2E"]
  M02["M02 – Installation & Rechte<br/>Geplant"]
@@ -52,13 +52,13 @@ flowchart LR
  M01 --> M02 & M04
  M02 --> M03 & M05
  M03 & M04 & M05 --> M06 --> M07
-\`\`\`
+```
 
 **M01–M06 sind Produktlieferziele, nicht die sechs historischen Sitzungen S01–S06.** Eine später getestete Teilfunktion darf ihren Session-Status nicht eigenmächtig verändern. [Produktmeilensteine](../governance/PRODUCT-MILESTONES.md) · [M01 #28](https://github.com/lxcoding95/desktop-control/issues/28) · [M03 #29](https://github.com/lxcoding95/desktop-control/issues/29).
 
 ## 3. Sicherer GitHub-/Releaseprozess
 
-\`\`\`mermaid
+```mermaid
 flowchart LR
   ISSUE["Issue / Scope / Datenschutzklasse"]
   DRAFT["Feature-Branch / Draft PR"]
@@ -73,13 +73,13 @@ flowchart LR
   REVIEW -->|Ja| MERGE --> RELEASE
   RELEASE -->|Nein| BLOCK
   RELEASE -->|Ja| ACTIVE
-\`\`\`
+```
 
 **Nachweisgrenzen:** Der universelle CI-Pilot [PR #30](https://github.com/lxcoding95/desktop-control/pull/30) hatte Windows/Ubuntu **19/19**, die signierte Policy/FSM [PR #31](https://github.com/lxcoding95/desktop-control/pull/31) **66/66** je Plattform. Diese Tests belegen **weder** einen Installer **noch** eine vollständige Releasefreigabe. Bei letzter Prüfung: fünf Draft-PRs (#22, #26, #30, #31, #33), keine im Hauptbranch abgenommen; [SEC #1](https://github.com/lxcoding95/desktop-control/issues/1), [CI #2](https://github.com/lxcoding95/desktop-control/issues/2) und [Release #3](https://github.com/lxcoding95/desktop-control/issues/3) offen.
 
 ## 4. Sicherer Installations- und Updatepfad (Soll)
 
-\`\`\`mermaid
+```mermaid
 flowchart LR
   SOURCE["Verifizierte offizielle Quelle"]
   CHECK["OS-Prüfung / Signatur / kompatible Version"]
@@ -95,7 +95,7 @@ flowchart LR
   POLICY -->|Nein| REPAIR --> STAGE --> HEALTH
   HEALTH -->|Bestanden| POLICY
   HEALTH -->|Fehler| REPAIR
-\`\`\`
+```
 
 **Wichtige Trennung:** Ein Update von **B** (lokale Bridge) ersetzt nicht automatisch die hostverwaltete Registrierung des **P**-Pluginpakets. [M03-Draft](https://github.com/lxcoding95/desktop-control/pull/31) implementiert bisher nur isolierte Kryptografie-, Kompatibilitäts- und Zustandsentscheidungen. Echte Update-Installation, Start/Health-Receipts, OS-Trust-Root, Rollback und Host-P-Refresh sind offen.
 
