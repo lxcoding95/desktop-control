@@ -10,6 +10,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { createDeviceTicketAuthority } from '../device-ticket.mjs';
 import { createDurableTicketStore } from '../durable-ticket-store.mjs';
+import { parseDeviceAuthenticate, parseHealthResponse, parseAuthorizedDeviceLookup } from '../remote-relay-protocol.mjs';
 
 export const PROBE_RELAY_SHARD = 'remote-health-probe-v1';
 
@@ -138,16 +139,14 @@ export class RemoteHealthRelay extends DurableObject<Env> {
   }
 
   private async authenticate(ws: WebSocket, frame: Record<string, unknown>, state: PendingAttachment) {
-    if (Date.now() > state.until || !exact(frame, 'challenge,deviceId,ticket,type') ||
-        frame.type !== 'remote.device.authenticate' || !validId(frame.deviceId) ||
-        !validId(frame.challenge) || typeof frame.ticket !== 'string' ||
-        frame.ticket.length > 2048 || !this.authority) {
+    const auth = parseDeviceAuthenticate(frame);
+    if (Date.now() > state.until || !auth || !this.authority) {
       this.close(ws); return;
     }
     let verified: {ownerId: string;deviceId: string;expiresAt: number};
-    try { verified = await this.authority.verifyDevice(frame.ticket); }
+    try { verified = await this.authority.verifyDevice(auth.ticket); }
     catch { this.close(ws); return; }
-    if (verified.deviceId !== frame.deviceId) { this.close(ws); return; }
+    if (verified.deviceId !== auth.deviceId) { this.close(ws); return; }
     const pair = await this.ctx.storage.get(
       'pairing:' + verified.ownerId + ':' + verified.deviceId
     );
@@ -168,29 +167,20 @@ export class RemoteHealthRelay extends DurableObject<Env> {
     // and checked for revocation on each privileged (health-only) event.
     ws.serializeAttachment(authenticated);
     ws.send(JSON.stringify({
-      type: 'remote.device.ready', deviceId: verified.deviceId, challenge: frame.challenge
+      type: 'remote.device.ready', deviceId: verified.deviceId, challenge: auth.challenge
     }));
   }
 
   private async receiveHealth(ws: WebSocket, frame: Record<string, unknown>, state: ReadyAttachment) {
     if (!await this.isPaired(state)) { this.close(ws); return; }
-    if (!exact(frame, 'id,nonce,result,type') ||
-        frame.type !== 'remote.health.response' ||
-        !validId(frame.id) || !validId(frame.nonce) || !record(frame.result)) {
-      this.close(ws); return;
-    }
-    const result = frame.result;
-    if (!exact(result, 'connected,desktopAccess,scope') ||
-        result.connected !== true || result.desktopAccess !== false ||
-        result.scope !== 'remote-health-only') {
-      this.close(ws); return;
-    }
-    const entry = this.pending.get(frame.id);
-    if (!entry || entry.ws !== ws || entry.nonce !== frame.nonce) {
+    const validated = parseHealthResponse(frame);
+    if (!validated) { this.close(ws); return; }
+    const entry = this.pending.get(validated.id);
+    if (!entry || entry.ws !== ws || entry.nonce !== validated.nonce) {
       // Unknown, stale and replayed responses are never accepted.
       return;
     }
-    this.pending.delete(frame.id);
+    this.pending.delete(validated.id);
     entry.settle({ ...healthStatus });
   }
 
@@ -223,13 +213,12 @@ export class RemoteHealthRelay extends DurableObject<Env> {
       if (raw.length > 1024) return reject(413, 'Request too large');
       body = JSON.parse(raw);
     } catch { return reject(400, 'Invalid request'); }
-    if (!record(body) || !exact(body, 'deviceId,ownerId') ||
-        !validId(body.ownerId) || !validId(body.deviceId))
-      return reject(400, 'Invalid request');
+    const lookup = parseAuthorizedDeviceLookup(body);
+    if (!lookup) return reject(400, 'Invalid request');
     let ws: WebSocket | undefined;
     for (const sock of this.ctx.getWebSockets()) {
       const a = attachment(sock);
-      if (a?.phase === 'ready' && a.ownerId === body.ownerId && a.deviceId === body.deviceId) {
+      if (a?.phase === 'ready' && a.ownerId === lookup.ownerId && a.deviceId === lookup.deviceId) {
         if (await this.isPaired(a)) { ws = sock; break; }
         this.close(sock);
       }
