@@ -22,7 +22,7 @@
     "test:private-components": "node --test --test-concurrency=1 packages/private-browser/test/*.test.mjs packages/private-desktop/test/*.test.mjs packages/private-settings/test/*.test.mjs tools/plugin/release-policy.test.mjs",
     "test:update-policy": "node --test packages/update-policy/index.test.mjs packages/update-policy/activation-machine.test.mjs",
     "test:bridge-updater": "node packages/bridge-updater/build-native.mjs && node --test packages/bridge-updater/runtime.test.mjs",
-    "verify": "npm run lint && npm run typecheck && npm test && npm run test:private-files && npm run build && npm run test:private-components && npm run test:update-policy && npm run test:bridge-updater && npm run test:remote && npm run test:remote:integration && npm run test:remote:outbound && npm run test:remote:protocol && npm run test:remote:ticket && npm run test:remote:durable && npm run test:remote:oauth-gate && npm run test:remote:single-owner && npm run test:protocol",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run test:private-files && npm run build && npm run test:private-components && npm run test:update-policy && npm run test:bridge-updater && npm run test:remote && npm run test:remote:integration && npm run test:remote:outbound && npm run test:remote:protocol && npm run test:remote:ticket && npm run test:remote:durable && npm run test:remote:oauth-gate && npm run test:remote:single-owner && npm run test:license:preview && npm run test:protocol",
     "test:remote": "node --test tools/remote/health-server.test.mjs",
     "inspect:remote": "npx --no-install @modelcontextprotocol/inspector --cli node tools/remote/health-server.mjs --method tools/list --strict --format json",
     "inspect:remote:health": "npx --no-install @modelcontextprotocol/inspector --cli node tools/remote/health-server.mjs --method tools/call --tool-name desktop_control.remote_health --format json",
@@ -34,7 +34,8 @@
     "test:remote:durable": "node --test tools/remote/durable-ticket-store.test.mjs",
     "test:remote:outbound": "node --test tools/remote/outbound-device-client.test.mjs",
     "test:remote:protocol": "node --test tools/remote/remote-relay-protocol.test.mjs",
-    "test:remote:single-owner": "node --test tools/remote/preview-single-owner.test.mjs"
+    "test:remote:single-owner": "node --test tools/remote/preview-single-owner.test.mjs",
+    "test:license:preview": "node --test tools/license/preview-license.test.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
