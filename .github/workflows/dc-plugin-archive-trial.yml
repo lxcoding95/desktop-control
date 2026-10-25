@@ -50,3 +50,60 @@ jobs:
             python3 --version
             python3 tools/plugin/test-archive.py
           fi
+
+  private-package-smoke:
+    name: Private plugin package smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    permissions: {}
+    steps:
+      - name: Fetch exact public PR merge commit anonymously
+        shell: bash
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+          git init -q .
+          git remote add origin https://github.com/lxcoding95/desktop-control.git
+          git -c protocol.version=2 fetch -q --depth=1 --no-tags origin "refs/pull/${PR_NUMBER}/merge"
+          git -c advice.detachedHead=false checkout -q --detach FETCH_HEAD
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          [[ -z "$(git status --porcelain)" ]]
+
+      - name: Install, verify complete project and audit dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          npm --version
+          node -e 'const [major,minor] = process.versions.node.split(".").map(Number); if(major < 22 || (major===22 && minor < 19)) process.exit(1)'
+          npm ci --ignore-scripts
+          npm run verify
+          npm audit --audit-level=high
+
+      - name: Build and verify the unpublished local plugin candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/plugin/build.mjs "$RUNNER_TEMP/dc-plugin-out" > "$RUNNER_TEMP/dc-plugin-build.log"
+          node --input-type=module - <<'JS'
+          import { readFileSync, statSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          import { resolve, join, sep } from 'node:path';
+          const output = readFileSync(join(process.env.RUNNER_TEMP, 'dc-plugin-build.log'), 'utf8');
+          const report = JSON.parse(output.trim().split(/\r?\n/).at(-1));
+          const archive = resolve(report.archive);
+          if (!archive.startsWith(resolve(process.env.RUNNER_TEMP) + sep) || !statSync(archive).isFile()) {
+            throw new Error('UNSAFE_ARCHIVE_OUTPUT');
+          }
+          const py = process.platform === 'win32' ? 'python' : 'python3';
+          const extracted = join(process.env.RUNNER_TEMP, 'dc-plugin-extracted');
+          execFileSync(py, ['tools/plugin/verify-archive.py', archive, extracted], {stdio:'inherit', timeout:120000});
+          execFileSync(process.execPath, ['tools/plugin/test-package.mjs', extracted], {stdio:'inherit', timeout:120000});
+          console.log('MCP package smoke PASS; candidate remains unpublished');
+          JS
