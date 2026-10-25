@@ -47,3 +47,10 @@ Desktop.ini
 *.key
 secrets/
 .credentials/
+
+# Desktop Control preview activation (generated only on the owner's PC)
+# Keep even mistakenly generated copies out of commits.
+desktop-control.txt
+.dc-wss-local-*.json
+.dc-preview-credentials-*.json
+.preview-owner-local.json
