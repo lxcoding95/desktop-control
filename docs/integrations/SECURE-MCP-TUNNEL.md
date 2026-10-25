@@ -120,7 +120,7 @@ Run the pinned test on a working checkout:
 npm run test:remote:ticket
 ```
 
-**Evidence**: Node v22.16.0 Linux sandbox: 12/12 tests passed for HMAC signature, tampering, short/long/malformed tickets, missing approval, expiry, one-time use/concurrent double consume, cross-secret denial, revoke and storage errors. Windows rerun of the exact GitHub commit remains pending. Existing `preview.5` local permission store and 34 privileged MCP tools are not connected to the remote ticket authority. No cloud endpoint is deployed.
+**Evidence**: Node v22.16.0 Linux sandbox: 12/12 tests passed for HMAC signature, tampering, short/long/malformed tickets, missing approval, expiry, one-time use/concurrent double consume, cross-secret denial, revoke and storage errors. Windows ordinary-user test performed by the owner on 2026-10-25 at commit `416f9ef686c6c12f20661fde597f500f9e0b63c3`: **12/12 PASS, 0 failures, `TEST_EXIT=0`**. Existing `preview.5` local permission store and 34 privileged MCP tools are not connected to the remote ticket authority. No cloud endpoint is deployed.
 
 ### Next controlled implementation step
 
