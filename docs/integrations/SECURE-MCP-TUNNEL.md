@@ -92,3 +92,17 @@ Test evidence: Node.js 22.16.0 Linux sandbox: **16/16 pass** for authentication 
 **Remaining blockers before a working ChatGPT cloud connection:** approved Free hosting account and deployment permission; upstream OAuth library and a stable user sign-in; an OAuth-approved device enrollment flow with local user interaction, proof of possession and durable revocation; authenticator/transport adapters for Cloudflare Workers/Durable Objects; an outbound Windows device channel; an HTTPS MCP Streamable HTTP route compatible with the 2026-07-28 protocol; user-facing ChatGPT custom MCP connection and end-to-end tests. The latest MCP transport spec requires header/body method metadata parity and Origin restrictions: https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2026-07-28/basic/transports/streamable-http.mdx . Prefer Cloudflare's current `createMcpHandler` and `OAuthProvider` implementations over custom token issuance or inventing the latest MCP transport: https://developers.cloudflare.com/agents/model-context-protocol/guides/remote-mcp-server/ .
 
 A successful local test is not proof of public internet exposure, ChatGPT connection, or remote permissions. `main`, the installed `preview.5`, and the Windows app remain unchanged. **No development session ledger was advanced.**
+
+
+## Device-side health filter — implemented locally, not a network client
+
+The new `tools/remote/device-health-channel.mjs` is a deny-by-default **message filter** for a future independently authenticated outbound TLS device WebSocket. It DOES NOT open a socket, log in, register a device, expose a local Windows process, or invoke the 34 privileged local MCP tools. Only a strict `remote.health.request` with no arguments and a bounded ID/nonce yields the static `remote.health.response`. Replay within the device session, unexpected fields/tools, oversized payloads and stopped sessions fail closed.
+
+```powershell
+npm run test:remote:device
+npm run test:remote:integration
+```
+
+The second command tests the relay and device together with **mock** identity verifiers and a simulated in-memory channel: Node.js 22.16.0 sandbox **24/24 tests passed** (16 relay + 8 device, including one request/response integration). Windows run is still pending. This is explicitly **NOT** real OAuth, TLS, a WebSocket connection, a Cloudflare deployment, or a ChatGPT cloud end-to-end result.
+
+Implementation boundary: The authenticated Cloudflare Streamable HTTP MCP endpoint, production OAuth provider, persistent device pairing/revocation and real outbound Windows WebSocket client are still missing. Do not publish the mock verifiers from test files as a production authentication mechanism. The only acceptable public test may return the static `remote-health-only` result after real account/device auth. Existing local permissions remain entirely separate.
