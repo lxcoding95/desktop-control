@@ -76,8 +76,7 @@ try {
         scope = 'remote.health'
     }
     $json = $claims | ConvertTo-Json -Compress -Depth 3
-    $body = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($json)).
-        TrimEnd('=').Replace('+','-').Replace('/','_')
+    $body = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($json)).TrimEnd('=').Replace('+','-').Replace('/','_')
     $msg = [Text.Encoding]::UTF8.GetBytes('desktop-control-preview-license-v1.'+$body)
     $sig = $rsa.SignData($msg,[Security.Cryptography.HashAlgorithmName]::SHA256,
         [Security.Cryptography.RSASignaturePadding]::Pss)
