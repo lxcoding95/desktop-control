@@ -74,3 +74,10 @@ The new local test is deliberately **not** part of the root `npm run verify` sin
 **Security warning:** Cloudflare notes Miniflare/workerd local development is **not a hardened sandbox**. Test only project code already reviewed and controlled; do not run untrusted Worker scripts on a sensitive desktop, and use an isolated virtual environment for stronger containment. Source: https://developers.cloudflare.com/workers/testing/ .
 
 Local smoke acceptance is only evidence that a disabled Worker starts and denies untrusted requests. It does not prove genuine OAuth issuance, pairing, WSS ticket consumption, Cloudflare hosted availability or successful ChatGPT connectivity. Those remain separate blockers and cannot be declared complete.
+
+
+### Windows workerd compatibility-date finding (2026-10-25)
+
+Owner ran the original localhost smoke fixture at commit `bd9b45bb1789715377d561ca99c3ee116a863807`. The smoke **failed before it could start or run HTTP assertions**: the pinned `wrangler@4.145.0` local `workerd` reported its maximum supported compatibility date as `2026-10-07`, but the fixture requested `2026-10-25`. This does **not** indicate an OAuth or application-level failure; no smoke cases were executed. The fixture-only `wrangler.mcp.local-smoke.jsonc` now uses `2026-10-07`, exactly the reported local-runtime limit. All deployable Worker templates are left unchanged and remain default disabled.
+
+This local compatibility-date override tests the behavior of an **older runtime configuration** only. Cloudflare compatibility dates control API and behavior changes, so a passing local smoke test cannot certify a future production configuration dated `2026-10-25`. Before any deployment, validate separately against the then-current supported `workerd` release and intended production compatibility date; do not silently backdate production settings. See https://developers.cloudflare.com/workers/configuration/compatibility-dates/ . **Retest of the changed fixture is pending.**
