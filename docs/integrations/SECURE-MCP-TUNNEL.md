@@ -1,19 +1,30 @@
-# Secure MCP Tunnel integration — experimental, OFF
+# Remote MCP transport — experimental, default OFF (free-tier only)
 
-Scope: **transport smoke-test only**. No real remote desktop access, no public server, no grant migration, and no automatic update.
+Scope: **transport smoke-test only**. No real remote desktop access, no public deployment, no grants, and no automatic update.
 
-## Decision
+## Decision — updated 2026-10-25 after owner cost constraint
 
-The existing Windows `preview.5` local stdio MCP server has been tested with 34 tools. Normal ChatGPT cloud chats cannot directly execute its local stdio transport. For remote access, **reuse the OpenAI open-source Secure MCP Tunnel client** rather than building a homegrown public relay or copying Desktop Commander's separately hosted Supabase device service.
+**Do not require an OpenAI Platform API key, paid tunnel, domain purchase, or subscription.** The previously investigated \`openai/tunnel-client\` is a reference only, not the selected deployment path. No tunnel-client installation or keys are necessary for the current local tests.
 
-Upstream sources:
-- https://github.com/openai/tunnel-client
-- https://github.com/openai/tunnel-client/blob/master/docs/onboarding.md
-- https://github.com/openai/tunnel-client/blob/master/docs/configuration.md
-- https://developers.openai.com/api/docs/guides/secure-mcp-tunnels
-- https://github.com/wonderwhy-er/DesktopCommanderMCP/tree/main/src/remote-device (MIT reference; not copied)
+Desktop Commander demonstrates the relevant architecture: a local MIT-licensed device agent paired through OAuth Device Authorization / PKCE to a separately hosted Remote MCP server. Its documented free hosted tier allows 10,000 tool calls per month for *Desktop Commander itself*, not third-party Desktop Control devices. The hosted server's implementation is proprietary; do not assume it can be reused, pointed at our tools, or copied.
 
-The official tunnel-client supports a **local stdio MCP child** via `--mcp-command`, plus outbound HTTPS to an authenticated OpenAI-hosted MCP tunnel endpoint. No inbound firewall port or private self-hosted domain is required.
+Verified upstream:
+- https://github.com/wonderwhy-er/DesktopCommanderMCP/tree/main/src/remote-device (local MIT code)
+- https://github.com/wonderwhy-er/DesktopCommanderMCP/blob/main/src/remote-device/README.md
+- https://github.com/desktop-commander/remote-desktop-commander (public manifests/docs; hosted relay source unavailable)
+- https://desktopcommander.app/pricing/
+
+**Preferred candidate for a zero-billed prototype (not deployed):** Cloudflare Workers **Free**, its included \`.workers.dev\` HTTPS hostname, plus **SQLite-backed Durable Objects** for authenticated device sessions/coordination. Current Free quotas are enforced with errors rather than automatic paid overages; confirm account selection and current terms before deployment. This still requires the owner's explicit creation of a free Cloudflare account and authorization of publishing an HTTPS endpoint. Never enable a paid plan, paid add-on, billing upgrade or automatic overage. GitHub OAuth is an option for human sign-in (not a ChatGPT/OpenAI API key) but requires its own registered OAuth application and strict account/device binding.
+
+Relevant reusable OSS:
+- https://github.com/cloudflare/agents/tree/main/examples/mcp-server (MCP Streamable HTTP)
+- https://github.com/cloudflare/agents/tree/main/examples/mcp-worker-authenticated (authenticated MCP)
+- https://github.com/cloudflare/agents/blob/main/docs/agents/securing-mcp-servers.md (OAuth security)
+- https://developers.cloudflare.com/durable-objects/platform/pricing/ (Free-plan limits)
+
+Required components before any remote device tools: HTTPS Streamable HTTP connector for ChatGPT, OAuth 2.1 with PKCE, separate device pairing, outbound authenticated WebSocket/device connection, explicit account/device routing, request IDs and bounded timeouts, replay protection, audit, revoke, fail-closed local capabilities, and an immediate emergency stop. The single-tool health-only probe remains the first end-to-end test. Never publish or forward the production \`preview.5/start.mjs\` with 34 tools merely because a transport connects.
+
+Original official OpenAI tunnel-client exploration remains documented below solely as an **unselected alternative** and must not be interpreted as deployment authorization.
 
 ## First slice: read-only connection probe
 
