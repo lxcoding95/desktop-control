@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Desktop Control</title>
+  <desc id="desc">A blue desktop window with a black pointer and a teal control indicator.</desc>
+  <defs>
+    <linearGradient id="surface" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#152740"/>
+      <stop offset="1" stop-color="#091321"/>
+    </linearGradient>
+    <linearGradient id="window" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#68D9F4"/>
+      <stop offset="1" stop-color="#2374DE"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="124" height="124" rx="28" fill="url(#surface)"/>
+  <rect x="19" y="26" width="90" height="75" rx="13" fill="url(#window)"/>
+  <path d="M20 46H108" stroke="#D4F7FF" stroke-opacity=".55" stroke-width="2"/>
+  <circle cx="30" cy="36" r="2.5" fill="#E8FBFF"/>
+  <circle cx="39" cy="36" r="2.5" fill="#E8FBFF" fill-opacity=".65"/>
+  <path d="M30 61H41M30 71H38" stroke="#E8FBFF" stroke-opacity=".7" stroke-width="4" stroke-linecap="round"/>
+  <path d="M53 49L91 78L73 81L65 101L56 97L64 78L47 80Z" fill="#07101B" stroke="#F2FCFF" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="103" cy="27" r="11" fill="#0E1C2F"/>
+  <circle cx="103" cy="27" r="6.5" fill="#43E3C2"/>
+</svg>

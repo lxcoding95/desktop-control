@@ -1,0 +1,10 @@
+✔ Linux production entry has no unexpected sockets beyond inherited Unix stdio (277.509931ms)
+✔ Linux socket detector finds deliberately listening TCP and UDP test endpoints (95.107746ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4356.647122

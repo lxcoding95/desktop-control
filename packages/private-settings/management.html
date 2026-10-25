@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Desktop Control · Verwaltung</title>
+<style>
+:root{color-scheme:light dark;font:15px/1.5 system-ui,sans-serif;background:var(--color-background-primary,#111820);color:var(--color-text-primary,#edf4ff)}*{box-sizing:border-box}body{margin:0;padding:clamp(16px,4vw,36px)}main{max-width:900px;margin:auto}header{display:flex;align-items:start;justify-content:space-between;gap:20px;margin-bottom:28px}h1{font-size:clamp(24px,5vw,34px);line-height:1.15;margin:0 0 7px}h2{font-size:19px;margin:0 0 12px}p{margin:8px 0;color:var(--color-text-secondary,#b9c9da)}.eyebrow{color:#68d9f4;letter-spacing:.08em;font-size:12px;font-weight:700;text-transform:uppercase}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.card,section{border:1px solid var(--color-border-primary,#344454);border-radius:16px;padding:20px;background:var(--color-background-secondary,#17222e)}.card h2{font-size:15px}.state{font-size:17px;font-weight:650;color:var(--color-text-primary,#edf4ff)}section{margin-top:16px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}button{font:inherit;font-weight:650;border:1px solid var(--color-border-primary,#53677b);border-radius:10px;padding:10px 15px;background:var(--color-background-tertiary,#26394c);color:inherit;cursor:pointer}button:hover:enabled{background:#33516c}button:focus-visible{outline:3px solid #68d9f4;outline-offset:3px}button:disabled{opacity:.5;cursor:not-allowed}.danger{background:#8d2337;border-color:#ee8d9d;color:#fff}.danger:hover:enabled{background:#aa2c44}dl{display:grid;grid-template-columns:minmax(140px,1fr) 2fr;gap:10px 20px;margin:0}dt{color:var(--color-text-secondary,#b9c9da)}dd{margin:0;overflow-wrap:anywhere}#notice{padding:12px 0;min-height:48px}.note{font-size:13px}.badge{border:1px solid #344f67;border-radius:100px;padding:5px 11px;white-space:nowrap;color:#94b8d8}footer{padding:20px 2px;font-size:12px;color:var(--color-text-tertiary,#91a7bd)}@media(max-width:560px){.cards{grid-template-columns:1fr}header{display:block}.badge{display:inline-block;margin-top:12px}dl{grid-template-columns:1fr;gap:3px}dd{margin-bottom:10px}.actions button{width:100%}}
+</style>
+</head>
+<body>
+<main>
+<header><div><div class="eyebrow">Anon Allman · Local first</div><h1>Desktop Control</h1><p>Verwaltung und Sicherheitsstatus direkt in ChatGPT.</p></div><span class="badge" id="connection">Verbindung wird geprüft</span></header>
+<div class="cards" aria-label="Aktueller Freigabestatus">
+<article class="card"><h2>Browser &amp; Desktop</h2><div class="state" id="controls-state">Noch nicht geprüft</div><p class="note">Dies ist der gemeinsame Kontrollstatus, keine Einzelberechtigung.</p></article>
+<article class="card"><h2>Dateien &amp; PDF</h2><div class="state" id="workspace-state">Noch nicht geprüft</div><p class="note">Nur der lokal freigegebene, isolierte Workspace.</p></article>
+<article class="card"><h2>Diagnostik</h2><div class="state" id="diagnostics-state">Noch nicht geprüft</div><p class="note">Minimaler, nicht identifizierender Systemstatus.</p></article>
+</div>
+<div id="notice" role="status" aria-live="polite">Die Oberfläche erteilt beim Öffnen keine Rechte.</div>
+<section aria-labelledby="controls-heading"><h2 id="controls-heading">Steuerung verwalten</h2><p>Stop beendet die laufende Browser- und Desktopsteuerung. Esc sendet in dieser Ansicht denselben Stop. Während Desktopsteuerung bleibt der globale Esc-Notstopp zusätzlich aktiv.</p><div class="actions"><button id="stop" class="danger" disabled>Steuerung stoppen · Esc</button><button id="refresh" disabled>Status aktualisieren</button><button id="local-confirmation" disabled>Lokale Freigaben öffnen</button></div><p class="note">Neue Rechte benötigen die vertrauenswürdige lokale Bestätigung. Die Ansicht speichert selbst keine Freigaben. Öffnen des Bestätigungsfensters pausiert die Automation.</p></section>
+<section aria-labelledby="version-heading"><h2 id="version-heading">Versionen &amp; Updates</h2><dl><dt>Plugin P</dt><dd id="package-version">Noch nicht gemeldet</dd><dt>Betriebssystem</dt><dd id="platform">Noch nicht gemeldet</dd><dt>Unabhängige Bridge B</dt><dd>Noch nicht unabhängig gemeldet</dd><dt>Automatischer Bridge-Updater</dt><dd>Nicht aktiv</dd></dl><p class="note">Ein hochgeladenes Plugin, die installierte Version und ein laufender Prozess sind getrennte Zustände. Hier werden keine Updates oder Zusatzrechte automatisch aktiviert.</p></section>
+<section aria-labelledby="future-heading"><h2 id="future-heading">Freigaben bis zum Widerruf</h2><p><strong>Noch nicht verfügbar in dieser Ansicht.</strong> Die bestehenden Laufzeiten gelten weiter. Neue dauerhafte Freigaben werden erst nach Integration und Prüfung einer expliziten lokalen Bestätigung angeboten; vorhandene Freigaben werden nicht stillschweigend verlängert.</p></section>
+<footer>Kein Administratorzugriff · Keine Zugangsdaten oder lokalen Pfade in dieser Ansicht · Fehlende Freigabe bedeutet Verweigerung</footer>
+</main>
+<script id="management-client">
+(() => {
+  'use strict';
+  const elements = id => document.getElementById(id);
+  const pending = new Map();
+  const actions = new Set(['desktop_control.control_status', 'desktop_control.stop_control', 'desktop_control.open_settings']);
+  let nextId = 0, origin = null, ready = false, closed = false, stopping = false;
+  const notify = text => { elements('notice').textContent = text; };
+  const send = message => window.parent.postMessage(message, origin && origin !== 'null' ? origin : '*');
+  function request(method, params) {
+    if (closed || pending.size >= 8) return Promise.reject(Error('BRIDGE_UNAVAILABLE'));
+    const id = ++nextId;
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { pending.delete(id); reject(Error('BRIDGE_TIMEOUT')); }, 10000);
+      pending.set(id, { resolve, reject, timer });
+      send({ jsonrpc: '2.0', id, method, params });
+    });
+  }
+  async function tool(name) {
+    if (!ready || !actions.has(name)) throw Error('ACTION_UNAVAILABLE');
+    const result = await request('tools/call', { name, arguments: {} });
+    if (!result || result.isError) throw Error('ACTION_DENIED');
+    return result;
+  }
+  const states = { active: 'Aktiv', denied: 'Nicht freigegeben', revoked: 'Widerrufen' };
+  function renderStatus(result) {
+    const value = result?.structuredContent;
+    if (!value || !['controls', 'workspace', 'diagnostics'].every(key => Object.hasOwn(states, value[key]))) throw Error('STATUS_UNAVAILABLE');
+    for (const key of ['controls', 'workspace', 'diagnostics']) elements(key + '-state').textContent = states[value[key]];
+    elements('package-version').textContent = typeof value.packageVersion === 'string' && /^[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?$/.test(value.packageVersion) && value.packageVersion.length < 100 ? value.packageVersion : 'Nicht verifiziert';
+    elements('platform').textContent = value.platform === 'win32' ? 'Windows' : value.platform === 'linux' ? 'Linux' : 'Nicht verifiziert';
+  }
+  async function refresh() {
+    try { renderStatus(await tool('desktop_control.control_status')); notify('Aktueller Status vom lokalen Host. Es wurden keine Rechte geändert.'); }
+    catch { for (const key of ['controls', 'workspace', 'diagnostics']) elements(key + '-state').textContent = 'Nicht verifiziert'; notify('Status nicht verfügbar. Es wird keine Freigabe angenommen. Erneut aktualisieren oder die lokale Verbindung prüfen.'); }
+  }
+  async function stop() {
+    if (!ready || stopping) return;
+    stopping = true;
+    try { await tool('desktop_control.stop_control'); await refresh(); notify('Stop wurde vom lokalen Host bestätigt. Erneute Freigabe erfordert die lokale Bestätigung.'); }
+    catch { notify('Stop konnte nicht bestätigt werden. Bei laufender Desktopsteuerung global Esc drücken und lokal widerrufen.'); }
+    finally { stopping = false; }
+  }
+  function teardown() {
+    closed = true; ready = false;
+    for (const item of pending.values()) { clearTimeout(item.timer); item.reject(Error('VIEW_CLOSED')); }
+    pending.clear(); window.removeEventListener('message', receive);
+    for (const id of ['stop', 'refresh', 'local-confirmation']) elements(id).disabled = true;
+  }
+  function receive(event) {
+    if (event.source !== window.parent || (origin !== null && event.origin !== origin)) return;
+    const message = event.data;
+    if (!message || typeof message !== 'object' || message.jsonrpc !== '2.0') return;
+    if (message.method === 'ui/resource-teardown') {
+      if (Number.isSafeInteger(message.id) || typeof message.id === 'string') send({ jsonrpc: '2.0', id: message.id, result: {} });
+      teardown(); return;
+    }
+    if (message.method === 'ping' && (Number.isSafeInteger(message.id) || typeof message.id === 'string')) { send({ jsonrpc: '2.0', id: message.id, result: {} }); return; }
+    if (!Number.isSafeInteger(message.id) || !pending.has(message.id)) return;
+    const item = pending.get(message.id); pending.delete(message.id); clearTimeout(item.timer);
+    if (origin === null) origin = event.origin;
+    if (message.error || !Object.hasOwn(message, 'result')) item.reject(Error('HOST_REQUEST_FAILED'));
+    else item.resolve(message.result);
+  }
+  window.addEventListener('message', receive);
+  elements('refresh').addEventListener('click', refresh);
+  elements('stop').addEventListener('click', stop);
+  elements('local-confirmation').addEventListener('click', async () => {
+    try { await tool('desktop_control.open_settings'); notify('Die lokale Bestätigung wurde geöffnet. Erst eine bewusste Auswahl dort kann Rechte erteilen.'); }
+    catch { notify('Lokale Bestätigung nicht verfügbar. Es wurden keine Rechte erteilt.'); }
+  });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape' && ready) { event.preventDefault(); void stop(); } });
+  request('ui/initialize', { appInfo: { name: 'Desktop Control management', version: '1.0.0' }, appCapabilities: { availableDisplayModes: ['inline', 'fullscreen'] }, protocolVersion: '2026-01-26' })
+    .then(async result => {
+      if (closed || result?.protocolVersion !== '2026-01-26') throw Error('UI_PROTOCOL_UNSUPPORTED');
+      send({ jsonrpc: '2.0', method: 'ui/notifications/initialized', params: {} });
+      if (!result?.hostCapabilities?.serverTools) { elements('connection').textContent = 'Nur Anzeige'; notify('Dieser Host unterstützt die lokale Werkzeugverbindung nicht. Die Freigaben bleiben unverändert.'); return; }
+      ready = true; elements('connection').textContent = 'Host verbunden';
+      for (const id of ['stop', 'refresh', 'local-confirmation']) elements(id).disabled = false;
+      await refresh();
+    }).catch(() => { elements('connection').textContent = 'Nicht verbunden'; notify('Die lokale Verbindung konnte nicht bestätigt werden. Keine Rechte wurden geändert.'); });
+})();
+</script>
+</body>
+</html>

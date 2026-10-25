@@ -1,0 +1,10 @@
+{
+  "name": "@desktop-control/private-browser",
+  "version": "0.0.1",
+  "private": true,
+  "author": "Anon Allman",
+  "type": "module",
+  "exports": "./controller.mjs",
+  "dependencies": { "playwright-core": "1.64.1" },
+  "scripts": { "test": "node --test test/*.test.mjs" }
+}

@@ -1,0 +1,7 @@
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
+const [root,inventory,out]=process.argv.slice(2);const data=JSON.parse(fs.readFileSync(inventory,'utf8'));const missing=data.entries.filter(x=>x.installed&&!x.files.length);
+const findings=missing.map(entry=>{const dir=path.join(root,entry.path);const manifest=JSON.parse(fs.readFileSync(path.join(dir,'package.json'),'utf8'));return {name:entry.name,version:entry.version,declaredLicense:manifest.license,filesAtPackageRoot:fs.readdirSync(dir),readmeLicenseMentions:fs.readdirSync(dir).filter(x=>/^readme/i.test(x)).map(name=>({path:name,lines:fs.readFileSync(path.join(dir,name),'utf8').split(/\r?\n/).filter(x=>/licen[cs]e|copyright|permission is hereby/i.test(x)).slice(0,12)}))};});
+let text='# Installed runtime license texts — evidence snapshot, not redistribution approval\n';
+for(const entry of data.entries.filter(x=>x.installed&&!x.dev)){for(const file of entry.files){text+=`\n\n## ${entry.name}@${entry.version} — ${file.path}\nSHA256 ${file.sha256}\n\n${fs.readFileSync(path.join(root,entry.path,file.path),'utf8')}`;}}
+fs.writeFileSync(path.join(out,'runtime-license-texts.md'),text);fs.writeFileSync(path.join(out,'missing-license-followup.json'),JSON.stringify(findings,null,2));
+const normalized=fs.readFileSync(path.join(root,'package-lock.json'),'utf8').replace(/\r\n/g,'\n');console.log(JSON.stringify({normalizedLockSha256:crypto.createHash('sha256').update(normalized).digest('hex'),missingStandaloneLicenseRecords:findings},null,2));

@@ -1,0 +1,83 @@
+{
+  "platform": "linux",
+  "node": "v24.22.1",
+  "lockSha256": "a3eb56f8874008396496f7af34d20bbad1259319ccb315e89c1bd334086a09b9",
+  "externalLockEntries": 245,
+  "installed": 209,
+  "notInstalled": 36,
+  "licenseFiles": 207,
+  "missingLicenseFiles": [
+    {
+      "name": "@humanfs/types",
+      "version": "0.15.0",
+      "path": "node_modules/@humanfs/types",
+      "dev": true
+    },
+    {
+      "name": "@rolldown/binding-linux-x64-gnu",
+      "version": "1.2.15",
+      "path": "node_modules/@rolldown/binding-linux-x64-gnu",
+      "dev": true
+    },
+    {
+      "name": "esrecurse",
+      "version": "4.3.0",
+      "path": "node_modules/esrecurse",
+      "dev": true
+    },
+    {
+      "name": "imurmurhash",
+      "version": "0.1.4",
+      "path": "node_modules/imurmurhash",
+      "dev": true
+    },
+    {
+      "name": "natural-compare",
+      "version": "1.4.0",
+      "path": "node_modules/natural-compare",
+      "dev": true
+    },
+    {
+      "name": "yoga-layout",
+      "version": "3.2.1",
+      "path": "node_modules/yoga-layout",
+      "dev": true
+    }
+  ],
+  "runtime": [
+    {
+      "name": "@modelcontextprotocol/core",
+      "version": "2.3.1",
+      "license": "Apache-2.0",
+      "files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "@modelcontextprotocol/server",
+      "version": "2.3.1",
+      "license": "Apache-2.0",
+      "files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "zod",
+      "version": "4.6.7",
+      "license": "MIT",
+      "files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "zod",
+      "version": "4.6.5",
+      "license": "MIT",
+      "files": [
+        "LICENSE"
+      ]
+    }
+  ],
+  "redistributionSignoff": false
+}
+EXIT_CODE: 0

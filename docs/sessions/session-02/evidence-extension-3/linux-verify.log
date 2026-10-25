@@ -1,0 +1,161 @@
+
+COMMAND: git fetch origin 
+START: 2026-10-22T20:07:12Z
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:12Z
+
+COMMAND: git pull --ff-only 
+START: 2026-10-22T20:07:12Z
+Already up to date.
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:13Z
+
+COMMAND: git status --short --branch 
+START: 2026-10-22T20:07:13Z
+## feat/s02-local-mcp-core...origin/feat/s02-local-mcp-core
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:13Z
+
+COMMAND: git rev-parse HEAD 
+START: 2026-10-22T20:07:13Z
+9789a61089f9fcd5de5f9df286a3d438e86ad217
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:13Z
+
+COMMAND: git ls-remote origin refs/heads/feat/s02-local-mcp-core 
+START: 2026-10-22T20:07:13Z
+9789a61089f9fcd5de5f9df286a3d438e86ad217	refs/heads/feat/s02-local-mcp-core
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:13Z
+
+COMMAND: uname -a 
+START: 2026-10-22T20:07:13Z
+Linux 5212c4235750 6.18.54.1-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Tue Oct  6 19:13:07 UTC 2026 x86_64 GNU/Linux
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:13Z
+
+COMMAND: node --version 
+START: 2026-10-22T20:07:13Z
+v24.22.1
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:14Z
+
+COMMAND: npm --version 
+START: 2026-10-22T20:07:14Z
+11.19.1
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:14Z
+
+COMMAND: id 
+START: 2026-10-22T20:07:14Z
+uid=1000(node) gid=1000(node) groups=1000(node)
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:14Z
+
+COMMAND: npm ci --ignore-scripts 
+START: 2026-10-22T20:07:14Z
+
+added 210 packages, and audited 212 packages in 9s
+
+82 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:23Z
+
+COMMAND: npm run verify 
+START: 2026-10-22T20:07:23Z
+
+> desktop-control@0.0.0 verify
+> npm run lint && npm run typecheck && npm test && npm run build && npm run test:protocol
+
+
+> desktop-control@0.0.0 lint
+> eslint --max-warnings 0 packages eslint.config.mjs
+
+
+> desktop-control@0.0.0 typecheck
+> tsc --noEmit --project tsconfig.json
+
+
+> desktop-control@0.0.0 test
+> node --experimental-strip-types --test packages/mcp-server/test/*.test.mts
+
+✔ deny by default (1.292452ms)
+✔ valid exact, unexpired grant permits read (0.32058ms)
+✔ different OS principal is denied (0.168256ms)
+✔ null principal is denied (0.155816ms)
+✔ grant expires exactly at deadline (0.216243ms)
+✔ revocation denies (0.204857ms)
+✔ missing grant store or invalid grants fail closed (0.292037ms)
+✔ wrong resource/capability denies (0.144406ms)
+✔ untrusted expiry values fail closed (0.209176ms)
+✔ same unprivileged POSIX uid yields matching principal (2.03849ms)
+✔ setuid/effective UID mismatch fails closed (0.250422ms)
+✔ privileged root identity fails closed even when both IDs match (0.262028ms)
+✔ invalid POSIX identity fails closed (0.343376ms)
+✔ real process principal is derived without request text (0.362945ms)
+✔ denied request never invokes adapter (3.938238ms)
+✔ test-only explicit grant allows bounded structured result (1.690138ms)
+✔ revoke between calls blocks subsequent execution (0.583232ms)
+✔ cancelled request never reaches adapter (0.408274ms)
+✔ adapter exceptions and invalid shapes redact as INTERNAL_ERROR (0.880851ms)
+✔ revocation before deferred adapter entry prevents invocation (0.650786ms)
+✔ cancellation before deferred adapter entry prevents invocation (2.586837ms)
+✔ adapter timeout returns a bounded redacted failure (26.264985ms)
+✔ in-flight abort returns CANCELLED without waiting for adapter (0.766501ms)
+✔ extra adapter fields are excluded from the public response (0.843562ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 191.407252
+
+> desktop-control@0.0.0 build
+> tsc --project tsconfig.json
+
+
+> desktop-control@0.0.0 test:protocol
+> node --test packages/mcp-server/test/*.test.mjs
+
+✔ actual SDK stdio fixture allowed: result, adapter count, redaction and EOF (206.855689ms)
+✔ actual SDK stdio fixture denied: result, adapter count, redaction and EOF (184.95079ms)
+✔ actual SDK stdio fixture expired: result, adapter count, redaction and EOF (184.070739ms)
+✔ actual SDK stdio fixture revoked: result, adapter count, redaction and EOF (186.633549ms)
+✔ actual SDK stdio fixture error: result, adapter count, redaction and EOF (190.148141ms)
+﹣ production built entry on Windows: malformed input, no TCP listener and EOF (0.318362ms) # SKIP
+✔ production built entry: unterminated input exceeding SDK 10 MiB bound terminates (973.020735ms)
+✔ actual SDK stdio fixture cancellation of in-flight adapter and subsequent liveness (202.125253ms)
+✔ modern MCP stdio discovery, strict arguments, default denial and clean EOF (316.541347ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 5367.779903
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:36Z
+
+COMMAND: git status --short --branch 
+START: 2026-10-22T20:07:36Z
+## feat/s02-local-mcp-core...origin/feat/s02-local-mcp-core
+
+EXIT_CODE: 0
+END: 2026-10-22T20:07:36Z

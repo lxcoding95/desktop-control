@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "desktop-control": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${PLUGIN_ROOT}/start.mjs"],
+      "cwd": "${PLUGIN_ROOT}"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+✖ Linux built production entry has no open socket descriptors after MCP discovery (326.618466ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4093.998224
+
+✖ failing tests:
+
+test at packages/mcp-server/test/protocol-linux.test.mjs:11:1
+✖ Linux built production entry has no open socket descriptors after MCP discovery (326.618466ms)
+  AssertionError [ERR_ASSERTION]: the MCP child must not own any socket descriptor at inspection time
+  + actual - expected
+  
+  + [
+  +   'socket:[9379]',
+  +   'socket:[9381]',
+  +   'socket:[9383]'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///workspace/desktop-control/packages/mcp-server/test/protocol-linux.test.mjs:57:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'socket:[9379]', 'socket:[9381]', 'socket:[9383]' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

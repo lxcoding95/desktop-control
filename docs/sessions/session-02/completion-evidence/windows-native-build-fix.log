@@ -1,0 +1,69 @@
+npm notice run desktop-control@0.0.0 verify
+npm notice run npm run lint && npm run typecheck && npm test && npm run build && npm run test:protocol
+npm notice run desktop-control@0.0.0 lint
+npm notice run eslint --max-warnings 0 packages eslint.config.mjs
+npm notice run desktop-control@0.0.0 typecheck
+npm notice run tsc --noEmit --project tsconfig.json
+npm notice run desktop-control@0.0.0 test
+npm notice run node packages/mcp-server/scripts/build-native.mjs && node --experimental-strip-types --test packages/mcp-server/test/*.test.mts
+✔ native process principal gates valid, wrong, missing, expired and revoked host grants (106.418ms)
+✔ audit failures remain redacted and cannot permit an unaudited adapter entry (74.8633ms)
+✔ deny by default (1.6803ms)
+✔ valid exact, unexpired grant permits read (0.4639ms)
+✔ different OS principal is denied (0.3659ms)
+✔ null principal is denied (0.3402ms)
+✔ grant expires exactly at deadline (0.331ms)
+✔ revocation denies (0.2867ms)
+✔ missing grant store or invalid grants fail closed (0.3689ms)
+✔ wrong resource/capability denies (0.3576ms)
+✔ untrusted expiry values fail closed (0.3995ms)
+✔ same unprivileged POSIX uid yields matching principal (1.1502ms)
+✔ setuid/effective UID mismatch fails closed (0.269ms)
+✔ privileged root identity fails closed even when both IDs match (0.1573ms)
+✔ invalid POSIX identity fails closed (0.1992ms)
+✔ real process principal is derived without request text (405.0601ms)
+✔ Windows token parser denies elevation, service, malformed and mismatched identity (0.3504ms)
+✔ denied request never invokes adapter (3.4415ms)
+✔ test-only explicit grant allows bounded structured result (1.9384ms)
+✔ revoke between calls blocks subsequent execution (0.6076ms)
+✔ cancelled request never reaches adapter (1.6141ms)
+✔ adapter exceptions and invalid shapes redact as INTERNAL_ERROR (0.6249ms)
+✔ revocation before deferred adapter entry prevents invocation (0.4533ms)
+✔ cancellation before deferred adapter entry prevents invocation (0.6484ms)
+✔ adapter timeout returns a bounded redacted failure (28.2953ms)
+✔ in-flight abort returns CANCELLED without waiting for adapter (0.8261ms)
+✔ extra adapter fields are excluded from the public response (0.657ms)
+✔ revocation before deferred entry records deny, never false allow (0.4538ms)
+✔ cancellation before deferred entry records cancel, never false allow (0.3445ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 611.4491
+npm notice run desktop-control@0.0.0 build
+npm notice run tsc --project tsconfig.json && node packages/mcp-server/scripts/build-native.mjs
+npm notice run desktop-control@0.0.0 test:protocol
+npm notice run node --test packages/mcp-server/test/*.test.mjs
+﹣ Linux production entry has no unexpected sockets beyond inherited Unix stdio (2.1116ms) # Requires Linux /proc/<pid>/fd
+﹣ Linux socket detector finds deliberately listening TCP and UDP test endpoints (0.1674ms) # Requires Linux /proc/<pid>/fd
+✔ actual SDK stdio fixture allowed: result, adapter count, redaction and EOF (522.4503ms)
+✔ actual SDK stdio fixture denied: result, adapter count, redaction and EOF (412.5181ms)
+✔ actual SDK stdio fixture expired: result, adapter count, redaction and EOF (397.1316ms)
+✔ actual SDK stdio fixture revoked: result, adapter count, redaction and EOF (409.3288ms)
+✔ actual SDK stdio fixture error: result, adapter count, redaction and EOF (402.5775ms)
+✔ production built entry on Windows: malformed input, no TCP listener and EOF (2564.4224ms)
+✔ production built entry: unterminated input exceeding SDK 10 MiB bound terminates (580.6168ms)
+✔ actual SDK stdio fixture cancellation of in-flight adapter and subsequent liveness (430.9978ms)
+✔ modern MCP stdio discovery, strict arguments, default denial and clean EOF (507.8912ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 2
+ℹ todo 0
+ℹ duration_ms 5850.0238
+VERIFY_EXIT:0

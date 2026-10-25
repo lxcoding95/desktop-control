@@ -1,0 +1,3 @@
+# Local downloaded executables and scanner output are never committed.
+.installed/
+.reports/

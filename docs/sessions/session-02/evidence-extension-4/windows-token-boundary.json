@@ -1,0 +1,8 @@
+{
+  "os": "Windows",
+  "nativeTokenUserSidAvailable": true,
+  "elevatedAdministrator": false,
+  "sidValue": "intentionally_not_recorded",
+  "productPrincipal": "null_fail_closed",
+  "sidIntegration": "not_implemented"
+}

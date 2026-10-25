@@ -1,0 +1,124 @@
+[
+  {
+    "name": "@humanfs/types",
+    "version": "0.15.0",
+    "declaredLicense": "Apache-2.0",
+    "filesAtPackageRoot": [
+      "CHANGELOG.md",
+      "README.md",
+      "package.json",
+      "src",
+      "tsconfig.json"
+    ],
+    "readmeLicenseMentions": [
+      {
+        "path": "README.md",
+        "lines": [
+          "## License"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "@rolldown/binding-linux-x64-gnu",
+    "version": "1.2.15",
+    "declaredLicense": "MIT",
+    "filesAtPackageRoot": [
+      "README.md",
+      "package.json",
+      "rolldown-binding.linux-x64-gnu.node"
+    ],
+    "readmeLicenseMentions": [
+      {
+        "path": "README.md",
+        "lines": []
+      }
+    ]
+  },
+  {
+    "name": "esrecurse",
+    "version": "4.3.0",
+    "declaredLicense": "BSD-2-Clause",
+    "filesAtPackageRoot": [
+      ".babelrc",
+      "README.md",
+      "esrecurse.js",
+      "gulpfile.babel.js",
+      "package.json"
+    ],
+    "readmeLicenseMentions": [
+      {
+        "path": "README.md",
+        "lines": [
+          "### License",
+          "Copyright (C) 2014 [Yusuke Suzuki](https://github.com/Constellation)",
+          "  * Redistributions of source code must retain the above copyright",
+          "  * Redistributions in binary form must reproduce the above copyright",
+          "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"",
+          "ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "imurmurhash",
+    "version": "0.1.4",
+    "declaredLicense": "MIT",
+    "filesAtPackageRoot": [
+      "README.md",
+      "imurmurhash.js",
+      "imurmurhash.min.js",
+      "package.json"
+    ],
+    "readmeLicenseMentions": [
+      {
+        "path": "README.md",
+        "lines": [
+          "License (MIT)",
+          "Copyright (c) 2013 Gary Court, Jens Taylor",
+          "Permission is hereby granted, free of charge, to any person obtaining a copy of",
+          "use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of",
+          "The above copyright notice and this permission notice shall be included in all",
+          "COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "natural-compare",
+    "version": "1.4.0",
+    "declaredLicense": "MIT",
+    "filesAtPackageRoot": [
+      "README.md",
+      "index.js",
+      "package.json"
+    ],
+    "readmeLicenseMentions": [
+      {
+        "path": "README.md",
+        "lines": [
+          "Licence",
+          "Copyright (c) 2012-2015 Lauri Rooden &lt;lauri@rooden.ee&gt;  ",
+          "[The MIT License](http://lauri.rooden.ee/mit-license.txt)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "yoga-layout",
+    "version": "3.2.1",
+    "declaredLicense": "MIT",
+    "filesAtPackageRoot": [
+      "README.md",
+      "dist",
+      "package.json",
+      "src"
+    ],
+    "readmeLicenseMentions": [
+      {
+        "path": "README.md",
+        "lines": []
+      }
+    ]
+  }
+]

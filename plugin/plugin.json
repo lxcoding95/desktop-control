@@ -1,0 +1,34 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "desktop-control-private",
+  "version": "0.0.1-preview.5",
+  "author": {
+    "name": "Anon Allman",
+    "email": "334623916+lxcoding95@users.noreply.github.com"
+  },
+  "description": "Local MCP preview: host-approved diagnostics, isolated workspace/PDF/terminal, separate browser and visible Windows desktop control. Signed Bridge updates are not active.",
+  "repository": "https://github.com/lxcoding95/desktop-control",
+  "license": "MIT",
+  "extensions": {
+    "com.openai": {
+      "requires_local_executor": true,
+      "interface": {
+        "displayName": "Desktop Control",
+        "developerName": "Anon Allman",
+        "category": "Developer Tools",
+        "logo": "./assets/desktop-control.png",
+        "composerIcon": "./assets/desktop-control.png",
+        "brandColor": "#2374DE",
+        "brandColorDark": "#68D9F4",
+        "shortDescription": "Desktop tools & workspace",
+        "capabilities": [
+          "Read",
+          "Write",
+          "Interactive"
+        ],
+        "defaultPrompt": null
+      },
+      "onboardingSkill": "./skills/private-control/SKILL.md"
+    }
+  }
+}
