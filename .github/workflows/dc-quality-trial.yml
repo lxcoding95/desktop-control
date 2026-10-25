@@ -1,14 +1,12 @@
-# SEC-GATE-001 proof-only run. PR-only, with no repository token permissions,
+# SEC-GATE-001 candidate universal PR baseline. PR-only, no token permissions,
 # no installed marketplace actions, no secrets, no write/deploy/release steps.
-name: Desktop Control - secure quality trial
+name: Desktop Control - universal read-only baseline
 
 on:
+  # Always run for any PR once merged to main. Do not use paths filters for
+  # required checks: skipped check runs would otherwise block unrelated PRs.
   pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - '.github/workflows/dc-quality-trial.yml'
-      - '.github/dependabot.yml'
-      - 'tools/governance/**'
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions: {}
 
