@@ -2,7 +2,7 @@
 // Lightweight deny-by-default public-content guard; NOT a substitute for history scanners.
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { constants as fsConstants, closeSync, fstatSync, lstatSync, openSync, readFileSync } from 'node:fs';
+import { constants as fsConstants, closeSync, fstatSync, lstatSync, openSync, readFileSync, realpathSync } from 'node:fs';
 import { resolve, relative, isAbsolute, sep, join } from 'node:path';
 
 const MAX_FILE = 8 * 1024 * 1024;
@@ -95,10 +95,17 @@ function reviewBytes(file, source, body) {
   }
 }
 let count = 0;
+let phase = 'root-validation';
 try {
   // Reject an arbitrary subdirectory that could silently reduce scan scope.
   const gitRoot = git('rev-parse', '--show-toplevel').toString('utf8').trim();
-  if (resolve(gitRoot) !== root) throw new Error('GIT_ROOT_MISMATCH');
+  // Git for Windows may spell the same on-disk root with slash and case differences.
+  // Compare canonical filesystem identities, not the textual spelling of a path.
+  const a = realpathSync.native(root);
+  const b = realpathSync.native(resolve(gitRoot));
+  const same = process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b;
+  if (!same) throw new Error('GIT_ROOT_MISMATCH');
+  phase = 'index-inventory';
   // Git index and working tree are independent. Scanning only working tree is unsafe:
   // a staged secret can be overwritten in the worktree and still be committed.
   const index = new Map();
@@ -109,9 +116,11 @@ try {
     if (!index.has(file)) index.set(file, []);
     index.get(file).push({ mode, sha, stage });
   }
+  phase = 'untracked-inventory';
   const untracked = new Set(nulItems(git('ls-files', '--others', '--exclude-standard', '-z')));
   const files = [...new Set([...index.keys(), ...untracked])].sort();
   count = files.length;
+  phase = 'file-inspection';
   for (const file of files) {
     if (!included(file)) { add(file, 'inventory', 'path-escape'); continue; }
     if (filenameSensitive.test(file)) add(file, 'inventory', 'sensitive-filename');
@@ -143,8 +152,10 @@ try {
       } finally { closeSync(fd); }
     } catch { add(file, 'worktree', 'unreadable-worktree-file'); }
   }
-} catch {
-  process.stderr.write('ERROR: Git inventory or preflight unavailable. No content certified.\n');
+} catch (err) {
+  const reason = ['GIT_ROOT_MISMATCH', 'INVALID_INDEX_RECORD', 'INVALID_GIT_INVENTORY'].includes(err?.message) ? err.message : 'IO_OR_GIT_FAILURE';
+  // Only fixed machine-readable categories; never include OS path or Git stderr.
+  process.stderr.write('ERROR: Preflight unavailable [' + phase + ':' + reason + ']. No content certified.\n');
   process.exit(2);
 }
 if (truncated) findings.push({ path: '[multiple]', source: 'inventory', rule: 'findings-limit-exceeded', line: null });
