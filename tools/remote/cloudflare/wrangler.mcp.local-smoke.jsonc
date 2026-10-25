@@ -3,10 +3,9 @@
   // Commands must additionally specify --local --ip 127.0.0.1.
   "name": "desktop-control-remote-health-local-smoke",
   "main": "mcp-worker.ts",
-  // This fixture must not request a date newer than pinned Wrangler
-    // 4.145.0 bundled workerd supports (reported limit: 2026-10-07).
-    // Keep production templates independently at their reviewed date.
-    "compatibility_date": "2026-10-07",
+  // Pinned Wrangler 4.145.0 bundled workerd supports at most 2026-10-07.
+  // Local smoke only: do not backdate production compatibility settings.
+  "compatibility_date": "2026-10-07",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": false,
   "routes": [],
