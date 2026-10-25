@@ -10,13 +10,15 @@ import zipfile
 validator = pathlib.Path(__file__).with_name('verify-archive.py')
 with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temporary:
     root = pathlib.Path(temporary)
-    cases = ['valid', 'remote', 'no-local', 'fixture', 'missing-license', 'zero-dependencies', 'tamper', 'traversal', 'alias', 'case-alias', 'windows-device', 'oversize', 'long-component', 'backslash', 'space-suffix']
+    cases = ['valid', 'remote', 'no-local', 'fixture', 'missing-license', 'zero-dependencies', 'tamper', 'traversal', 'alias', 'case-alias', 'windows-device', 'oversize', 'long-component', 'backslash', 'space-suffix', 'dirty-provenance', 'wrong-commit', 'version-drift', 'metadata-name', 'mcp-drift']
     for case in cases:
-        manifest = {'version': '0.0.1-test', 'extensions': {'com.openai': {'requires_local_executor': case != 'no-local'}}}
+        manifest = {'name': 'desktop-control-private', 'version': '0.0.1-test', 'extensions': {'com.openai': {'requires_local_executor': case != 'no-local'}}}
         mcp = {'mcpServers': {'desktop-control': {'type': 'http' if case == 'remote' else 'stdio', 'args': ['${PLUGIN_ROOT}/start.mjs']}}}
         files = {'plugin.json': json.dumps(manifest).encode(), 'mcp.json': json.dumps(mcp).encode(),
+                 '.codex-plugin/plugin.json': json.dumps({'name': 'desktop-control-private', 'version': '0.0.1-test', 'requires_local_executor': True}).encode(),
+                 '.mcp.json': json.dumps({'mcpServers': mcp['mcpServers']}).encode(),
                  'dist/packages/mcp-server/src/server.mjs': b'deps.grants ?? DENY_ALL_GRANTS',
-                 'PROVENANCE.json': json.dumps({'source_commit': 'test', 'dirty': False, 'dependencies': [] if case == 'zero-dependencies' else [{'name': n} for n in ['a', 'b', 'c']]}).encode()}
+                 'PROVENANCE.json': json.dumps({'source_commit': 'a' * 40, 'plugin_version': '0.0.1-test', 'dirty': False, 'dependencies': [] if case == 'zero-dependencies' else [{'name': n} for n in ['a', 'b', 'c']]}).encode()}
         for name in ['a', 'b', 'c']:
             if case != 'missing-license' or name != 'c':
                 files[f'node_modules/{name}/LICENSE'] = b'test-only synthetic license'
@@ -34,6 +36,18 @@ with tempfile.TemporaryDirectory(prefix='desktop-control-archive-test-') as temp
             'space-suffix': {'safe .txt ': b'y'},
         }
         files.update(extras.get(case, {}))
+        if case in ('dirty-provenance', 'wrong-commit', 'version-drift'):
+            source = json.loads(files['PROVENANCE.json'])
+            if case == 'dirty-provenance': source['dirty'] = True
+            elif case == 'wrong-commit': source['source_commit'] = 'not-a-git-sha'
+            else: source['plugin_version'] = '0.0.0-stale'
+            files['PROVENANCE.json'] = json.dumps(source).encode()
+        if case == 'metadata-name':
+            metadata = json.loads(files['.codex-plugin/plugin.json'])
+            metadata['name'] = 'unexpected-plugin'
+            files['.codex-plugin/plugin.json'] = json.dumps(metadata).encode()
+        if case == 'mcp-drift':
+            files['.mcp.json'] = json.dumps({'mcpServers': {'desktop-control': {'type': 'http'}}}).encode()
         inventory = {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}
         if case == 'tamper':
             files['plugin.json'] += b' '
