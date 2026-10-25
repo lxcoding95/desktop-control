@@ -67,17 +67,26 @@ function validatePolicy(p) {
   if (issued >= expires || expires - issued > 31 * 86400000) fail('INVALID_TIME');
   return { issued, expires };
 }
-function assertTrustedTicket(ticket, now) {
+function readClock(clock) {
+  let now;
+  try { if (typeof clock !== 'function') fail('UNTRUSTED_CLOCK'); now = clock(); }
+  catch { fail('UNTRUSTED_CLOCK'); }
+  if (!Number.isSafeInteger(now) || now < 0) fail('UNTRUSTED_CLOCK');
+  return now;
+}
+function assertTrustedTicket(ticket) {
   if (!isObject(ticket) || !verifiedTickets.has(ticket)) fail('UNVERIFIED_POLICY');
-  const { policy, verifiedAt, expires } = verifiedTickets.get(ticket);
-  if (!Number.isSafeInteger(now) || now < verifiedAt || now >= expires) fail('EXPIRED_OR_UNTRUSTED_CLOCK');
+  const { policy, verifiedAt, expires, clock } = verifiedTickets.get(ticket);
+  const now = readClock(clock);
+  if (now < verifiedAt || now >= expires) fail('EXPIRED_OR_UNTRUSTED_CLOCK');
   return policy;
 }
 /**
  * Trust anchors and the previous checkpoint must be provided from protected local host state.
  * This module cannot validate OS ownership, monotonic persistence or key provenance.
  */
-export function verifyPolicy(envelope, trustedKeys, { previous = null, now = Date.now() } = {}) {
+export function verifyPolicy(envelope, trustedKeys, { previous = null, clock = Date.now } = {}) {
+  const now = readClock(clock);
   exactKeys(envelope, ['format', 'keyId', 'payload', 'signature']);
   if (envelope.format !== 'dc-update-policy-v1' || !KEY_ID.test(envelope.keyId)) fail('INVALID_ENVELOPE');
   if (!isObject(trustedKeys) || !Object.hasOwn(trustedKeys, envelope.keyId)) fail('UNKNOWN_SIGNER');
@@ -91,7 +100,6 @@ export function verifyPolicy(envelope, trustedKeys, { previous = null, now = Dat
   try { policy = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(payloadBytes)); }
   catch { fail('INVALID_PAYLOAD'); }
   const { issued, expires } = validatePolicy(policy);
-  if (!Number.isSafeInteger(now) || now < 0) fail('INVALID_TIME');
   if (issued > now + 5 * 60000 || expires <= now) fail('EXPIRED_OR_FUTURE_POLICY');
   const digest = createHash('sha256').update(payloadBytes).digest('hex');
   if (previous !== null) {
@@ -106,20 +114,20 @@ export function verifyPolicy(envelope, trustedKeys, { previous = null, now = Dat
   Object.freeze(policy);
   const checkpoint = Object.freeze({ sequence: policy.sequence, digest, trustedTime: now });
   const ticket = Object.freeze({ policy, checkpoint });
-  verifiedTickets.set(ticket, { policy, verifiedAt: now, expires });
+  verifiedTickets.set(ticket, { policy, verifiedAt: now, expires, clock });
   return ticket;
 }
 /** Only hashes against artifact metadata bound to a verified signed ticket. */
-export function verifyArtifact(bytes, ticket, { now = Date.now() } = {}) {
-  const { artifact } = assertTrustedTicket(ticket, now);
+export function verifyArtifact(bytes, ticket) {
+  const { artifact } = assertTrustedTicket(ticket);
   if (!Buffer.isBuffer(bytes)) fail('INVALID_ARTIFACT');
   if (bytes.length !== artifact.size) return false;
   const got = createHash('sha256').update(bytes).digest();
   return timingSafeEqual(got, Buffer.from(artifact.sha256, 'hex'));
 }
 /** Only decisions from previously verified, non-expired signed metadata. */
-export function decideAccess(ticket, { bridgeVersion, pluginVersion, platform, contract, now = Date.now() }) {
-  const policy = assertTrustedTicket(ticket, now);
+export function decideAccess(ticket, { bridgeVersion, pluginVersion, platform, contract }) {
+  const policy = assertTrustedTicket(ticket);
   versionParts(bridgeVersion); versionParts(pluginVersion);
   if (policy.platform !== platform) return { state: 'REPAIR_ONLY', reason: 'PLATFORM_MISMATCH', allowed: RECOVERY_TOOLS };
   if (contract !== policy.contract) return { state: 'REPAIR_ONLY', reason: 'CONTRACT_MISMATCH', allowed: RECOVERY_TOOLS };
