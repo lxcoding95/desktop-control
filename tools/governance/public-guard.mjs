@@ -27,6 +27,7 @@ const patterns = [
   ['private-ipv4', /\b(?:192\.168|10\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01]))\.\d{1,3}\.\d{1,3}\b/g],
   ['windows-sid', /\bS-1-5-21-\d+-\d+-\d+-\d+\b/g],
 ];
+const filenameSensitive = /(?:[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|(?:^|\/)\.env(?:\.|$)|\.(?:p12|pfx|pem|key|kdbx|sqlite|db|bak)$)/i;
 const findings = [];
 let truncated = false;
 const opaque = path => '[file-sha256:' + createHash('sha256').update(path).digest('hex').slice(0, 16) + ']';
