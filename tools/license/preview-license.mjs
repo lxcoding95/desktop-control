@@ -64,7 +64,8 @@ export async function issuePreviewLicense({
   if (!validateClaims(claims, issuedAt)) fail('INVALID_CLAIMS');
   let signingKey;
   try {
-    signingKey = createPrivateKey(privateKey);
+    signingKey = privateKey?.type === 'private' && privateKey?.asymmetricKeyType === 'rsa'
+      ? privateKey : createPrivateKey(privateKey);
     if (signingKey.asymmetricKeyType !== 'rsa' ||
         (signingKey.asymmetricKeyDetails?.modulusLength ?? 0) < 3072) fail('INVALID_SIGNER');
   } catch { fail('INVALID_SIGNER'); }
@@ -104,7 +105,8 @@ export async function verifyPreviewLicense({
     fail('WRONG_OWNER_OR_DEVICE');
   let verified = false;
   try {
-    const key = createPublicKey(publicKey);
+    const key = publicKey?.type === 'public' && publicKey?.asymmetricKeyType === 'rsa'
+      ? publicKey : createPublicKey(publicKey);
     if (key.asymmetricKeyType !== 'rsa' ||
         (key.asymmetricKeyDetails?.modulusLength ?? 0) < 3072) fail('INVALID_LICENSE');
     verified = verify('sha256', message(body), rsaOptions(key), sig);
