@@ -1,0 +1,22 @@
+{
+  // TEMPLATE ONLY. No public route, no device relay binding, remote disabled.
+  // Enabling remote requires reviewed Durable Object, OAuth and account pairing.
+  "name": "desktop-control-mcp-disabled",
+  "main": "mcp-worker.ts",
+  "compatibility_date": "2026-10-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [],
+  "services": [
+    {
+      "binding": "AUTH_SERVER",
+      "service": "desktop-control-auth-disabled",
+      "entrypoint": "DesktopControlAuthServer"
+    }
+  ],
+  "vars": {
+    "AUTH_ISSUER": "https://REPLACE_WITH_AUTH_HOST.workers.dev",
+    "RESOURCE_URL": "https://REPLACE_WITH_MCP_HOST.workers.dev/mcp",
+    "ENABLE_REMOTE_HEALTH": "0"
+  }
+}
