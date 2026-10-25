@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "project": "Desktop Control",
-  "snapshot_date": "2026-10-24",
+  "snapshot_date": "2026-10-25",
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_draft_windows_linux_owner_tested_independent_review_and_private_chatgpt_integration_pending",
+  "phase": "S02_draft_cross_platform_tested_private_diagnostic_host_proven_review_pending",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -61,7 +61,7 @@
     },
     "administration": {
       "issue": "https://github.com/lxcoding95/desktop-control/issues/4",
-      "status": "open"
+      "status": "closed"
     }
   },
   "session_issues": [
@@ -88,8 +88,8 @@
       "remaining_budget_seconds_conservative": 0,
       "work_branch": "feat/s02-local-mcp-core",
       "pr_url": "https://github.com/lxcoding95/desktop-control/pull/22",
-      "test_result": "On feature branch, owner-provided real Windows/Linux logs: 29/29 unit each; Windows 9 protocol passes + 2 Linux-only skips, Linux 10 protocol passes + 1 Windows-only skip; npm audit zero reported vulnerabilities and pinned local OSS security tools selftest/scan passed both platforms. Private ChatGPT plugin end-to-end untested; independent semantic review PENDING; no main merge.",
-      "environment_blocker": "Earlier SDK/npm environment failures are historic; Windows/Linux tests later PASSED. Remaining blockers: independent semantic review, native Windows privacy-log classification and actual private client-to-MCP integration.",
+      "test_result": "On feature branch, owner-provided real Windows/Linux logs: 29/29 unit each; Windows 9 protocol passes + 2 Linux-only skips, Linux 10 protocol passes + 1 Windows-only skip; npm audit zero reported vulnerabilities and pinned local OSS security tools selftest/scan passed both platforms. A later private preview ChatGPT diagnostic allow/revoke/deny was evidenced separately in Issue #28 on 2026-10-24; S02 final semantic review PENDING; no main merge.",
+      "environment_blocker": "Earlier npm/SDK environment failures are historical; latest Windows/Linux S02 regressions passed. Outstanding: independent current-head semantic security review, historical Git/privacy exposure triage, production integration/host freshness.",
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
       "next_exact_action": "Verify latest S02 feature HEAD and Issue #6, complete independent semantic-security review and privacy-log triage before PR #22 acceptance. Do not start S03-S06. Governance/product milestones migration is a separate docs-only PR / Issue #25.",
       "extension_authorized_on": "2026-10-22",
@@ -155,7 +155,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Read live main, open Draft PR #22 and Issue #6 for S02 test/review status. Review docs-only product-roadmap PR / Issue #25; create and verify product-based GitHub milestones and private Project fields via owner-approved UI only, without changing S01–S06 histories. SEC-GATE-001 open, no Actions; private ChatGPT plugin connection untested.",
+  "next_preflight_action": "Read current GitHub PRs #22/#26/#30/#31, issues #1/#6/#25/#27/#28/#29 and exact tested heads. Confirm historical positive/revoked private ChatGPT status proof from #28 while current host version remains unverified; independently review and privacy-scan S02 PR22; review PR30 staged/index scanner on clean Windows/Linux; fix unsigned-policy and artifact-integrity API blockers in PR31; keep all unsafe merges, releases and regular CI blocked.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
@@ -199,13 +199,27 @@
     "register": "docs/governance/PRODUCT-MILESTONES.md",
     "roadmap": "ROADMAP.md",
     "information_policy": "docs/governance/PUBLIC-INFORMATION-POLICY.md",
-    "github_platform_migration": "not_performed_existing_session_milestone_memberships_preserved_issue_25",
+    "github_platform_migration": "partial_unverified_full_migration; issue28 has GitHub milestone numeric ID7; maintain historical session milestone mappings; verify complete M01-M06 and Project views independently",
     "mapping_issue": "https://github.com/lxcoding95/desktop-control/issues/25",
     "approved_distribution": "public MIT source but no official installable binaries, npm packages, or published plugins before separately authorized release",
     "private_auth": "device_bound_crypto_planned_no_username_only",
     "optional_wsl_and_containers": "explicit_user_choice_only",
-    "mandatory_update_mode": "always_block_normal_mcp_on_verified_new_required_version_plan_only",
+    "mandatory_update_mode": "always_block_on_verified_signed_mandatory_update; isolated M03 policy/FSM prototypes in Draft PR31, no installer/activation",
     "browser_workspace": "separate headed browser_mcp_control_only_license_research_pending",
     "confidential_material": "outside_public_repo_secrets_in_credential_vault"
+  },
+  "latest_product_checkpoint": {
+    "date_utc": "2026-10-25",
+    "scope": "read-only status reconciliation from GitHub and previous documented local test evidence; no formal session started",
+    "private_plugin_host_proof_issue": "https://github.com/lxcoding95/desktop-control/issues/28",
+    "observed_positive_status_utc": "2026-10-24T23:03:23Z",
+    "observed_revoke_then_denial_utc": "2026-10-24T23:03:41Z",
+    "currently_installed_host_version": "not verified in current Chat session",
+    "saved_private_plugin_preview": "0.0.1-preview.3 (snapshot only; not an installed updater)",
+    "s02_status": "PR22 Draft; independent semantic security review and privacy scan open",
+    "governance": "PR26 Draft, documentation freshness in progress",
+    "free_quality_automation": "PR30 Draft; staged/index scanner locally tested on Linux 19/19, native Windows and final review pending",
+    "m03_update": "PR31 Draft; isolated pure policy and FSM prototypes, no automatic runtime updater, signing infrastructure or actual Host P upgrade",
+    "security_gate": "SEC-GATE-001 still open, no regular GitHub Actions enabled"
   }
 }
