@@ -19,3 +19,17 @@ updates:
         update-types:
           - minor
           - patch
+
+  # Only version-update PRs; never auto-merge changes to workflow code.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 3
+    labels:
+      - "type: maintenance"
+    commit-message:
+      prefix: ci-deps
