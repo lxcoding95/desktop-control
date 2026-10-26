@@ -1,6 +1,6 @@
 # Desktop Control — Verbindlicher Projekt-Masterplan
 
-**Aktualisierter Orientierungsstand:** 2026-10-24 | S01 Architektur gemergt; S02 Windows/Linux-Regression + lokale OSS-Sicherheitsscans vom Owner bestanden auf [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **nicht gemergt**; unabhängiger semantischer Review **offen**; eine tatsächliche private ChatGPT-Diagnoseverbindung mit anschließender Widerrufsprüfung wurde am 24.10.2026 gemäß [M01 Issue #28](https://github.com/lxcoding95/desktop-control/issues/28) nachgewiesen, aktuelle Host-/Plugin-Fassung noch nicht erneut überprüft | Lizenz des öffentlichen Kerns: MIT | Repository: https://github.com/lxcoding95/desktop-control
+**Historischer Orientierungsstand (aktueller privater Checkpoint weiter unten):** 2026-10-24 | S01 Architektur gemergt; S02 Windows/Linux-Regression + lokale OSS-Sicherheitsscans vom Owner bestanden auf [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **nicht gemergt**; unabhängiger semantischer Review **offen**; eine tatsächliche private ChatGPT-Diagnoseverbindung mit anschließender Widerrufsprüfung wurde am 24.10.2026 gemäß [M01 Issue #28](https://github.com/lxcoding95/desktop-control/issues/28) nachgewiesen, aktuelle Host-/Plugin-Fassung noch nicht erneut überprüft | Lizenz des öffentlichen Kerns: MIT | Repository: https://github.com/lxcoding95/desktop-control
 
 > Dieses Dokument beschreibt Ziele, Entscheidungen und Gates. Es ist keine Behauptung, dass das Produkt bereits implementiert ist. Vorhandene GitHub-Daten (Commits, PRs, Issues und aktuelle Branches) haben Vorrang vor statischen Statusangaben. Für neue ChatGPT-Chats zwingend auch [CHAT-CONTINUITY.md](../governance/CHAT-CONTINUITY.md) lesen.
 
@@ -26,6 +26,10 @@ Die folgenden Entscheidungen ergänzen frühere, teilweise historische Sitzungs-
 - **Autonome Repositorypflege:** Qualität, Aktualität, Upstream-Versionen, Lizenzen, Dokumenten-Drift und Produkt-Meilensteine regelmäßig **bei tatsächlichen Arbeitsereignissen** prüfen; wiederkehrende Jobs erst nach echter Installation/Erfolgsprüfung als aktiv markieren. Github Actions weiterhin durch [SEC-GATE-001 #1](https://github.com/lxcoding95/desktop-control/issues/1) blockiert.
 
 Diese Ergänzung **startet keine S03–S06** und behauptet weder Installation, OAuth, einen eigenen Dienst noch automatisierte Updates als bereits realisiert.
+
+**Aktueller privater Checkpoint:** [PROJECT-STATE.json](../governance/PROJECT-STATE.json) und [README-Nachweise](../../README.md#product-roadmap-and-verified-delivery) führen installierte Preview versus neueren Quellstand, getrennte lokale/Hosted-Prüfungen und sämtliche Skips/Fehler. Produktiver Updater OFF; PR34 bleibt standardmäßig OFF und Health-only, ohne deployed Dienst.
+
+**Aktuelle Freigabe:** Ausgewählte private S02–S06-Funktionen und kontrollierte PR-Konsolidierung sind am 25.10.2026 ausdrücklich freigegeben. Historische Session- und Zeitdatensätze bleiben unverändert (2/6 gestartet); frühere pauschale Scope-Sperren gelten für diese ausgewählte private Arbeit nicht. Kein öffentliches Release und keine Abnahme allein aufgrund dieser Freigabe.
 
 ## 1. Fixierte Produktentscheidungen
 

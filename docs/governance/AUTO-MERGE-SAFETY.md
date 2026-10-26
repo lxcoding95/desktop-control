@@ -1,6 +1,6 @@
 # Desktop Control — native GitHub Auto-Merge safety contract
 
-Status on **2026-10-25**: GitHub repo `allow_auto_merge=true` verified by API. **No PR is granted auto-merge.** This file is staged in [Draft PR #26](https://github.com/lxcoding95/desktop-control/pull/26), not yet on `main`. The authoritative settings are the live GitHub rulesets and actual status checks, not this file.
+Status on **2026-10-25**: GitHub repo `allow_auto_merge=true` verified by API. **No PR is granted auto-merge.** This policy is introduced through [PR #26](https://github.com/lxcoding95/desktop-control/pull/26); use its live state for merge status. The authoritative settings are the live GitHub rulesets and actual status checks, not this file.
 
 ## Why an enabled switch is insufficient
 
@@ -20,9 +20,9 @@ The active [Protect main ruleset](https://github.com/lxcoding95/desktop-control/
 
 - [SEC-GATE #1](https://github.com/lxcoding95/desktop-control/issues/1): main policy, full-SHA-enforced workflows, admin settings confirmation, final review.
 - [CI-GATE #2](https://github.com/lxcoding95/desktop-control/issues/2): always-running checks that are unskippable and attested on the exact candidate merge HEAD.
-- [PR #30](https://github.com/lxcoding95/desktop-control/pull/30): tokenless path-scoped security trial (Windows 19/19, Linux 19/19); not sufficient as a universally required merge check.
-- [PR #31](https://github.com/lxcoding95/desktop-control/pull/31): isolated signed-policy/FSM test trial (Windows 66/66, Linux 66/66); source-based, not installer security acceptance.
-- [PR #22](https://github.com/lxcoding95/desktop-control/pull/22) and [PR #33](https://github.com/lxcoding95/desktop-control/pull/33): MCP runtime and private plugin integration; high trust and historical privacy risks, Draft pending independent semantic review. #31 is stacked on #33 source.
+- [PR #30](https://github.com/lxcoding95/desktop-control/pull/30): tokenless universal PR baseline (Windows 19/19, Linux 19/19), with no path filter at `e97c5bfe5be84d90396eb702e8b39958f5770a75`. It runs synthetic scanner fixtures, not the actual repository scan or full runtime matrix, and is not a complete merge gate.
+- [PR #31](https://github.com/lxcoding95/desktop-control/pull/31): signed-policy/FSM prototype merged into the private feature branch via `9ec243963ec0bd4b1325863aab99d4bcee53a7bc`, not main. Historical isolated trial: Windows 66/66, Linux 66/66; not installer or unattended-update acceptance.
+- [PR #22](https://github.com/lxcoding95/desktop-control/pull/22) and [PR #33](https://github.com/lxcoding95/desktop-control/pull/33): MCP runtime and private plugin integration; high trust and historical privacy risks, Draft pending independent semantic review. #31 is already integrated into the #33 private source branch; this does not close its remaining update/deployment gates.
 - [REL-GATE #3](https://github.com/lxcoding95/desktop-control/issues/3): separate signed release gate, not waived by an ordinary PR merge.
 
 ## Current connector restrictions / manual settings step

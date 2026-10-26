@@ -25,3 +25,7 @@ Public **product milestones M01–M06 and M07+ are a different axis**, defined i
 6. Report exact session bounds, changes, test links, unresolved risks and next steps.
 
 A session ends after its permitted timebox. A failed quality gate or impossible scope is reported, not hidden. Full commercial-grade desktop control is unlikely to be safe or complete in just 150 minutes; follow-up phases may be necessary.
+
+## Current authorization clarification — 2026-10-25
+
+Selected private S02–S06 implementation and controlled PR consolidation are expressly owner-authorized outside a new formal session. The six reservations and all original time records above remain historical; exactly two sessions have started. Earlier “not authorized” labels describe the reserved formal sessions, not a ban on the later selected private work. No automatic acceptance, time reset, public release or protected-main bypass follows from this authorization.

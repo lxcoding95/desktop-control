@@ -13,7 +13,11 @@ The section **Unreleased** is not a promised release date, download, changelog f
 ### In review — **not** on `main` (exclude from release notes until merged)
 
 - [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22): S02 local read-only MCP status-core, Windows/Linux owner-run regression and local security-scanner evidence; independent semantic security review is pending.
-- [Draft PR #26](https://github.com/lxcoding95/desktop-control/pull/26): evidence-based public product milestones M01–M06/M07+, repository freshness and data classification, reconciliation of public docs and issue templates; GitHub milestone/Project-v2 UI migration is still outstanding.
+- [PR #33](https://github.com/lxcoding95/desktop-control/pull/33): private plugin preview.5 installed from source `847bf6a`; newer recovered source `6c513db` passed the documented Windows/Linux matrix but is not installed by that package. Permissions/browser/desktop/workspace acceptance remains open.
+- [PR #30](https://github.com/lxcoding95/desktop-control/pull/30): universal tokenless synthetic privacy baseline; [PR #31](https://github.com/lxcoding95/desktop-control/pull/31): tested signed-policy/FSM prototype merged into the private feature branch via `9ec243963`, not main. Neither constitutes a production updater or complete merge gate.
+- [PR #34](https://github.com/lxcoding95/desktop-control/pull/34): default-OFF remote health prototype, no deployed service.
+
+Governance register: product M01–M06/M07+, freshness/data classification and issue templates are documented by [PR #26](https://github.com/lxcoding95/desktop-control/pull/26). This entry does not assert that PR #26 has merged; use its live GitHub state. Product milestone objects #7–#12 exist, while complete membership/Project reconciliation remains open.
 
 ## Future versioned release discipline
 

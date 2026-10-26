@@ -64,6 +64,10 @@ Der Fortschrittsprozentsatz eines Milestones wird von GitHub aus Issue-Abschlüs
 - **S03–S06:** gesperrt, nicht gestartet, ohne separate explizite Anweisung keine Bearbeitung.
 - Cross-Chat-Übergabe in GitHub ist Pflicht, inklusive Branch-SHA, Issue/PR, echter Testresultate, aktiver/pausierter Session, konservativem Zeitkonto und exakter nächster Aktion. Keine erdachten Prüfungen oder Zeiten.
 
+### Current scope amendment — 2026-10-25
+
+The owner explicitly authorizes selected private S02–S06 implementation and controlled PR consolidation without a new formal session or reset of prior ledgers. Earlier blanket locks above are historical for this selected work. Exactly two formal sessions have started. Product acceptance, protected-main requirements, free-tool/privacy boundaries and the separate public release gate remain binding. Current installed preview.5 and newer source evidence are recorded in [PROJECT-STATE.json](PROJECT-STATE.json); no background updater or remote service is active merely because a prototype exists.
+
 ## 6. Selbstkontrolle und Berichtspflicht
 
 Jeder Arbeitsabschluss berichtet kompakt: **geplant / implementiert / getestet / reviewed / gemergt / blockiert**, mit überprüfbaren Links, negativen Ergebnissen und offener Benutzeraktion. Fehlende Berechtigungen nie allgemein als „nicht möglich“ abtun, bevor verfügbare Plugins/Tools geprüft wurden; nie zusätzliche Rechte oder unsichtbaren Browserzugang erfinden.

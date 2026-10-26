@@ -50,6 +50,6 @@ The following are checked after each significant issue/PR/release decision, with
 - [ ] All dependencies and third-party licenses verified before integration; security tool findings independently triaged.
 - [ ] Documentation links, status tables, milestone/project UI and version matrix agree with the underlying live state.
 - [ ] Recovery/handoff checkpoint, next exact action and owner-only blockers updated.
-- [ ] Protected `main`, S03–S06 restrictions, SEC-GATE-001 and private data preserved.
+- [ ] Protected `main`, current owner-authorized scope, historical S01–S06 ledgers, SEC-GATE-001 and private data preserved.
 
 This checklist is the definition of a high-quality **process**, not a guarantee of bug-free code or an automated control already enabled. See [product milestones](PRODUCT-MILESTONES.md), [operations standard](GITHUB-OPERATIONS-STANDARD.md) and [quality gates](QUALITY-GATES.md).

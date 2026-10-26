@@ -4,6 +4,10 @@
 
 Public project milestones are evidence-based and unbounded ([M01–M06 and M07+](PRODUCT-MILESTONES.md)); separate internal S01–S06 history remains immutable. [Information classification and freshness controls](PUBLIC-INFORMATION-POLICY.md) apply to all test logs and status statements.
 
+**Current evidence:** consult [PROJECT-STATE.json](PROJECT-STATE.json) and the [README matrix](../../README.md#product-roadmap-and-verified-delivery). The local normal-user Windows/Linux matrix passed with explicit skips; hosted run [40240436331](https://github.com/lxcoding95/desktop-control/actions/runs/40240436331) still fails four Windows elevated-principal positive tests. These results are separate; the current source is not accepted or installed by preview.5.
+
+This checkpoint reports source tests and the earlier installed package separately. Passing/skipped counts are not formal review or release approval.
+
 ## Before starting work
 
 - Link a tracked issue with objective, requirements, out-of-scope elements and measurable acceptance criteria.
