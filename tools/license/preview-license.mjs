@@ -7,7 +7,7 @@
  * trusted official distribution and our server, not use of public source.
  */
 import {
-  createPrivateKey, createPublicKey, sign, verify,
+  createPrivateKey, createPublicKey, sign,
   constants as cryptoConstants
 } from 'node:crypto';
 
@@ -109,7 +109,14 @@ export async function verifyPreviewLicense({
       ? publicKey : createPublicKey(publicKey);
     if (key.asymmetricKeyType !== 'rsa' ||
         (key.asymmetricKeyDetails?.modulusLength ?? 0) < 3072) fail('INVALID_LICENSE');
-    verified = verify('sha256', message(body), rsaOptions(key), sig);
+    // workerd's node:crypto RSA-PSS verifier does not interoperate reliably
+    // with Node-created PSS signatures. Use the standard WebCrypto primitive
+    // with an explicit SHA-256 digest-length salt on both supported runtimes.
+    const spki = key.export({format:'der', type:'spki'});
+    const verificationKey = await globalThis.crypto.subtle.importKey(
+      'spki', spki, {name:'RSA-PSS', hash:'SHA-256'}, false, ['verify']);
+    verified = await globalThis.crypto.subtle.verify(
+      {name:'RSA-PSS', saltLength:32}, verificationKey, sig, message(body));
   } catch { fail('INVALID_LICENSE'); }
   if (!verified) fail('INVALID_LICENSE');
   let active;

@@ -1,0 +1,5 @@
+# Runtime state, local account configuration and secrets must never be packaged.
+.wrangler/
+.cache/
+.dev.vars*
+.env*

@@ -10,7 +10,14 @@
   "kv_namespaces": [
     {"binding": "OAUTH_KV", "id": "REPLACE_WITH_AUTH_KV_ID"}
   ],
+  "durable_objects": {"bindings": [{"name": "AUTH_LOGIN_STATE", "class_name": "AuthLoginState"}]},
+  "migrations": [{"tag": "auth-login-v1", "new_sqlite_classes": ["AuthLoginState"]}],
   "vars": {
+    "ENABLE_GITHUB_LOGIN": "0",
+    "PREVIEW_SINGLE_USER": "1",
+    "PREVIEW_OWNER_ID": "REPLACE_WITH_EXISTING_OWNER",
+    "GITHUB_OWNER_ID": "REPLACE_WITH_NUMERIC_GITHUB_ID",
+    "GITHUB_CLIENT_ID": "REPLACE_WITH_DEDICATED_CLIENT_ID",
     "AUTH_ISSUER": "https://REPLACE_WITH_AUTH_HOST.workers.dev",
     "MCP_RESOURCE_URL": "https://REPLACE_WITH_MCP_HOST.workers.dev/mcp"
   }

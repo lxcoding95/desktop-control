@@ -1,8 +1,9 @@
 /**
- * Cloudflare MCP Resource Server (experimental, deliberately non-deployable).
+ * Cloudflare MCP Resource Server (experimental, default OFF).
  * Uses MIT-licensed official OAuthResourceServer and createMcpHandler.
- * No OAuth provider, no device binding, no working remote connection yet.
- * Config files must keep workers_dev=false and no routes until reviewed.
+ * Health-only owner staging requires independently reviewed hosted acceptance.
+ * Templates keep workers_dev=false and no routes; private operator configuration
+ * is never a public release or permission to forward local OS tools.
  */
 import { OAuthResourceServer, type AuthorizationServerBinding } from '@cloudflare/workers-oauth-provider';
 import { McpServer } from '@modelcontextprotocol/server';
@@ -11,6 +12,7 @@ import { z } from 'zod';
 import { handleHealthTool } from '../oauth-health-gate.mjs';
 import { configuredPreviewOwner, isAllowedPreviewOwner } from '../preview-single-owner.mjs';
 import { PROBE_RELAY_SHARD, RemoteHealthRelay } from './remote-relay-do';
+import {readBoundedBody} from '../bounded-body.mjs';
 export { RemoteHealthRelay };
 
 type IdentityProps = { userId: string };
@@ -21,6 +23,7 @@ interface Env {
   ENABLE_REMOTE_HEALTH?: string;
   PREVIEW_SINGLE_USER?: string;
   PREVIEW_OWNER_ID?: string;
+  PREVIEW_DEVICE_ID?: string;
   REMOTE_RELAY?: DurableObjectNamespace;
 }
 
@@ -54,6 +57,17 @@ async function dispatchHealth(env: Env, ownerId: string, deviceId: string, signa
   });
   if (!response.ok) throw new Error('Device relay rejected request');
   return await response.json();
+}
+
+async function entitled(env: Env, ownerId: string): Promise<boolean> {
+  if (!env.REMOTE_RELAY || !allowedId.test(env.PREVIEW_DEVICE_ID ?? '')) return false;
+  const stub = env.REMOTE_RELAY.get(env.REMOTE_RELAY.idFromName(PROBE_RELAY_SHARD));
+  try {
+    const response = await stub.fetch('https://relay.internal/entitlement', { method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ownerId, deviceId: env.PREVIEW_DEVICE_ID }) });
+    return response.ok && (await response.json() as { entitled?: unknown }).entitled === true;
+  } catch { return false; }
 }
 
 function createHealthMcpServer(
@@ -106,6 +120,20 @@ export default {
     // verifies a one-use signed ticket against an approved pairing before
     // accepting ANY remote health operation. Never proxy /health publicly.
     const incoming = new URL(request.url);
+    if (incoming.pathname === '/device-ticket') {
+      if (env.ENABLE_REMOTE_HEALTH !== '1' || !configuredPreviewOwner(env) || !env.REMOTE_RELAY ||
+          incoming.search || request.method !== 'POST' ||
+          request.headers.get('content-type') !== 'application/json') {
+        return new Response('Device endpoint unavailable', {status:503, headers:{'cache-control':'no-store'}});
+      }
+      try {
+        const body = await readBoundedBody(request);
+        const headers = new Headers(request.headers);
+        headers.set('content-length',String(new TextEncoder().encode(body).byteLength));
+        return env.REMOTE_RELAY.get(env.REMOTE_RELAY.idFromName(PROBE_RELAY_SHARD)).fetch(
+          new Request(request.url,{method:'POST',headers,body,signal:request.signal}));
+      } catch { return new Response('Invalid device request',{status:400,headers:{'cache-control':'no-store'}}); }
+    }
     if (incoming.pathname === '/device') {
       if (env.ENABLE_REMOTE_HEALTH !== '1' || !configuredPreviewOwner(env) || !env.REMOTE_RELAY ||
           incoming.search || incoming.hash || request.method !== 'GET' ||
@@ -135,13 +163,18 @@ export default {
       requiredScopes: ['remote.health'],
       validateToken: boundEnv => boundEnv.AUTH_SERVER.validateToken,
       handler: {
-        fetch: (req, verifiedEnv, ctx) => {
+        fetch: async (req, verifiedEnv, ctx) => {
           if (!ctx.auth.scope.includes('remote.health') ||
               typeof ctx.props?.userId !== 'string' ||
               ctx.auth.userId !== ctx.props.userId ||
               !isAllowedPreviewOwner(ctx.auth.userId, verifiedEnv)) {
             return new Response('Forbidden', { status: 403 });
           }
+          // Before protocol discovery AND each stateless request, not merely a
+          // release-policy checkbox. Relay repeats it for the actual health call.
+          if (!await entitled(verifiedEnv, ctx.auth.userId)) return new Response('Entitlement unavailable', {
+            status: 403, headers: { 'cache-control': 'no-store' }
+          });
           const mcp = createMcpHandler(
             () => createHealthMcpServer(verifiedEnv, {
               clientId: ctx.auth.clientId,

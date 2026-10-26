@@ -69,7 +69,7 @@ export function createOutboundHealthClient({
     const challenge = makeChallenge();
     if (!validId(challenge)) { state = 'stopped'; fail('INVALID_CHALLENGE'); }
     state = 'connecting';
-    try { socket = new WebSocketCtor(url); }
+    try { socket = new WebSocketCtor(url, ['desktop-control-health', ticket]); }
     catch { state = 'stopped'; fail('CONNECTION_FAILED'); }
 
     connectPromise = new Promise((resolve, reject) => {

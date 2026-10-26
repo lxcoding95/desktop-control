@@ -22,7 +22,7 @@ const timeout = 30_000;
 async function installedWrangler() {
   const filename = join(dir, 'node_modules', 'wrangler', 'package.json');
   const pkg = JSON.parse(await readFile(filename, 'utf8'));
-  if (pkg.version !== '4.145.0') throw new Error('PINNED_WRANGLER_VERSION_REQUIRED');
+  if (pkg.version !== '4.152.0') throw new Error('PINNED_WRANGLER_VERSION_REQUIRED');
   const bin = typeof pkg.bin === 'string' ? pkg.bin : pkg.bin?.wrangler;
   if (typeof bin !== 'string' || bin.includes('..')) throw new Error('INVALID_WRANGLER_BIN');
   return resolve(dirname(filename), bin);
@@ -65,17 +65,17 @@ async function expectWebSocketDenial(url, frame, label) {
       if (error) reject(error); else resolve();
     }
     ws.addEventListener('open', () => {
-      try { ws.send(JSON.stringify(frame)); }
-      catch { finish(new Error(label + ': SEND_FAILED')); }
+      finish(new Error(label + ': UNAUTHENTICATED_UPGRADE_ACCEPTED'));
     });
     ws.addEventListener('message', () => finish(new Error(label + ': UNEXPECTED_SERVER_REPLY')));
     ws.addEventListener('close', event => {
-      if (event.code !== 1008) {
+      if (event.code !== 1008 && event.code !== 1006) {
         finish(new Error(label + ': UNEXPECTED_CLOSE_' + event.code));
       } else finish();
     });
     ws.addEventListener('error', () => {
-      // On some Node versions an 'error' precedes close. Observe close code.
+      // HTTP rejection occurs before allocation/first-frame authentication.
+      finish();
     });
   });
 }
