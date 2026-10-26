@@ -1,0 +1,27 @@
+{
+  "name": "@desktop-control/remote-cloudflare-prototype",
+  "version": "0.0.0-private",
+  "private": true,
+  "type": "module",
+  "description": "Default-off OAuth-protected remote health MCP Worker prototype; no deployments permitted",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "test:gate": "node --test ../oauth-health-gate.test.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:local:deny": "node smoke-local.mjs",
+    "test:local:wss-deny": "node smoke-local-wss-deny.mjs"
+  },
+  "dependencies": {
+    "@cloudflare/workers-oauth-provider": "1.2.4",
+    "@modelcontextprotocol/server": "2.3.1",
+    "agents": "0.30.1",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261014.1",
+    "typescript": "5.9.3",
+    "wrangler": "4.145.0"
+  }
+}

@@ -4,7 +4,10 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const REQUIRED_CHECKS = Object.freeze(['verify-windows', 'verify-linux', 'archive-validation', 'package-protocol', 'licenses']);
+// Requires independent evidence that the OFFICIAL preview entrypoint really enforces
+// one verified account (not merely a file containing a password). This gate
+// blocks release readiness; it does not by itself authenticate users.
+export const REQUIRED_CHECKS = Object.freeze(['verify-windows', 'verify-linux', 'archive-validation', 'package-protocol', 'licenses', 'preview-single-owner-auth']);
 export const QUIET_WINDOW_MS = 5 * 60 * 1000;
 const hex = (value, length) => typeof value === 'string' && new RegExp(`^[a-f0-9]{${length}}$`).test(value);
 

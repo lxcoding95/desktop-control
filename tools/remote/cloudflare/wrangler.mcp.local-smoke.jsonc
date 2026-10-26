@@ -1,0 +1,23 @@
+{
+  // LOCAL TEST ONLY: Never deploy. No OAuth binding or production credentials.
+  // Commands must additionally specify --local --ip 127.0.0.1.
+  "name": "desktop-control-remote-health-local-smoke",
+  "main": "mcp-worker.ts",
+  // Pinned Wrangler 4.145.0 bundled workerd supports at most 2026-10-07.
+  // Local smoke only: do not backdate production compatibility settings.
+  "compatibility_date": "2026-10-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [],
+  "vars": {
+    "ENABLE_REMOTE_HEALTH": "0"
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "REMOTE_RELAY", "class_name": "RemoteHealthRelay" }
+    ]
+  },
+  "migrations": [
+    { "tag": "smoke-v1", "new_sqlite_classes": ["RemoteHealthRelay"] }
+  ]
+}

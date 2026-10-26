@@ -47,3 +47,17 @@ Desktop.ini
 *.key
 secrets/
 .credentials/
+
+# Desktop Control preview activation (generated only on the owner's PC)
+# Keep even mistakenly generated copies out of commits.
+desktop-control.txt
+.dc-wss-local-*.json
+.dc-preview-credentials-*.json
+.preview-owner-local.json
+
+# Cloudflare local secret bindings, private issuer state and staged vault files
+.dev.vars
+.dev.vars.*
+*.preview-license
+.dc-vault-write-*.tmp
+.dc-license-update-*.tmp
