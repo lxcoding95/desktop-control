@@ -30,3 +30,14 @@ body:
       label: Acceptance criteria and test plan
     validations:
       required: true
+  - type: input
+    id: product_milestone
+    attributes:
+      label: Product outcome milestone (M01–M06 or M07+)
+      description: Product milestone ID, not private S01–S06 session. Write proposed if not assigned.
+      placeholder: M01 or proposed
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies, versions, platforms and rollout
+      description: Include update/compatibility and recovery implications. Never post credentials or private host logs.

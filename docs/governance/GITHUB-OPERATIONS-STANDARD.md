@@ -13,6 +13,12 @@
 7. **Freie/offene Werkzeuge bevorzugen:** Qualifizierte kostenlose OSS-Werkzeuge mit nachvollziehbarer Lizenz/Version; keine kredit-/kostenpflichtige Reviewer-Abhängigkeit als Voraussetzung. Qodo nicht automatisch erneut installieren.
 8. **Kein versteckter Dauerbetrieb:** Ohne ausdrücklich eingerichtete GitHub-/Task-Automation keine periodischen Läufe oder Hintergrundarbeit versprechen. Tools nur gemäß verfügbarer Fähigkeiten nutzen.
 
+## Product milestone and information stewardship amendment (2026-10-24)
+
+The public portfolio uses **deliverable-oriented product M01–M06 plus M07+** in [PRODUCT-MILESTONES.md](PRODUCT-MILESTONES.md) and [ROADMAP](../../ROADMAP.md). Existing GitHub session-based milestone objects and historical #5–#10 issue links must be inventoried and migrated **without deletion, invented completion or orphaned issues**; [governance #25](https://github.com/lxcoding95/desktop-control/issues/25) tracks this work. Six reserved S01–S06 sessions remain a separate fixed historical axis. Changes to GitHub Milestones / private Project v2 require actual supported API/UI authorization and read-back; a branch documentation update is **not** a completed platform configuration.
+
+The [PUBLIC-INFORMATION-POLICY](PUBLIC-INFORMATION-POLICY.md) governs PUBLIC/INTERNAL/CONFIDENTIAL/SECRET classification and freshness checks. Check PR logs/screenshots, test evidence, Git history and private filesystem paths before any public GitHub commit. No automatic private-source upload. Correct source/drift at issue/PR boundaries; continuous automated maintenance is **not assumed running** until deployed and evidenced. Treat every update/release as **version + compatibility + migration + rollback + OS test + exact source provenance**, not just a green status.
+
 ## 2. Synchronisationsvertrag nach JEDER nachweisbaren Zustandsänderung
 
 Eine Arbeit gilt erst administrativ übergeben, wenn nach dem eigentlichen Schritt – soweit die Oberfläche verfügbar ist – diese zusammenhängenden Stellen geprüft und bei Bedarf konsistent aktualisiert wurden:
@@ -57,6 +63,10 @@ Der Fortschrittsprozentsatz eines Milestones wird von GitHub aus Issue-Abschlüs
 - **S02:** Lokaler MCP-Prototyp ausschließlich auf Draft PR #22; das aktuelle tatsächliche Ergebnis steht in [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6), [Featurebranch-Handoff](https://github.com/lxcoding95/desktop-control/blob/feat/s02-local-mcp-core/docs/sessions/session-02/EXTENSION-2-2026-10-22.md) und [Live-Zustand](https://github.com/lxcoding95/desktop-control/blob/feat/s02-local-mcp-core/docs/governance/PROJECT-STATE.json). Nach der zweiten 35-Minuten-Verlängerung wurden lokale Windows-Tests als bestanden dokumentiert; unabhängige Abnahme, Windows-SID, Linux und Redistribution-Lizenzen sind weiter offen. Vor jeder Fortsetzung die aktuelle PR und Zeitbuchung prüfen. **Die letzte Verlängerung ist beendet, keine weitere automatisch beginnen.**
 - **S03–S06:** gesperrt, nicht gestartet, ohne separate explizite Anweisung keine Bearbeitung.
 - Cross-Chat-Übergabe in GitHub ist Pflicht, inklusive Branch-SHA, Issue/PR, echter Testresultate, aktiver/pausierter Session, konservativem Zeitkonto und exakter nächster Aktion. Keine erdachten Prüfungen oder Zeiten.
+
+### Current scope amendment — 2026-10-25
+
+The owner explicitly authorizes selected private S02–S06 implementation and controlled PR consolidation without a new formal session or reset of prior ledgers. Earlier blanket locks above are historical for this selected work. Exactly two formal sessions have started. Product acceptance, protected-main requirements, free-tool/privacy boundaries and the separate public release gate remain binding. Current installed preview.5 and newer source evidence are recorded in [PROJECT-STATE.json](PROJECT-STATE.json); no background updater or remote service is active merely because a prototype exists.
 
 ## 6. Selbstkontrolle und Berichtspflicht
 

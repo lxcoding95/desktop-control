@@ -1,6 +1,10 @@
 # Desktop Control — repository working agreement
 
-**Status (2026-10-22): S01 completed and merged (PR #21); S02 experimental MCP stdio prototype on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), not merged/fully validated.** **2/6 sessions started.** S02 original budget exhausted, owner expressly authorized separately timed up-to-35-minute extensions for S02 only; current extension paused pending a usable SDK/npm test environment. [S02 checkpoint](https://github.com/lxcoding95/desktop-control/blob/feat/s02-local-mcp-core/docs/sessions/session-02/EXTENSION-2026-10-22.md). **S03–S06 remain locked.** `main` has no runtime product code.
+**Historical baseline checkpoint (2026-10-24; superseded by the private checkpoint below):** `main` holds architecture/governance only; local S02 MCP-core code exists on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **not merged**. Owner-run Windows/Linux regression and pinned OSS security scans PASS (current test details in [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6)); independent semantic review **PENDING**. A real private ChatGPT local diagnostic grant/allow/revoke/deny cycle was previously evidenced in [Issue #28](https://github.com/lxcoding95/desktop-control/issues/28), but no current product release or full host end-to-end matrix is approved. S01 done (PR #21); S03–S06 not started. Exactly 2/6 reserved sessions started; owner-approved between-session **documentation/governance** work does not start, recharge or extend one.
+
+**Current private state (2026-10-25):** use the canonical [PROJECT-STATE.json](docs/governance/PROJECT-STATE.json) and [README evidence](README.md#product-roadmap-and-verified-delivery) for installed preview versus newer source, OS test counts/skips and the unresolved hosted Windows failure. The production updater is OFF and PR34 remains default-OFF health-only, not deployed. Do not infer acceptance from a passing component or local run.
+
+**Current owner authorization:** selected private S02–S06 capabilities and controlled PR consolidation are authorized. Exactly two of six formal sessions have started; historical session/time ledgers are preserved. Earlier scope locks below are historical where they conflict with this authorization. Authorization is not feature acceptance, a new session, public release permission or permission to bypass protected main.
 
 ## Authoritative context
 
@@ -10,6 +14,12 @@
 - Security: [SECURITY.md](SECURITY.md), [threat model](docs/architecture/THREAT-MODEL.md), [quality gates](docs/governance/QUALITY-GATES.md).
 - Open-source reuse: [sources](docs/research/SOURCES.md) and [license requirements](docs/governance/REUSE-LICENSES.md).
 
+## Public delivery versus private session history
+
+Public outcomes are organized as **M01–M06 and M07+** under [product milestones](docs/governance/PRODUCT-MILESTONES.md), with real acceptance evidence and non-destructive milestone migration. Six historical sessions S01–S06 remain recorded in [session plan](docs/governance/SESSION-PLAN.md). Use [public information and freshness policy](docs/governance/PUBLIC-INFORMATION-POLICY.md): no secrets, personal paths, confidential development or unredacted logs in a public commit/issue, even on a draft branch. Before claiming a milestone is active in GitHub, verify its actual object, membership and Project view.
+
+Owner-approved **selected private integration and runtime prototyping outside formal sessions** is now tracked through [M01 #28](https://github.com/lxcoding95/desktop-control/issues/28) and [M03 #29](https://github.com/lxcoding95/desktop-control/issues/29); this does **not** start any formal S03–S06 development session, permit unreviewed OS permissions, or authorize a public release. Never assume an automation is running merely because a process is documented.
+
 ## Binding GitHub autonomy standard
 
 The owner requires a **showcase-quality, automation-first, secure and consistently synchronized repository**. Follow [GITHUB-OPERATIONS-STANDARD](docs/governance/GITHUB-OPERATIONS-STANDARD.md) for issues, milestones, Projects v2, labels, PRs, branches, reviews, dependency/security posture, release gates and mandatory cross-chat handoffs. Perform available authorized operations autonomously; if a surface is owner-only, supply Alex a direct link and exact steps, record the blocker and verify afterwards. Automation must not bypass consent, branch protection, test evidence, the active session scope or SEC-GATE-001. Do **not** reactivate Qodo automatically. Latest S02 evidence is on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), not yet merged.
@@ -17,7 +27,7 @@ The owner requires a **showcase-quality, automation-first, secure and consistent
 ## Hard boundaries
 
 1. Change only lxcoding95/desktop-control. Other repositories connected via All repositories are off limits.
-2. During preflight no product/desktop/MCP runtime code and no development session start.
+2. During preflight and separately approved between-session documentation work: no product/desktop/MCP runtime code and no development session start.
 3. Work on reviewable branches; protect main. No force pushes, deleted protection, or bypasses.
 4. No unapproved paid services, public registrations, credentials, tokens or domain expenses.
 5. Never invent tests, reviewer identities, audits, green badges or Windows/Linux capability evidence.

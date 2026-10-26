@@ -1,6 +1,6 @@
 # Desktop Control — Verbindlicher Projekt-Masterplan
 
-**Stand:** 2026-10-22 | **Status:** S01 Dokumentation gemergt; S02 experimenteller lokaler MCP-Kern auf Draft PR #22, Build/Integration noch nicht abgenommen | **Lizenz:** MIT | **Repository:** https://github.com/lxcoding95/desktop-control
+**Historischer Orientierungsstand (aktueller privater Checkpoint weiter unten):** 2026-10-24 | S01 Architektur gemergt; S02 Windows/Linux-Regression + lokale OSS-Sicherheitsscans vom Owner bestanden auf [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **nicht gemergt**; unabhängiger semantischer Review **offen**; eine tatsächliche private ChatGPT-Diagnoseverbindung mit anschließender Widerrufsprüfung wurde am 24.10.2026 gemäß [M01 Issue #28](https://github.com/lxcoding95/desktop-control/issues/28) nachgewiesen, aktuelle Host-/Plugin-Fassung noch nicht erneut überprüft | Lizenz des öffentlichen Kerns: MIT | Repository: https://github.com/lxcoding95/desktop-control
 
 > Dieses Dokument beschreibt Ziele, Entscheidungen und Gates. Es ist keine Behauptung, dass das Produkt bereits implementiert ist. Vorhandene GitHub-Daten (Commits, PRs, Issues und aktuelle Branches) haben Vorrang vor statischen Statusangaben. Für neue ChatGPT-Chats zwingend auch [CHAT-CONTINUITY.md](../governance/CHAT-CONTINUITY.md) lesen.
 
@@ -11,6 +11,25 @@
 3. **Live-Handoff:** [PROJECT-STATE.json](../governance/PROJECT-STATE.json), [CHAT-CONTINUITY.md](../governance/CHAT-CONTINUITY.md), SESSION-Issues #5–#10 und PR-Kommentare. Bei Konflikten durch tatsächlichen GitHub-Ist-Zustand auflösen und dokumentieren.
 4. **Normative externe Quellen:** [SOURCES.md](../research/SOURCES.md) und offizielle Dokumentationen; vor Implementierung erneut Version/Datum überprüfen.
 5. **Quellmaterial der Nutzeranforderungen:** `Projektbeschreibung.txt` („Computer Worker“) und bereitgestellte Desktop-Commander-Werkzeugübersicht mit 29 Einträgen. In der Unterhaltung heißt das Produkt verbindlich **Desktop Control**; „Computer Worker“ ist ein früher Arbeitstitel, kein zusätzliches Agentenprodukt.
+
+## Aktuelle Produkt-/Governance-Ergänzung — 24.10.2026 (außerhalb S01–S06)
+
+Die folgenden Entscheidungen ergänzen frühere, teilweise historische Sitzungs-/Produktplanungen. [Öffentliche Produkt-Roadmap](../../ROADMAP.md), [produktbasierte M01–M06/M07+ Register](../governance/PRODUCT-MILESTONES.md), [Datenklassifikation und Frischekontrollen](../governance/PUBLIC-INFORMATION-POLICY.md) und [Governance-Issue #25](https://github.com/lxcoding95/desktop-control/issues/25) sind die verbindlichen Referenzen für neue Produkt- und Verwaltungsarbeit.
+
+- **Zwei Zeitleisten:** Sechs reservierte Entwicklungssitzungen **S01–S06** bleiben historische Arbeitseinheiten; öffentliche Produkt-Meilensteine **M01–M06, M07+ ohne feste Obergrenze** gruppieren reale Funktionen und überprüfbare Abnahmen. Alte sessionbezogene GitHub-Meilensteine erst nach dokumentierter, reversibler Migration umordnen; keine bestehenden Issue-/PR-Nachweise verlieren.
+- **Öffentlichkeit:** Das bestehende MIT-Repository bleibt öffentlich, einschließlich Branches und Git-Historie. Keine offiziell publizierten Installer, npm-Pakete oder Plugin-Releases vor separater Releasefreigabe. Ein einfacher Zugangscode kann öffentliches MIT-Quellmaterial nicht privat machen.
+- **Private Testanmeldung:** künftig kryptografische lokale **Gerätebindung** und OS-geschützte Schlüsselablage, keine reine Benutzername-Eingabe als Vertrauensanker; noch nicht implementiert. Nach nachgewiesener privater Verbindung können autorisierte lokale Einrichtungsschritte vorbereitet werden; keine daraus abgeleitete blanket-Adminfreigabe.
+- **Optionale Abhängigkeiten:** Windows nativ sowie Linux nativ; WSL, Podman/Docker und zusätzliche Container-Funktionen nur nach **expliziter Nutzerwahl**, Abhängigkeits-/Lizenzprüfung und gegebenenfalls Betriebssystem-UAC/polkit-Bestätigung. Nichts heimlich im Hintergrund mit erhöhten Rechten installieren.
+- **Pflichtupdates (`always-block`):** sobald die lokal signaturgeprüfte Richtlinie eine neue verpflichtende Version festgestellt hat, sperrt Desktop Control reguläre MCP-Werkzeuge bis zum erfolgreich verifizierten Update/Neustart. Diagnose, Reparatur, Widerruf, Logout und Not-Aus bleiben erreichbar. Offline-, Rollback- und Metadatenschutz bedürfen eigener Tests. ChatGPT-Plugin-Updates liegen teilweise beim Host und lassen sich nicht allein durch die lokale Bridge erzwingen. **Geplant, noch nicht implementiert.**
+- **Browser Workspace:** separat sichtbarer und per MCP steuerbarer Browser mit eigenem Profil; **kein eigenständiger KI-Agent**. Premium-/Lizenzmodell ist Forschungsfrage; keine öffentlich committen vertraulichen Geschäftsdetails, keine Payment-/Login-Veröffentlichung.
+- **Datenschutz/Qualität:** PUBLIC vs. INTERNAL vs. CONFIDENTIAL vs. SECRET vor jeder Änderung prüfen. Nur öffentliche abstrahierte Anforderungen in GitHub; persönliche Logs/Signing-Keys/Secrets nie dort. [Datenschutzpolicy](../governance/PUBLIC-INFORMATION-POLICY.md).
+- **Autonome Repositorypflege:** Qualität, Aktualität, Upstream-Versionen, Lizenzen, Dokumenten-Drift und Produkt-Meilensteine regelmäßig **bei tatsächlichen Arbeitsereignissen** prüfen; wiederkehrende Jobs erst nach echter Installation/Erfolgsprüfung als aktiv markieren. Github Actions weiterhin durch [SEC-GATE-001 #1](https://github.com/lxcoding95/desktop-control/issues/1) blockiert.
+
+Diese Ergänzung **startet keine S03–S06** und behauptet weder Installation, OAuth, einen eigenen Dienst noch automatisierte Updates als bereits realisiert.
+
+**Aktueller privater Checkpoint:** [PROJECT-STATE.json](../governance/PROJECT-STATE.json) und [README-Nachweise](../../README.md#product-roadmap-and-verified-delivery) führen installierte Preview versus neueren Quellstand, getrennte lokale/Hosted-Prüfungen und sämtliche Skips/Fehler. Produktiver Updater OFF; PR34 bleibt standardmäßig OFF und Health-only, ohne deployed Dienst.
+
+**Aktuelle Freigabe:** Ausgewählte private S02–S06-Funktionen und kontrollierte PR-Konsolidierung sind am 25.10.2026 ausdrücklich freigegeben. Historische Session- und Zeitdatensätze bleiben unverändert (2/6 gestartet); frühere pauschale Scope-Sperren gelten für diese ausgewählte private Arbeit nicht. Kein öffentliches Release und keine Abnahme allein aufgrund dieser Freigabe.
 
 ## 1. Fixierte Produktentscheidungen
 
@@ -66,11 +85,11 @@ Für destruktives Löschen, externen Datentransfer sensibler Daten, Accountände
 - **Kritische Kontoaktionen bleiben bestätigungspflichtig**, auch wenn der Browser bereits angemeldet ist.
 - **Browserfenster während KI-Aktionen immer sichtbar als headed-Fenster**, kein versteckter Headless-Browser. Sichtbarkeit bedeutet nicht Always-on-top oder Fokus-Stealing.
 - Schwarzer KI-Cursor nur bei Mausaktionen; KI-Browser darf unabhängig von menschlichem OS-Cursor arbeiten, solange keine gemeinsame OS-Eingabe nötig ist. Gemeinsamer Desktop erfordert getrennte Übernahme-/Stoppregeln.
-- Verbindliche vollständige Planung und Tests: [KI-Browser-Spezifikation](../architecture/AI-BROWSER-PROFILE.md), [ADR-0002](../architecture/ADR-0002-AI-BROWSER.md), [Issue #14](https://github.com/lxcoding95/desktop-control/issues/14). **1/6 Entwicklungssitzungen gestartet.**
+- Verbindliche vollständige Planung und Tests: [KI-Browser-Spezifikation](../architecture/AI-BROWSER-PROFILE.md), [ADR-0002](../architecture/ADR-0002-AI-BROWSER.md), [Issue #14](https://github.com/lxcoding95/desktop-control/issues/14). **Historischer Stand vom 22.10.; tatsächlich 2/6 Sessions gestartet, siehe aktuellen Status oben.**
 
 ## 2.4 Auslieferung und Verbindung – verbindliche Ownerentscheidung vom 22.10.2026
 
-**Option 1 — Local-first bestätigt.** Zuerst einen lokalen MCP-Kern entwickeln und mit lokalem MCP-Testclient beziehungsweise MCP Inspector prüfen; danach ChatGPT anbinden. Zielprodukt ist eine lokal installierbare Windows-/Linux-App mit Tray, lokalem Dashboard und eigenem sichtbarem KI-Browser. Ein versionierter `npx`-Start ist ein zusätzlicher Entwickler-/Expertenweg. In der ersten Entwicklungsphase keine Domain, kein eigener öffentlicher Server und keine kostenpflichtige Cloud-Infrastruktur. Transport, App-Shell und Installer benötigen später reale technische Prüfung; Tunnel-Zugang/Kosten sind keine Voraussetzung für den ersten lokalen Nachweis. [ADR-0003](../architecture/ADR-0003-PRODUCT-DELIVERY.md), [Issue #17](https://github.com/lxcoding95/desktop-control/issues/17). **Keine Entwicklungsfreigabe, Sessions 1/6.**
+**Option 1 — Local-first bestätigt.** Zuerst einen lokalen MCP-Kern entwickeln und mit lokalem MCP-Testclient beziehungsweise MCP Inspector prüfen; danach ChatGPT anbinden. Zielprodukt ist eine lokal installierbare Windows-/Linux-App mit Tray, lokalem Dashboard und eigenem sichtbarem KI-Browser. Ein versionierter `npx`-Start ist ein zusätzlicher Entwickler-/Expertenweg. In der ersten Entwicklungsphase keine Domain, kein eigener öffentlicher Server und keine kostenpflichtige Cloud-Infrastruktur. Transport, App-Shell und Installer benötigen später reale technische Prüfung; Tunnel-Zugang/Kosten sind keine Voraussetzung für den ersten lokalen Nachweis. [ADR-0003](../architecture/ADR-0003-PRODUCT-DELIVERY.md), [Issue #17](https://github.com/lxcoding95/desktop-control/issues/17). **Historische Architekturauswahl vom 22.10.; tatsächlich inzwischen 2/6 Sessions gestartet, siehe aktuellen Status oben.**
 
 ## 3. Architektur und Vertrauensgrenzen
 

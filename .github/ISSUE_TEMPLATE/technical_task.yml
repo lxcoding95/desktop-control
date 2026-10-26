@@ -26,3 +26,13 @@ body:
     id: risk
     attributes:
       label: Security, platform and rollback considerations
+  - type: input
+    id: product_milestone
+    attributes:
+      label: Product milestone or governance tracking
+      description: E.g. M03, M07+ or governance only. Internal S01–S06 are not product milestones.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Current evidence and status
+      description: Provide issue/PR SHA and actual test state (not run / blocked / passed), not claims of unexecuted CI.

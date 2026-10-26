@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This project is still in pre-development. Please report security vulnerabilities privately through the Security tab.
+        Desktop Control is in early development; a tested S02 MCP prototype exists on an unmerged Draft PR, but there is no public supported release. Report security vulnerabilities privately through the Security tab. Redact device identifiers, paths, tokens and logs.
   - type: textarea
     id: problem
     attributes:
@@ -33,3 +33,13 @@ body:
     attributes:
       label: Affected commit/version, OS and environment
       placeholder: commit SHA, Windows/Linux variant, relevant configuration
+  - type: input
+    id: product_milestone
+    attributes:
+      label: Affected product milestone and version
+      description: E.g. M01; if unknown, leave blank. Do not confuse with internal session numbers.
+  - type: textarea
+    id: regression
+    attributes:
+      label: Regression and safety check
+      description: Actual platform test result, reproduction commit, expected fix criterion, rollback or impact. State not run if unknown.

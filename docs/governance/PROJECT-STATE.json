@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "project": "Desktop Control",
-  "snapshot_date": "2026-10-22",
+  "snapshot_date": "2026-10-25",
   "repository": "lxcoding95/desktop-control",
   "default_branch": "main",
   "license": "MIT",
-  "phase": "S02_extension_1_paused_environment_blocked",
+  "phase": "private_preview5_installed_recovered_source_tested_acceptance_open",
   "development_session_started_count": 2,
   "total_development_sessions": 6,
   "development_session_max_seconds": 1500,
@@ -14,8 +14,8 @@
   "work_admin": {
     "owner_intends_resume_local_time": "2026-10-22T01:00:00+02:00",
     "scheduled_by_assistant": false,
-    "state": "ready_for_owner_review",
-    "notes": "Admin API and signed-in UI verified; Project root loading/API aggregate inconsistency remains, direct views and issue-level project memberships verified. See #4 and PREFLIGHT-REPORT.md."
+    "state": "closed_in_issue_4_but_product_milestone_ui_migration_pending",
+    "notes": "GitHub Issue #4 observed CLOSED on 2026-10-24; closure does not prove Project-v2 metadata or milestone descriptions editable by this connector. Product milestone migration tracked separately in Issue #25; leave Project visibility unchanged."
   },
   "decisions": {
     "product": "installable ChatGPT plugin and MCP tools, not new AI agent",
@@ -61,7 +61,7 @@
     },
     "administration": {
       "issue": "https://github.com/lxcoding95/desktop-control/issues/4",
-      "status": "open"
+      "status": "closed"
     }
   },
   "session_issues": [
@@ -81,17 +81,17 @@
     {
       "id": "S02",
       "url": "https://github.com/lxcoding95/desktop-control/issues/6",
-      "status": "extension_1_paused_environment_blocked",
+      "status": "cross_platform_owner_run_regressions_scans_passed_review_open_unmerged",
       "started_at_utc": "2026-10-22T17:03:07.548Z",
       "verified_elapsed_active_seconds": null,
       "elapsed_budget_seconds_charged_conservative": 1500,
       "remaining_budget_seconds_conservative": 0,
       "work_branch": "feat/s02-local-mcp-core",
       "pr_url": "https://github.com/lxcoding95/desktop-control/pull/22",
-      "test_result": "Windows locked install and 18/18 tests PASS; full typecheck/build FAIL; legacy Inspector list/denial PASS; modern discovery unsupported",
-      "environment_blocker": "Initial Node/npm/GitHub blockers resolved; test typing and modern/lifecycle validation remain",
+      "test_result": "On feature branch, owner-provided real Windows/Linux logs: 29/29 unit each; Windows 9 protocol passes + 2 Linux-only skips, Linux 10 protocol passes + 1 Windows-only skip; npm audit zero reported vulnerabilities and pinned local OSS security tools selftest/scan passed both platforms. A later private preview ChatGPT diagnostic allow/revoke/deny was evidenced separately in Issue #28 on 2026-10-24; S02 final semantic review PENDING; no main merge.",
+      "environment_blocker": "Earlier npm/SDK environment failures are historical; latest Windows/Linux S02 regressions passed. Outstanding: independent current-head semantic security review, historical Git/privacy exposure triage, production integration/host freshness.",
       "paused_at_utc": "2026-10-22T17:25:02.09Z",
-      "next_exact_action": "Same S02 extension #1, do not reset charged time; use working Node>=22.19 npm registry environment to run npm ci/typecheck/test/build/protocol; keep PR draft until results verified.",
+      "next_exact_action": "Verify latest S02 feature HEAD and Issue #6, complete independent semantic-security review and privacy-log triage before PR #22 acceptance. Do not start S03-S06. Governance/product milestones migration is a separate docs-only PR / Issue #25.",
       "extension_authorized_on": "2026-10-22",
       "extensions": [
         {
@@ -106,7 +106,25 @@
           "environment_blocker": "Linux container cannot resolve npm registry; read-only Codex execution unavailable. Earlier Windows Work env not attached.",
           "test_evidence": "Local prepared Linux copy 20/20 tests and subset TS pass, 18 versioned tests; SDK protocol NOT run; clean npm/SDK build NOT run at latest head"
         }
-      ]
+      ],
+      "current_evidence_2026_10_24": {
+        "provenance": "Owner-supplied real Windows PowerShell/Linux Docker transcripts; GitHub Issue #6 and feature-branch PROJECT-STATE",
+        "tested_source_head": "5f4aa15c7b797c775f1c5615f7ce041bdd0020aa",
+        "latest_feature_branch_head_at_documentation": "303f1fe143195049e57ca498bc42d628b126f115",
+        "windows_unit_passes": 29,
+        "windows_protocol_passes": 9,
+        "windows_linux_specific_skips": 2,
+        "linux_unit_passes": 29,
+        "linux_protocol_passes": 10,
+        "linux_windows_specific_skips": 1,
+        "local_security_scanners": {
+          "windows": "PASS",
+          "linux": "PASS"
+        },
+        "independent_semantic_review": "not_completed",
+        "private_chatgpt_mcp_connection": "not_performed",
+        "pr22": "draft_unmerged"
+      }
     },
     {
       "id": "S03",
@@ -137,7 +155,7 @@
       "verified_elapsed_active_seconds": 0
     }
   ],
-  "next_preflight_action": "Current authoritative S02 code and time on branch feat/s02-local-mcp-core, draft PR #22 and Issue #6; at last pause extension #1 866s remained, verify live before action. S03-S06 not started.",
+  "next_preflight_action": "Verify live PR heads and reconcile PR26 docs-only changes; preserve private PR33 working changes. Complete current permission/management review, clean Windows/Linux/package and actual host tests before a new batch. Updater OFF; PR34 health-only default OFF, not deployed; no new staging license. Do not reset formal session ledgers or bypass main protection.",
   "session_start_authorized": false,
   "safety": {
     "no_product_code_during_preflight": true,
@@ -175,5 +193,134 @@
     "timing_explanation": "First captured time was 16:44:06.576Z; preflight started before this, so full active duration cannot be independently reconstructed.",
     "s02": "not_started",
     "security_gate_001": "open"
+  },
+  "public_product_delivery": {
+    "policy": "Owner approved outcome-based public milestones M01–M06, expandable M07+; sessions S01–S06 historically independent and capped at six.",
+    "register": "docs/governance/PRODUCT-MILESTONES.md",
+    "roadmap": "ROADMAP.md",
+    "information_policy": "docs/governance/PUBLIC-INFORMATION-POLICY.md",
+    "github_platform_migration": "partial_unverified_full_migration; issue28 has GitHub milestone numeric ID7; maintain historical session milestone mappings; verify complete M01-M06 and Project views independently",
+    "mapping_issue": "https://github.com/lxcoding95/desktop-control/issues/25",
+    "approved_distribution": "public MIT source but no official installable binaries, npm packages, or published plugins before separately authorized release",
+    "private_auth": "device_bound_crypto_planned_no_username_only",
+    "optional_wsl_and_containers": "explicit_user_choice_only",
+    "mandatory_update_mode": "always_block_on_verified_signed_mandatory_update; PR31 policy/FSM prototypes merged into private feature branch via9ec243963, notmain; production updater OFF",
+    "browser_workspace": "separate headed browser_mcp_control_only_license_research_pending",
+    "confidential_material": "outside_public_repo_secrets_in_credential_vault"
+  },
+  "latest_product_checkpoint": {
+    "date_utc": "2026-10-25",
+    "scope": "Current selected private work and docs-only reconciliation; formal session/time history unchanged",
+    "source_head": "6c513db22f396143b2ad8086d36e19e650582e99",
+    "private_pr": 33,
+    "installed_plugin_version": "0.0.1-preview.5",
+    "installed_plugin_source_head": "847bf6aef517e1f6f17f86c4b10a08e76338cdf2",
+    "permissions_source": "Recovered and subsequent permission/management source is not installed in preview.5",
+    "source_tests": {
+      "windows": {
+        "tests": 232,
+        "pass": 224,
+        "fail": 0,
+        "skip": 8
+      },
+      "debian12": {
+        "tests": 232,
+        "pass": 208,
+        "fail": 0,
+        "skip": 24
+      },
+      "provenance": "Source recovery matrix; not a new independent rerun by this docs-only change"
+    },
+    "updater": "OFF",
+    "remote": "PR34 default OFF health only, no deployed service, one existing staging license, no new issuance",
+    "acceptance": "OPEN; current source requires complete host/package/native/security acceptance",
+    "next_exact_action": "Verify live PR heads and reconcile PR26 docs-only changes; preserve private PR33 working changes. Complete current permission/management review, clean Windows/Linux/package and actual host tests before a new batch. Updater OFF; PR34 health-only default OFF, not deployed; no new staging license. Do not reset formal session ledgers or bypass main protection.",
+    "m03_private_integration": {
+      "pr": 31,
+      "state": "merged_into_private_feature_branch_not_main",
+      "merge_sha": "9ec243963ec0bd4b1325863aab99d4bcee53a7bc",
+      "updater": "OFF"
+    },
+    "hosted_verification_failure": {
+      "run": "https://github.com/lxcoding95/desktop-control/actions/runs/40240436331",
+      "head": "6c513db22f396143b2ad8086d36e19e650582e99",
+      "conclusion": "failure",
+      "windows_positive_elevated_principal_failures": 4,
+      "relationship_to_local_matrix": "Separate from passing normal-user local Windows/Linux results; unresolved, not an all-green CI claim"
+    }
+  },
+  "current_private_checkpoint_20261025": {
+    "source_head": "6c513db22f396143b2ad8086d36e19e650582e99",
+    "private_pr": 33,
+    "installed_plugin_version": "0.0.1-preview.5",
+    "installed_plugin_source_head": "847bf6aef517e1f6f17f86c4b10a08e76338cdf2",
+    "installed_vs_source": "Recovered permission/management source is not installed in preview.5; subsequent uncommitted work needs new verification",
+    "source_tests": {
+      "windows": {
+        "tests": 232,
+        "pass": 224,
+        "fail": 0,
+        "skip": 8
+      },
+      "debian12": {
+        "tests": 232,
+        "pass": 208,
+        "fail": 0,
+        "skip": 24
+      },
+      "provenance": "Source recovery matrix; not a new independent rerun by this docs-only change"
+    },
+    "owner_scope": "Selected private S02-S06 capabilities and controlled PR consolidation authorized; exactly2formal sessions started; historical ledgers unchanged",
+    "updater": "OFF; development fixtures are not deployed unattended updates",
+    "remote": {
+      "pr": 34,
+      "head": "4be071c51519c11e7ebe4a8c7f432c1c4ca1aea2",
+      "status": "default_OFF_health_only_no_deployed_service_no_accepted_Internet_session",
+      "license": "one_existing_OS_protected_staging_license_only_no_new_issuance"
+    },
+    "acceptance": "OPEN; no public release or new main runtime merge",
+    "product_milestone_objects": {
+      "M01": 7,
+      "M02": 8,
+      "M03": 9,
+      "M04": 10,
+      "M05": 11,
+      "M06": 12
+    },
+    "migration": "Objects verified; complete membership/Project view acceptance remains open",
+    "m03_private_integration": {
+      "pr": 31,
+      "state": "merged_into_private_feature_branch_not_main",
+      "merge_sha": "9ec243963ec0bd4b1325863aab99d4bcee53a7bc",
+      "updater": "OFF"
+    },
+    "hosted_verification_failure": {
+      "run": "https://github.com/lxcoding95/desktop-control/actions/runs/40240436331",
+      "head": "6c513db22f396143b2ad8086d36e19e650582e99",
+      "conclusion": "failure",
+      "windows_positive_elevated_principal_failures": 4,
+      "relationship_to_local_matrix": "Separate from passing normal-user local Windows/Linux results; unresolved, not an all-green CI claim"
+    }
+  },
+  "historical_product_checkpoint_20261025_early": {
+    "date_utc": "2026-10-25",
+    "scope": "Verified GitHub PR and hosted Windows/Linux trials plus owner-provided clean Windows M03 run; no formal S03-S06 session started",
+    "private_plugin_host_proof_issue": "https://github.com/lxcoding95/desktop-control/issues/28",
+    "observed_positive_status_utc": "2026-10-24T23:03:23Z",
+    "observed_revoke_then_denial_utc": "2026-10-24T23:03:41Z",
+    "currently_installed_host_version": "not verified in current Chat session",
+    "saved_private_plugin_preview": "0.0.1-preview.3 (snapshot only; not an installed updater)",
+    "s02_status": "PR22 Draft; independent semantic security review and privacy scan open",
+    "governance": "PR26 Draft, documentation freshness in progress",
+    "free_quality_automation": "PR30 Draft HEAD aa3d3f2a2e52209e3018d2d3b391806d2b7ee87b; GitHub Actions windows-2025 19/19 PASS and ubuntu-24.04 19/19 PASS, run 40152885725. No main integration or merge.",
+    "m03_update": "PR31 Draft HEAD f09bcbaff342c5e837d35b052fa4c54d05816263; GitHub Actions windows-2025 66/66 PASS and ubuntu-24.04 66/66 PASS, run 40153344621. Owner Windows Node24.21.0 66/66 at prior tested head. Pure policy/FSM only, no installed signed updater.",
+    "security_gate": "SEC-GATE-001 #1 and CI-GATE-001 #2 OPEN; two tokenless PR-only trials have zero external uses/actions. No regular CI merged to main, owner Actions settings current readback and independent final reviews pending.",
+    "redundant_pr32": "Closed unmerged after byte-identical proven guard/workflow moved to PR30.",
+    "historical_privacy": "Prior full-reachable audit reported zero detected credentials in 143 scanned nonempty commits, but public historical non-noreply committer email metadata and four potential personal-path blobs remain. Two email-patterns in latest tracked logs are upstream third-party copyright notices, not verified owner data. Full remediation pending.",
+    "public_copyright": "Existing public MIT grants copying/forks; PR26 new brand/copyright guidance distinguishes licensed source from independently signed official services and does not falsely claim a registered trademark.",
+    "verified_runs": {
+      "quality": "https://github.com/lxcoding95/desktop-control/actions/runs/40152885725",
+      "signed_policy": "https://github.com/lxcoding95/desktop-control/actions/runs/40153344621"
+    }
   }
 }

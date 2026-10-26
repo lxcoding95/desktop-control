@@ -2,7 +2,7 @@
 
 Open-source desktop control tooling for MCP-compatible AI clients on Windows and Linux.
 
-> **Status: early development (S01 complete; S02 experimental, not accepted).** A local MCP stdio status-tool prototype exists only on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **not on `main`**. The main branch contains architecture, governance and documentation; no installable desktop app, public service, published plugin or production-ready MCP server has been released. Do not install or rely on this repository for computer control yet.
+> **Status reviewed 2026-10-25:** no production release, installer or publicly released plugin. The original local MCP status-core source is tracked by [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **not on `main`**; owner-run Windows/Linux regression and local security scanners passed, but **independent semantic review remains pending. A prior real private ChatGPT diagnostic call and post-revocation denial were verified in [M01 Issue #28](https://github.com/lxcoding95/desktop-control/issues/28); this does not establish a released or current host installation**. Do not rely on this repository for production computer control.
 
 ## Intended capabilities
 
@@ -15,9 +15,19 @@ Open-source desktop control tooling for MCP-compatible AI clients on Windows and
 
 An AI client makes decisions; this project will provide **tools and a local execution bridge**, not another AI agent.
 
-## Status and roadmap
+## Visual architecture atlas
 
-**Two of six reserved sessions have started.** S01 [Foundation & Architecture](https://github.com/lxcoding95/desktop-control/issues/5) is **completed** and [PR #21](https://github.com/lxcoding95/desktop-control/pull/21) was squash-merged. S02 [MCP Core & Connectivity](https://github.com/lxcoding95/desktop-control/issues/6) is **in development, currently paused pending a usable SDK validation environment**, with an owner-authorized additional time allowance and [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22). S03–S06 remain **not started and not authorized**. See [ROADMAP.md](ROADMAP.md), [session plan](docs/governance/SESSION-PLAN.md), and [issues](https://github.com/lxcoding95/desktop-control/issues). A six-session timebox is a planning constraint, **not a promise that full feature parity or a production release will fit inside it**.
+The [public system atlas](docs/architecture/SYSTEM-ATLAS-2026.md) provides four source-linked Mermaid views: local runtime and trust boundaries, product milestones, the GitHub/QA/release chain, and the planned install/update lifecycle. Every view separates the historical and Draft-only evidence from unimplemented target capabilities; no private device information belongs in this public document.
+
+## Product roadmap and verified delivery
+
+Desktop Control uses **product-outcome milestones M01–M06 and M07+** (unbounded) to present real user-visible progress, dependencies and evidence; they are **not** the six timeboxed development sessions. See the [product roadmap](ROADMAP.md) and [milestone/evidence register](docs/governance/PRODUCT-MILESTONES.md). Full GitHub milestone/Project-v2 migration is **not yet independently verified** (Issue #28 is assigned milestone object #7, but that does not certify the whole migration): the [non-destructive migration issue #25](https://github.com/lxcoding95/desktop-control/issues/25) tracks verified owner/UI follow-up.
+
+**Current private checkpoint — 2026-10-25:** [PR #33](https://github.com/lxcoding95/desktop-control/pull/33), source `6c513db22f396143b2ad8086d36e19e650582e99`, has fresh root verification: Windows **232 tests / 224 passed / 0 failed / 8 skipped**; Debian 12 **232 / 208 / 0 / 24**. Skips are platform/environment-specific and remain explicit; these totals do not certify every native feature. Installed private plugin **0.0.1-preview.5** comes from `847bf6aef517e1f6f17f86c4b10a08e76338cdf2`; its version/status and local settings window were observed in the actual host. Recovered permission/management changes are newer source work, **not installed by that preview**. The unattended bridge updater remains **OFF**. [Remote PR #34](https://github.com/lxcoding95/desktop-control/pull/34) is a default-OFF health-only prototype: one existing OS-protected staging license, no deployed remote service or accepted Internet device session. No license secrets or device identifiers belong in public evidence.
+
+**Hosted verification remains failed:** [run 40240436331](https://github.com/lxcoding95/desktop-control/actions/runs/40240436331), source `6c513db22f396143b2ad8086d36e19e650582e99`, failed four Windows elevated-principal positive tests. This is separate from the passing normal-user local matrix above; no all-green CI or merge-readiness claim follows from those local results.
+
+**Historical S02 evidence:** S01 architecture [#5](https://github.com/lxcoding95/desktop-control/issues/5) and [PR #21](https://github.com/lxcoding95/desktop-control/pull/21) completed/merged; S02 [#6](https://github.com/lxcoding95/desktop-control/issues/6) read-only MCP status-core was tested on Windows/Linux on [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22), **not accepted or merged**. Windows: 29 unit/9 platform-applicable protocol tests passed, 2 Linux-only tests skipped; Linux: 29 unit/10 protocol passed, 1 Windows-only test skipped; local OSS security scan checks passed. **A previous private ChatGPT diagnostic end-to-end connection was demonstrated on 2026-10-24; that older run does not certify the newer installed package, and there is no installer or released application.** The independent semantic security review remains an outstanding gate. Formal S03–S06 sessions remain **not started**; selected private capabilities from their scope are now owner-authorized, separately tracked and not automatically accepted; [session history](docs/governance/SESSION-PLAN.md) is preserved separately.
 
 ## Planned system boundary
 
@@ -38,6 +48,9 @@ The gateway, local bridge, identity model and transports remain subject to desig
 
 ## Canonical project plan and cross-chat continuity
 
+- [Product milestones M01–M06, migration and evidence semantics](docs/governance/PRODUCT-MILESTONES.md)
+- [Changelog — merged changes versus in-review work](CHANGELOG.md)
+- [Public information classification and repository freshness](docs/governance/PUBLIC-INFORMATION-POLICY.md)
 - [German masterplan (scope, decisions, architecture, sources and six sessions)](docs/master/PROJECT-MASTERPLAN.md)
 - [Cross-chat recovery protocol](docs/governance/CHAT-CONTINUITY.md)
 - [Machine-readable project state snapshot](docs/governance/PROJECT-STATE.json)
@@ -46,15 +59,19 @@ The gateway, local bridge, identity model and transports remain subject to desig
 - [29 Desktop Commander tool coverage plan](docs/research/DESKTOP-COMMANDER-COVERAGE.md)
 - [Final GitHub Work administration assignment](docs/governance/WORK-ADMIN-FINAL.md)
 
-The plan and state files **are not live execution results**. Before making changes, read GitHub's current branch SHA, open PRs, linked Issues #1–#10 and any session-specific branch handoff. Sessions started: **2/6** (S01 completed; S02 incomplete). Authoritative S02 progress, tests and time accounting are on [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6), [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22) and [S02 extension checkpoint](https://github.com/lxcoding95/desktop-control/blob/feat/s02-local-mcp-core/docs/sessions/session-02/EXTENSION-2026-10-22.md). GitHub Projects and milestone descriptions may lag until separately updated; do not interpret labels or progress bars as execution evidence.
+Plans and snapshots **are not live execution results**. Read actual GitHub `main`, open PR branches and issues before any write. S02's current evidence is on [Issue #6](https://github.com/lxcoding95/desktop-control/issues/6), [Draft PR #22](https://github.com/lxcoding95/desktop-control/pull/22) and the [feature-branch state snapshot](https://github.com/lxcoding95/desktop-control/blob/feat/s02-local-mcp-core/docs/governance/PROJECT-STATE.json). GitHub milestone descriptions and private Project metadata may lag; do not interpret completion percentages as proof of tests or independent review.
 
-## Dedicated AI browser profile (planned)
+## Dedicated AI browser profile — private implementation, acceptance open
 
-The AI will use its **own persistent browser profile**, separate from the user's existing browser. The specification covers history, bookmarks, cookies/login state, session restoration, downloaded files, site permissions and a password manager or OS-backed credential vault subject to security validation. Browser automation will use Playwright where practical, with a visible black virtual cursor only during mouse actions. Sensitive browser credentials must not be exposed to AI tools. See [browser profile specification](docs/architecture/AI-BROWSER-PROFILE.md), [proposed ADR](docs/architecture/ADR-0002-AI-BROWSER.md), and [feature tracking issue #14](https://github.com/lxcoding95/desktop-control/issues/14). The browser is **not implemented**. Its reserved development session S04 remains unstarted and unauthorised.
+The AI will use its **own persistent browser profile**, separate from the user's existing browser. The specification covers history, bookmarks, cookies/login state, session restoration, downloaded files, site permissions and a password manager or OS-backed credential vault subject to security validation. Browser automation will use Playwright where practical, with a visible black virtual cursor only during mouse actions. Sensitive browser credentials must not be exposed to AI tools. See [browser profile specification](docs/architecture/AI-BROWSER-PROFILE.md), [proposed ADR](docs/architecture/ADR-0002-AI-BROWSER.md), and [feature tracking issue #14](https://github.com/lxcoding95/desktop-control/issues/14). A separate visible browser/controller exists on private Draft PR #33. Complete account consent, downloads, native lifecycle and cross-platform acceptance remain open; this is not a public browser release. Formal S04 remains unstarted; selected private browser development is authorized.
 
 ## Security
 
 Computer control is a high-trust capability. An unrestricted shell is **not contained** by a command blocklist or an allowed-directory configuration. Production designs must use OS-enforced isolation where a strong boundary is required. See [SECURITY.md](SECURITY.md) before reporting a vulnerability or experimenting with privileged execution.
+
+## GitHub automation and merge security
+
+GitHub auto-merge is enabled at repository level, but **it must not be enabled on an individual PR until mandatory reviews and stable required status checks are enforced** on the protected main branch. See [Auto-merge safety and release gates](docs/governance/AUTO-MERGE-SAFETY.md). Historical tokenless quality and isolated M03 trial results exist, but the current private hosted Windows verification remains failed as recorded above. PR31 is merged into the private feature branch, not main. None of these results constitutes a release or automatic merge approval.
 
 ## Contributing and community
 
@@ -62,6 +79,10 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md), [SUPPOR
 
 ## Licensing and attribution
 
-Project-authored source and documents are licensed under [MIT](LICENSE), unless a file explicitly states otherwise. Third-party code retains its original license and notices; see the [reuse policy](docs/governance/REUSE-LICENSES.md). This project is independent of Desktop Commander and other referenced projects, and does not claim affiliation.
+Project-authored source and documents are licensed under [MIT](LICENSE), unless a file explicitly states otherwise.
+
+The MIT license **permits copying, redistribution and forks**; it is not a copy-prevention mechanism. [Copyright and official project identity](docs/governance/COPYRIGHT-AND-PROJECT-IDENTITY.md) explains what belongs in the public repository and what remains separate from the source code. Third-party code retains its original license and notices; see the [reuse policy](docs/governance/REUSE-LICENSES.md). This project is independent of Desktop Commander and other referenced projects, and does not claim affiliation.
+
+Private plugin developer presentation: **Anon Allman**. Existing project/third-party copyright notices remain unchanged.
 
 Maintained by the repository owner and contributors; contributors and reviewers are credited only for work actually performed.
