@@ -1,0 +1,194 @@
+
+COMMAND: git fetch origin 
+START: 2026-10-24T17:26:13Z
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:14Z
+
+COMMAND: git pull --ff-only 
+START: 2026-10-24T17:26:14Z
+Already up to date.
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:15Z
+
+COMMAND: git rev-parse HEAD 
+START: 2026-10-24T17:26:15Z
+e7792f1c782f28e0be4154e43ed596456022b409
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:15Z
+
+COMMAND: git ls-remote origin refs/heads/feat/s02-local-mcp-core 
+START: 2026-10-24T17:26:15Z
+e7792f1c782f28e0be4154e43ed596456022b409	refs/heads/feat/s02-local-mcp-core
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:15Z
+
+COMMAND: git status --short --branch 
+START: 2026-10-24T17:26:15Z
+## feat/s02-local-mcp-core...origin/feat/s02-local-mcp-core
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:15Z
+
+COMMAND: uname -a 
+START: 2026-10-24T17:26:15Z
+Linux 5212c4235750 6.18.54.1-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Tue Oct  6 19:13:07 UTC 2026 x86_64 GNU/Linux
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:15Z
+
+COMMAND: node --version 
+START: 2026-10-24T17:26:15Z
+v24.22.1
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:15Z
+
+COMMAND: npm --version 
+START: 2026-10-24T17:26:15Z
+11.19.1
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:16Z
+
+COMMAND: id 
+START: 2026-10-24T17:26:16Z
+uid=1000(node) gid=1000(node) groups=1000(node)
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:16Z
+
+COMMAND: npm ci --ignore-scripts 
+START: 2026-10-24T17:26:16Z
+
+added 210 packages, and audited 212 packages in 9s
+
+82 packages are looking for funding
+  run `npm fund` for details
+
+1 high severity vulnerability
+
+To address all issues, run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:25Z
+
+COMMAND: npm run verify 
+START: 2026-10-24T17:26:25Z
+
+> desktop-control@0.0.0 verify
+> npm run lint && npm run typecheck && npm test && npm run build && npm run test:protocol
+
+
+> desktop-control@0.0.0 lint
+> eslint --max-warnings 0 packages eslint.config.mjs
+
+
+> desktop-control@0.0.0 typecheck
+> tsc --noEmit --project tsconfig.json
+
+
+> desktop-control@0.0.0 test
+> node --experimental-strip-types --test packages/mcp-server/test/*.test.mts
+
+✔ deny by default (1.279056ms)
+✔ valid exact, unexpired grant permits read (0.307658ms)
+✔ different OS principal is denied (0.228993ms)
+✔ null principal is denied (0.155553ms)
+✔ grant expires exactly at deadline (0.185882ms)
+✔ revocation denies (0.150992ms)
+✔ missing grant store or invalid grants fail closed (0.224505ms)
+✔ wrong resource/capability denies (0.147103ms)
+✔ untrusted expiry values fail closed (0.387919ms)
+✔ same unprivileged POSIX uid yields matching principal (1.467457ms)
+✔ setuid/effective UID mismatch fails closed (0.328831ms)
+✔ privileged root identity fails closed even when both IDs match (0.206114ms)
+✔ invalid POSIX identity fails closed (0.181818ms)
+✔ real process principal is derived without request text (0.20532ms)
+✔ denied request never invokes adapter (2.917131ms)
+✔ test-only explicit grant allows bounded structured result (2.022644ms)
+✔ revoke between calls blocks subsequent execution (0.6068ms)
+✔ cancelled request never reaches adapter (0.417292ms)
+✔ adapter exceptions and invalid shapes redact as INTERNAL_ERROR (2.0539ms)
+✔ revocation before deferred adapter entry prevents invocation (0.787742ms)
+✔ cancellation before deferred adapter entry prevents invocation (0.588187ms)
+✔ adapter timeout returns a bounded redacted failure (26.998356ms)
+✔ in-flight abort returns CANCELLED without waiting for adapter (1.199507ms)
+✔ extra adapter fields are excluded from the public response (0.841261ms)
+✔ revocation before deferred entry records deny, never false allow (0.725485ms)
+✔ cancellation before deferred entry records cancel, never false allow (0.846374ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 199.599457
+
+> desktop-control@0.0.0 build
+> tsc --project tsconfig.json
+
+
+> desktop-control@0.0.0 test:protocol
+> node --test packages/mcp-server/test/*.test.mjs
+
+✖ Linux built production entry has no open socket descriptors after MCP discovery (733.660238ms)
+✔ actual SDK stdio fixture allowed: result, adapter count, redaction and EOF (757.547354ms)
+✔ actual SDK stdio fixture denied: result, adapter count, redaction and EOF (613.211466ms)
+✔ actual SDK stdio fixture expired: result, adapter count, redaction and EOF (647.208781ms)
+✔ actual SDK stdio fixture revoked: result, adapter count, redaction and EOF (485.97134ms)
+✔ actual SDK stdio fixture error: result, adapter count, redaction and EOF (506.125851ms)
+﹣ production built entry on Windows: malformed input, no TCP listener and EOF (0.530016ms) # SKIP
+✔ production built entry: unterminated input exceeding SDK 10 MiB bound terminates (1868.116088ms)
+✔ actual SDK stdio fixture cancellation of in-flight adapter and subsequent liveness (324.450815ms)
+✔ modern MCP stdio discovery, strict arguments, default denial and clean EOF (1165.596082ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 6341.243628
+
+✖ failing tests:
+
+test at packages/mcp-server/test/protocol-linux.test.mjs:11:1
+✖ Linux built production entry has no open socket descriptors after MCP discovery (733.660238ms)
+  AssertionError [ERR_ASSERTION]: the MCP child must not own any socket descriptor at inspection time
+  + actual - expected
+  
+  + [
+  +   'socket:[6531]',
+  +   'socket:[6533]',
+  +   'socket:[6535]'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///workspace/desktop-control/packages/mcp-server/test/protocol-linux.test.mjs:57:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'socket:[6531]', 'socket:[6533]', 'socket:[6535]' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+EXIT_CODE: 1
+END: 2026-10-24T17:26:41Z
+
+COMMAND: git status --short --branch 
+START: 2026-10-24T17:26:41Z
+## feat/s02-local-mcp-core...origin/feat/s02-local-mcp-core
+
+EXIT_CODE: 0
+END: 2026-10-24T17:26:41Z

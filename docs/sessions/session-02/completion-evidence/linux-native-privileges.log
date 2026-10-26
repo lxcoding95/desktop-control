@@ -1,0 +1,9 @@
+COMMAND:isolated native privilege probe root
+{"mode":"root","uid":0,"euid":0,"principal":null,"adapterCalls":0,"result":"PERMISSION_DENIED"}
+EXIT_CODE:0
+COMMAND:isolated native privilege probe real-user-effective-root
+{"mode":"real-user-effective-root","uid":1000,"euid":0,"principal":null,"adapterCalls":0,"result":"PERMISSION_DENIED"}
+EXIT_CODE:0
+COMMAND:isolated native privilege probe real-root-effective-user
+{"mode":"real-root-effective-user","uid":0,"euid":1000,"principal":null,"adapterCalls":0,"result":"PERMISSION_DENIED"}
+EXIT_CODE:0

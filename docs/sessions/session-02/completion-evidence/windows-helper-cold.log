@@ -1,0 +1,6 @@
+FRESH_COMPILE_ROUND:1
+{"elapsedMs":758,"pidMatch":true,"elevated":false,"integrity":8192}
+PROBE_EXIT:0
+FRESH_COMPILE_ROUND:2
+{"elapsedMs":16037,"code":"ETIMEDOUT","status":null,"signal":"SIGTERM"}
+PROBE_EXIT:1

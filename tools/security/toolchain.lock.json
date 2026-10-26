@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Pinned user-local security tools for Desktop Control S02. Release metadata read from publisher GitHub Releases on 2026-10-24; archives are not installed by committing this manifest.",
+  "supported": [
+    "win32-x64",
+    "linux-x64"
+  ],
+  "tools": {
+    "opengrep": {
+      "version": "1.30.0",
+      "license": "LGPL-2.1",
+      "source": "https://github.com/opengrep/opengrep/releases/tag/v1.30.0",
+      "assets": {
+        "win32-x64": {
+          "file": "opengrep_windows_x86.exe",
+          "sha256": "b5cf4f8fe9f44e030aab2d579d96bd395c139db1f1ba66633676ff4d5ebc7c39",
+          "archive": false,
+          "executable": "opengrep.exe",
+          "url": "https://github.com/opengrep/opengrep/releases/download/v1.30.0/opengrep_windows_x86.exe"
+        },
+        "linux-x64": {
+          "file": "opengrep_manylinux_x86",
+          "sha256": "35779bdd72e92129c8df2a77f0c55e8c08356801ea92591ef32108d6b28d564c",
+          "archive": false,
+          "executable": "opengrep",
+          "url": "https://github.com/opengrep/opengrep/releases/download/v1.30.0/opengrep_manylinux_x86"
+        }
+      }
+    },
+    "osv-scanner": {
+      "version": "2.7.0",
+      "license": "Apache-2.0",
+      "source": "https://github.com/google/osv-scanner/releases/tag/v2.7.0",
+      "assets": {
+        "win32-x64": {
+          "file": "osv-scanner_windows_amd64.exe",
+          "sha256": "9964ed64ec9a387391eb4cc006ad5c531154821aef29b793e02c448de4686438",
+          "archive": false,
+          "executable": "osv-scanner.exe",
+          "url": "https://github.com/google/osv-scanner/releases/download/v2.7.0/osv-scanner_windows_amd64.exe"
+        },
+        "linux-x64": {
+          "file": "osv-scanner_linux_amd64",
+          "sha256": "160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b",
+          "archive": false,
+          "executable": "osv-scanner",
+          "url": "https://github.com/google/osv-scanner/releases/download/v2.7.0/osv-scanner_linux_amd64"
+        }
+      }
+    },
+    "reviewdog": {
+      "version": "0.21.2",
+      "license": "MIT",
+      "source": "https://github.com/reviewdog/reviewdog/releases/tag/v0.21.2",
+      "assets": {
+        "win32-x64": {
+          "file": "reviewdog_0.21.2_Windows_x86_64.tar.gz",
+          "sha256": "397959e250bfc6bc801fba34b7d4922f2eaa4763deacf7d32ef11bffb284a315",
+          "archive": true,
+          "executable": "reviewdog.exe",
+          "url": "https://github.com/reviewdog/reviewdog/releases/download/v0.21.2/reviewdog_0.21.2_Windows_x86_64.tar.gz"
+        },
+        "linux-x64": {
+          "file": "reviewdog_0.21.2_Linux_x86_64.tar.gz",
+          "sha256": "30413aa3c7443e9c3c157fe5766cad40e3bb39a32e210ee69b710a8d5c4b8e51",
+          "archive": true,
+          "executable": "reviewdog",
+          "url": "https://github.com/reviewdog/reviewdog/releases/download/v0.21.2/reviewdog_0.21.2_Linux_x86_64.tar.gz"
+        }
+      }
+    }
+  }
+}

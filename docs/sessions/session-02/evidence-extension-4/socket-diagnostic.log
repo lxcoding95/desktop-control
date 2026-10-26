@@ -1,0 +1,183 @@
+{
+  "name": "minimal-node-stdio-control",
+  "pid": 387,
+  "response": "stdio-control",
+  "fds": [
+    {
+      "fd": "0",
+      "target": "socket:[5834]"
+    },
+    {
+      "fd": "1",
+      "target": "socket:[5836]"
+    },
+    {
+      "fd": "10",
+      "target": "pipe:[5840]"
+    },
+    {
+      "fd": "11",
+      "target": "pipe:[5840]"
+    },
+    {
+      "fd": "12",
+      "target": "anon_inode:[eventfd]"
+    },
+    {
+      "fd": "13",
+      "target": "anon_inode:[eventpoll]"
+    },
+    {
+      "fd": "14",
+      "target": "pipe:[8343]"
+    },
+    {
+      "fd": "15",
+      "target": "pipe:[8343]"
+    },
+    {
+      "fd": "16",
+      "target": "anon_inode:[eventfd]"
+    },
+    {
+      "fd": "17",
+      "target": "/dev/null"
+    },
+    {
+      "fd": "2",
+      "target": "socket:[5838]"
+    },
+    {
+      "fd": "3",
+      "target": "anon_inode:[eventpoll]"
+    },
+    {
+      "fd": "4",
+      "target": "pipe:[8341]"
+    },
+    {
+      "fd": "5",
+      "target": "pipe:[8341]"
+    },
+    {
+      "fd": "6",
+      "target": "pipe:[8342]"
+    },
+    {
+      "fd": "7",
+      "target": "pipe:[8342]"
+    },
+    {
+      "fd": "8",
+      "target": "anon_inode:[eventfd]"
+    },
+    {
+      "fd": "9",
+      "target": "anon_inode:[eventpoll]"
+    }
+  ],
+  "socketRows": {
+    "tcp": [],
+    "tcp6": [],
+    "udp": [],
+    "udp6": [],
+    "unix": [
+      "00000000c795606c: 00000003 00000000 00000000 0001 03  5834",
+      "000000000d6694c5: 00000003 00000000 00000000 0001 03  5838",
+      "00000000fe847890: 00000003 00000000 00000000 0001 03  5836"
+    ]
+  }
+}
+{"name":"minimal-node-stdio-control","exitCode":0,"signal":null,"stderr":""}
+{
+  "name": "production-mcp",
+  "pid": 410,
+  "response": "{\"result\":{\"supportedVersions\":[\"2026-07-28\"],\"capabilities\":{\"tools\":{\"listChanged\":true}},\"resultType\":\"complete\",\"ttlMs\":0,\"cacheScope\":\"private\",\"_meta\":{\"io.modelcontextprotocol/serverInfo\":{\"name\":\"desktop-control\",\"version\":\"0.0.1\"}}},\"jsonrpc\":\"2.0\",\"id\":1}",
+  "fds": [
+    {
+      "fd": "0",
+      "target": "socket:[5848]"
+    },
+    {
+      "fd": "1",
+      "target": "socket:[5850]"
+    },
+    {
+      "fd": "10",
+      "target": "pipe:[8353]"
+    },
+    {
+      "fd": "11",
+      "target": "pipe:[8353]"
+    },
+    {
+      "fd": "12",
+      "target": "anon_inode:[eventfd]"
+    },
+    {
+      "fd": "13",
+      "target": "anon_inode:[eventpoll]"
+    },
+    {
+      "fd": "14",
+      "target": "pipe:[5854]"
+    },
+    {
+      "fd": "15",
+      "target": "pipe:[5854]"
+    },
+    {
+      "fd": "16",
+      "target": "anon_inode:[eventfd]"
+    },
+    {
+      "fd": "17",
+      "target": "/dev/null"
+    },
+    {
+      "fd": "2",
+      "target": "socket:[5852]"
+    },
+    {
+      "fd": "3",
+      "target": "anon_inode:[eventpoll]"
+    },
+    {
+      "fd": "4",
+      "target": "pipe:[8351]"
+    },
+    {
+      "fd": "5",
+      "target": "pipe:[8351]"
+    },
+    {
+      "fd": "6",
+      "target": "pipe:[8352]"
+    },
+    {
+      "fd": "7",
+      "target": "pipe:[8352]"
+    },
+    {
+      "fd": "8",
+      "target": "anon_inode:[eventfd]"
+    },
+    {
+      "fd": "9",
+      "target": "anon_inode:[eventpoll]"
+    }
+  ],
+  "socketRows": {
+    "tcp": [],
+    "tcp6": [],
+    "udp": [],
+    "udp6": [],
+    "unix": [
+      "000000006d69135e: 00000003 00000000 00000000 0001 03  5852",
+      "000000000d6694c5: 00000003 00000000 00000000 0001 03  5850",
+      "00000000fe847890: 00000003 00000000 00000000 0001 03  5848"
+    ]
+  }
+}
+{"name":"production-mcp","exitCode":0,"signal":null,"stderr":""}
+EXIT_CODE: 0

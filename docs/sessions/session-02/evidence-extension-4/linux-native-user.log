@@ -1,0 +1,11 @@
+{
+  "platform": "linux",
+  "node": "v24.22.1",
+  "uid": 1000,
+  "euid": 1000,
+  "principalKind": "native-posix",
+  "adapterCalls": 1,
+  "resultCode": "SUCCESS",
+  "windowsSIDImplemented": false
+}
+EXIT_CODE: 0

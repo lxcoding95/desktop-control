@@ -1,0 +1,17 @@
+{
+  "windowsInstalled": 209,
+  "linuxInstalled": 209,
+  "windowsLicenseFiles": 207,
+  "linuxLicenseFiles": 207,
+  "commonLicenseHashDifferences": [],
+  "windowsOnlyInstalled": [
+    "@napi-rs/keyring-win32-x64-msvc@2.1.2",
+    "@rolldown/binding-win32-x64-msvc@1.2.15",
+    "lightningcss-win32-x64-msvc@1.33.0"
+  ],
+  "linuxOnlyInstalled": [
+    "@napi-rs/keyring-linux-x64-gnu@2.1.2",
+    "@rolldown/binding-linux-x64-gnu@1.2.15",
+    "lightningcss-linux-x64-gnu@1.33.0"
+  ]
+}

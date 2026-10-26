@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {localPrincipal} from '/workspace/desktop-control/dist/packages/mcp-server/src/bridge/principal.mjs';
+import {createStatusExecutor} from '/workspace/desktop-control/dist/packages/mcp-server/src/bridge/status.mjs';
+const mode=process.argv[2],uid=process.getuid(),euid=process.geteuid();
+const expected={root:[0,0],'real-user-effective-root':[1000,0],'real-root-effective-user':[0,1000]}[mode];
+assert.deepEqual([uid,euid],expected);
+const principal=localPrincipal();assert.equal(principal,null);
+let calls=0;
+const execute=createStatusExecutor({grants:{getGrants:()=>['posix:0','posix:1000'].map(principal=>({principal,capability:'diagnostics.read',resource:'local:desktop-control',revoked:false,expiresAt:Date.now()+60000}))},adapter:{readStatus:()=>{calls++;return {service:'desktop-control',ready:true,api_version:1}}}});
+const result=await execute({principal});assert.equal(result.isError,true);assert.equal(result.content[0].text,'PERMISSION_DENIED');assert.equal(calls,0);
+console.log(JSON.stringify({mode,uid,euid,principal:null,adapterCalls:calls,result:'PERMISSION_DENIED'}));
