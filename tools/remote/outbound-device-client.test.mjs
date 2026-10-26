@@ -10,7 +10,7 @@ class Socket {
   handlers=new Map();
   messages=[];
   closed=false;
-  constructor(url){ this.url=url;Socket.sockets.push(this); }
+  constructor(url,protocols){ this.url=url;this.protocols=protocols;Socket.sockets.push(this); }
   addEventListener(name,fn){const a=this.handlers.get(name)||[];a.push(fn);this.handlers.set(name,a)}
   emit(name,data){for(const fn of (this.handlers.get(name)||[])) fn(data === undefined ? {} : {data:typeof data==='string'?data:JSON.stringify(data)});}
   send(data){if(this.closed) throw Error('socket closed'); this.messages.push(JSON.parse(data));}
@@ -36,6 +36,12 @@ test('valid pinned WSS endpoint never includes a ticket',()=>{
   assert.equal(validateWssEndpoint(endpoint,host),endpoint);
   assert.ok(!endpoint.includes(token));
 });
+test('device admission sends ticket only in protocol header and keeps public selected protocol separate',async()=>{
+  const c=client();const pending=c.connect();await new Promise(resolve=>setImmediate(resolve));
+  const socket=last();assert.equal(socket.url,endpoint);
+  assert.deepEqual(socket.protocols,['desktop-control-health',token]);
+  socket.emit('open');ready(socket);await pending;c.stop();
+});
 test('fails closed when ticket was not locally approved',async()=>{
   const c=client({ticketProvider:async()=>{throw Error('private')}});
   await expectCode(c.connect(),'TICKET_UNAVAILABLE');
@@ -47,7 +53,7 @@ test('never attempts socket for malformed ticket',async()=>{
   await expectCode(c.connect(),'INVALID_TICKET');
   assert.equal(Socket.sockets.length,n);
 });
-test('ticket is sent only after WSS opens, never in URL',async()=>{
+test('authentication frame is sent only after WSS opens, never in URL',async()=>{
   const c=client();const p=c.connect();
   await new Promise(resolve=>setImmediate(resolve));const s=last();
   assert.equal(s.messages.length,0);

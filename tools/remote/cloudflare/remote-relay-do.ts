@@ -12,16 +12,24 @@ import { createDeviceTicketAuthority } from '../device-ticket.mjs';
 import { createDurableTicketStore } from '../durable-ticket-store.mjs';
 import { configuredPreviewOwner, isAllowedPreviewOwner } from '../preview-single-owner.mjs';
 import { parseDeviceAuthenticate, parseHealthResponse, parseAuthorizedDeviceLookup } from '../remote-relay-protocol.mjs';
+import { createConfiguredPreviewEntitlement } from '../configured-entitlement.mjs';
+import { createConfiguredDeviceTicket } from '../configured-device-ticket.mjs';
+import {readBoundedBody} from '../bounded-body.mjs';
 
 export const PROBE_RELAY_SHARD = 'remote-health-probe-v1';
 
 type Env = {
   DEVICE_TICKET_HMAC_KEY?: string;
+  DEVICE_BOOTSTRAP_HMAC_KEY?: string;
+  APPROVE_INITIAL_DEVICE_PAIRING?: string;
   ENABLE_REMOTE_HEALTH?: string;
   PREVIEW_SINGLE_USER?: string;
   PREVIEW_OWNER_ID?: string;
+  PREVIEW_DEVICE_ID?: string;
+  PREVIEW_LICENSE_TOKEN?: string;
+  PREVIEW_LICENSE_ISSUER_KEY?: string;
 };
-type PendingAttachment = { phase: 'pending'; until: number };
+type PendingAttachment = { phase: 'pending'; until: number; admitted: ReadyAttachment; ticketHash: string };
 type ReadyAttachment = {
   phase: 'ready'; ownerId: string; deviceId: string;
   pairingRevision: string; until: number;
@@ -62,7 +70,11 @@ function attachment(ws: WebSocket): Attachment | null {
   const a: unknown = ws.deserializeAttachment();
   if (!record(a)) return null;
   if (a.phase === 'pending' && Number.isSafeInteger(a.until)) {
-    return { phase: 'pending', until: a.until as number };
+    const admitted = a.admitted;
+    if (!record(admitted) || admitted.phase !== 'ready' || !validId(admitted.ownerId) ||
+        !validId(admitted.deviceId) || !validId(admitted.pairingRevision) || !Number.isSafeInteger(admitted.until) ||
+        typeof a.ticketHash !== 'string' || !/^[a-f0-9]{64}$/.test(a.ticketHash)) return null;
+    return {phase:'pending',until:a.until as number,admitted:admitted as ReadyAttachment,ticketHash:a.ticketHash};
   }
   if (a.phase === 'ready' && validId(a.ownerId) && validId(a.deviceId) &&
       validId(a.pairingRevision) && Number.isSafeInteger(a.until)) {
@@ -81,13 +93,31 @@ const paired = (p: unknown, a: ReadyAttachment) =>
 export class RemoteHealthRelay extends DurableObject<Env> {
   private pending = new Map<string, PendingHealth>();
   private authority: ReturnType<typeof createDeviceTicketAuthority> | null = null;
+  private entitlement: ReturnType<typeof createConfiguredPreviewEntitlement> | null = null;
+  private bootstrap: ReturnType<typeof createConfiguredDeviceTicket> | null = null;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
+    if (configuredPreviewOwner(env) && validId(env.PREVIEW_DEVICE_ID) &&
+        env.PREVIEW_LICENSE_TOKEN && env.PREVIEW_LICENSE_ISSUER_KEY) {
+      this.entitlement = createConfiguredPreviewEntitlement({ storage: ctx.storage,
+        ownerId: env.PREVIEW_OWNER_ID, deviceId: env.PREVIEW_DEVICE_ID,
+        token: env.PREVIEW_LICENSE_TOKEN, publicKey: env.PREVIEW_LICENSE_ISSUER_KEY });
+    }
     const key = secretBytes(env.DEVICE_TICKET_HMAC_KEY);
     if (key) {
       const store = createDurableTicketStore({ storage: ctx.storage });
       this.authority = createDeviceTicketAuthority({ secret: key, ...store });
+      const requestKey = secretBytes(env.DEVICE_BOOTSTRAP_HMAC_KEY);
+      if (requestKey && this.entitlement && validId(env.PREVIEW_OWNER_ID) && validId(env.PREVIEW_DEVICE_ID)) {
+        try {
+          this.bootstrap = createConfiguredDeviceTicket({ storage: ctx.storage,
+            ownerId: env.PREVIEW_OWNER_ID, deviceId: env.PREVIEW_DEVICE_ID,
+            requestSecret: requestKey, ticketSecret: key,
+            approveInitialPairing: env.APPROVE_INITIAL_DEVICE_PAIRING === '1',
+            checkEntitlement: (owner: string, device: string) => this.entitlement!.claims(owner, device) });
+        } finally { requestKey.fill(0); }
+      }
       key.fill(0);
     }
     // On hibernation, only safe owner/device/revision metadata are restored by
@@ -109,7 +139,28 @@ export class RemoteHealthRelay extends DurableObject<Env> {
     if (!this.enabled()) return reject(503, 'Remote disabled');
     const path = new URL(request.url).pathname;
     if (path === '/device') return this.upgrade(request);
+    if (path === '/device-ticket') {
+      if (!this.bootstrap || request.method !== 'POST' ||
+          request.headers.get('content-type') !== 'application/json') return reject(403, 'Not permitted');
+      if (Number(request.headers.get('content-length') ?? '0') > 1024) return reject(413, 'Request too large');
+      try {
+        const raw = await readBoundedBody(request);
+        const result = await this.bootstrap.issue(JSON.parse(raw));
+        await this.scheduleAlarm(Date.now() + 65_001);
+        return Response.json(result, {headers:{'cache-control':'no-store'}});
+      } catch { return reject(403, 'Not permitted'); }
+    }
     if (path === '/health') return this.health(request);
+    if (path === '/entitlement') {
+      if (request.method !== 'POST') return reject(405, 'Method not allowed');
+      // No identity is accepted from the MCP client here: the Worker passes the
+      // verified OAuth subject and the deployment-bound single device.
+      let body: unknown;
+      try { body = await request.json(); } catch { return reject(400, 'Invalid request'); }
+      const value = parseAuthorizedDeviceLookup(body);
+      if (!value || !await this.entitled(value.ownerId, value.deviceId)) return reject(403, 'Not permitted');
+      return Response.json({ entitled: true }, { headers: { 'cache-control': 'no-store' } });
+    }
     return reject(404, 'Not found');
   }
 
@@ -117,19 +168,42 @@ export class RemoteHealthRelay extends DurableObject<Env> {
     if (request.method !== 'GET' ||
         request.headers.get('Upgrade')?.toLowerCase() !== 'websocket')
       return reject(426, 'WebSocket required');
+    // Authenticate before allocating any WebSocket slot. The one-use ticket is
+    // sent in a TLS-protected protocol header, never a URL or reflected protocol.
+    const protocols = (request.headers.get('Sec-WebSocket-Protocol') ?? '').split(',').map(x => x.trim());
+    if (protocols.length !== 2 || protocols[0] !== 'desktop-control-health' ||
+        !/^dt1\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(protocols[1]) || protocols[1].length > 2048 || !this.authority)
+      return reject(403, 'Not permitted');
+    let admitted: ReadyAttachment;
+    try {
+      const verified = await this.authority.verifyDevice(protocols[1]);
+      const pairing = await this.ctx.storage.get<{revision:string;expiresAt:number}>('pairing:'+verified.ownerId+':'+verified.deviceId);
+      if (!pairing || !validId(pairing.revision)) return reject(403,'Not permitted');
+      admitted = {phase:'ready',ownerId:verified.ownerId,deviceId:verified.deviceId,
+        pairingRevision:pairing.revision,until:pairing.expiresAt};
+      if (!await this.isPaired(admitted)) return reject(403,'Not permitted');
+    } catch { return reject(403,'Not permitted'); }
+    if (this.ctx.getWebSockets().length >= MAX_SOCKETS) return reject(429, 'Capacity exceeded');
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(protocols[1])));
+    const ticketHash = [...digest].map(x=>x.toString(16).padStart(2,'0')).join('');
+    // No await between this final capacity check and slot allocation.
     if (this.ctx.getWebSockets().length >= MAX_SOCKETS) return reject(429, 'Capacity exceeded');
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair) as [WebSocket, WebSocket];
     this.ctx.acceptWebSocket(server);
-    server.serializeAttachment({ phase: 'pending', until: Date.now() + 5_000 } satisfies PendingAttachment);
-    await this.ctx.storage.setAlarm(Date.now() + 5_500);
-    return new Response(null, { status: 101, webSocket: client });
+    server.serializeAttachment({ phase: 'pending', until: Date.now() + 5_000, admitted, ticketHash } satisfies PendingAttachment);
+    await this.scheduleAlarm(Date.now() + 5_000);
+    return new Response(null, { status: 101, webSocket: client, headers:{'Sec-WebSocket-Protocol':'desktop-control-health'} });
   }
 
   private async isPaired(a: ReadyAttachment): Promise<boolean> {
     if (a.until <= Date.now() || !isAllowedPreviewOwner(a.ownerId, this.env)) return false;
+    if (!await this.entitled(a.ownerId, a.deviceId)) return false;
     const p = await this.ctx.storage.get('pairing:' + a.ownerId + ':' + a.deviceId);
     return paired(p, a);
+  }
+  private async entitled(ownerId: string, deviceId: string): Promise<boolean> {
+    return this.entitlement !== null && await this.entitlement.check(ownerId, deviceId);
   }
 
   private close(ws: WebSocket, code = 1008) {
@@ -147,19 +221,10 @@ export class RemoteHealthRelay extends DurableObject<Env> {
     if (Date.now() > state.until || !auth || !this.authority) {
       this.close(ws); return;
     }
-    let verified: {ownerId: string;deviceId: string;expiresAt: number};
-    try { verified = await this.authority.verifyDevice(auth.ticket); }
-    catch { this.close(ws); return; }
-    if (verified.deviceId !== auth.deviceId ||
-        !isAllowedPreviewOwner(verified.ownerId, this.env)) { this.close(ws); return; }
-    const pair = await this.ctx.storage.get(
-      'pairing:' + verified.ownerId + ':' + verified.deviceId
-    );
-    if (!record(pair) || !validId(pair.revision)) { this.close(ws); return; }
-    const authenticated: ReadyAttachment = {
-      phase: 'ready', ownerId: verified.ownerId, deviceId: verified.deviceId,
-      pairingRevision: pair.revision, until: pair.expiresAt as number
-    };
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(auth.ticket)));
+    const ticketHash = [...digest].map(x=>x.toString(16).padStart(2,'0')).join('');
+    const authenticated = state.admitted;
+    if (ticketHash !== state.ticketHash || authenticated.deviceId !== auth.deviceId) { this.close(ws); return; }
     if (!await this.isPaired(authenticated)) { this.close(ws); return; }
     for (const other of this.ctx.getWebSockets()) {
       if (other === ws) continue;
@@ -172,7 +237,7 @@ export class RemoteHealthRelay extends DurableObject<Env> {
     // and checked for revocation on each privileged (health-only) event.
     ws.serializeAttachment(authenticated);
     ws.send(JSON.stringify({
-      type: 'remote.device.ready', deviceId: verified.deviceId, challenge: auth.challenge
+      type: 'remote.device.ready', deviceId: authenticated.deviceId, challenge: auth.challenge
     }));
   }
 
@@ -214,8 +279,7 @@ export class RemoteHealthRelay extends DurableObject<Env> {
       return reject(413, 'Request too large');
     let body: unknown;
     try {
-      const raw = await request.text();
-      if (raw.length > 1024) return reject(413, 'Request too large');
+      const raw = await readBoundedBody(request);
       body = JSON.parse(raw);
     } catch { return reject(400, 'Invalid request'); }
     const lookup = parseAuthorizedDeviceLookup(body);
@@ -257,14 +321,43 @@ export class RemoteHealthRelay extends DurableObject<Env> {
   }
 
   async alarm(): Promise<void> {
+    let next = Number.POSITIVE_INFINITY;
     for (const ws of this.ctx.getWebSockets()) {
       const a = attachment(ws);
-      if (!a || a.until <= Date.now()) this.close(ws);
+      if (!a || a.until <= Date.now() || (a.phase === 'ready' && !await this.isPaired(a))) {
+        this.close(ws);
+      } else {
+        next = Math.min(next, a.until);
+      }
     }
-    // Revalidation of ready sessions is essential to expire revoked pairings
-    // even if no user requests arrive. Free-plan idle cost is a consideration.
-    if (this.ctx.getWebSockets().length)
-      await this.ctx.storage.setAlarm(Date.now() + 30_000);
+    // Every health event revalidates durable revocation; idle sockets also
+    // revalidate here. Never postpone an earlier pending-handshake deadline.
+    // Bounded cleanup only after the full replay admission window. Never remove
+    // live nonces or authoritative pairing/license rows.
+    const nonces = await this.ctx.storage.list<{expiresAt:number}>({prefix:'device-bootstrap-nonce:', limit:256});
+    for (const [key, value] of nonces) {
+      if (Number.isSafeInteger(value?.expiresAt) && value.expiresAt <= Date.now()) await this.ctx.storage.delete(key);
+      else next = Math.min(next, Date.now() + 30_000);
+    }
+    if (nonces.size === 256) next = Math.min(next, Date.now() + 30_000);
+    const tickets = await this.ctx.storage.list<{expiresAt:number}>({prefix:'ticket:',limit:256});
+    for (const [key,value] of tickets) {
+      if (Number.isSafeInteger(value?.expiresAt) && value.expiresAt <= Date.now()) await this.ctx.storage.delete(key);
+      else next = Math.min(next, Date.now()+30_000);
+    }
+    if (tickets.size === 256) next = Math.min(next,Date.now()+30_000);
+    const reservations = await this.ctx.storage.list<{expiresAt:number}>({prefix:'device-bootstrap-pending-ticket:',limit:256});
+    for (const [key,value] of reservations) {
+      if (Number.isSafeInteger(value?.expiresAt) && value.expiresAt <= Date.now()) await this.ctx.storage.delete(key);
+      else next = Math.min(next,Date.now()+30_000);
+    }
+    if (reservations.size === 256) next = Math.min(next,Date.now()+30_000);
+    if (Number.isFinite(next)) await this.scheduleAlarm(Math.min(next, Date.now() + 30_000));
+  }
+
+  private async scheduleAlarm(deadline: number) {
+    const previous = await this.ctx.storage.getAlarm();
+    if (previous === null || previous > deadline) await this.ctx.storage.setAlarm(deadline);
   }
 
   webSocketClose(ws: WebSocket) { this.close(ws, 1000); }

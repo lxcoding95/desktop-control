@@ -3,12 +3,15 @@
   "version": "0.0.0-private",
   "private": true,
   "type": "module",
-  "description": "Default-off OAuth-protected remote health MCP Worker prototype; no deployments permitted",
+  "description": "Default-off OAuth-protected single-owner remote health staging prototype",
   "engines": {
     "node": ">=22.19.0"
   },
   "scripts": {
-    "test:gate": "node --test ../oauth-health-gate.test.mjs",
+    "test:gate": "node --test ../*.test.mjs ../../license/*.test.mjs auth-login.test.mjs",
+    "test:login:runtime": "node test-auth-login-runtime.mjs",
+    "test:relay:runtime": "node test-relay-runtime.mjs",
+    "verify": "npm run typecheck && npm run test:gate && npm run test:login:runtime && npm run test:relay:runtime && npm run test:local:deny && npm run test:local:wss-deny",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:local:deny": "node smoke-local.mjs",
     "test:local:wss-deny": "node smoke-local-wss-deny.mjs"
@@ -17,11 +20,16 @@
     "@cloudflare/workers-oauth-provider": "1.2.4",
     "@modelcontextprotocol/server": "2.3.1",
     "agents": "0.30.1",
-    "zod": "4.5.4"
+    "zod": "4.6.7"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261014.1",
+    "@cloudflare/workers-types": "5.20261026.1",
     "typescript": "5.9.3",
-    "wrangler": "4.145.0"
+    "wrangler": "4.152.0"
+  },
+  "overrides": {
+    "miniflare": {
+      "undici": "7.30.1"
+    }
   }
 }

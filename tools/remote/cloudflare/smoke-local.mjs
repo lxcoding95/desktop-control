@@ -28,7 +28,7 @@ async function freeLocalPort() {
 async function wranglerPath() {
   const path = join(dir, 'node_modules', 'wrangler', 'package.json');
   const pkg = JSON.parse(await readFile(path, 'utf8'));
-  if (pkg.version !== '4.145.0') {
+  if (pkg.version !== '4.152.0') {
     throw new Error('PINNED_WRANGLER_VERSION_REQUIRED');
   }
   const bin = typeof pkg.bin === 'string' ? pkg.bin : pkg.bin?.wrangler;

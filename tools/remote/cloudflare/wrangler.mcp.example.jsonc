@@ -14,7 +14,13 @@
       "entrypoint": "DesktopControlAuthServer"
     }
   ],
+  "durable_objects": {"bindings": [{"name": "REMOTE_RELAY", "class_name": "RemoteHealthRelay"}]},
+  "migrations": [{"tag": "relay-v1", "new_sqlite_classes": ["RemoteHealthRelay"]}],
   "vars": {
+    "PREVIEW_SINGLE_USER": "1",
+    "PREVIEW_OWNER_ID": "REPLACE_WITH_EXISTING_OWNER",
+    "PREVIEW_DEVICE_ID": "REPLACE_WITH_EXISTING_DEVICE",
+    "APPROVE_INITIAL_DEVICE_PAIRING": "0",
     "AUTH_ISSUER": "https://REPLACE_WITH_AUTH_HOST.workers.dev",
     "RESOURCE_URL": "https://REPLACE_WITH_MCP_HOST.workers.dev/mcp",
     "ENABLE_REMOTE_HEALTH": "0"
