@@ -74,3 +74,9 @@ Free-tier quotas may cause denial of availability; no paid upgrade is authorized
 See [Worker limits](https://developers.cloudflare.com/workers/platform/limits/)
 and [Durable Object pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/).
 Only SQLite DOs are used. Do not interpret a Free allowance as unlimited capacity.
+
+## Same-source Linux result and named entrypoint
+
+Debian12/UID1000 Node24.22.1/npm11.19.1 at exact `aeb07cd7f90a58716596343688ee0804775f010d`: nested npm ci --ignore-scripts, full remote verify and audit exit0; zero advisories. Full log remains local `.cache/remote-linux-exact-20261026.log` in the primary checkout. A restricted remote-fetch configuration caused initial branch-switch setup failures; index/worktree were verified byte-for-byte against the fetched commit before completing the branch reference. No dirty work was discarded.
+
+The Auth Worker additionally exports its named DesktopControlAuthServer RPC entrypoint explicitly, matching the Resource Worker's service-binding configuration. Typecheck and actual auth workerd fixture passed after this export-only change. Hosted cross-worker OAuth validation remains to be demonstrated.

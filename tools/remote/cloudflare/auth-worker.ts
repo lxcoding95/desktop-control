@@ -105,3 +105,6 @@ export default class DesktopControlAuthServer extends WorkerEntrypoint<Env> {
     return provider.validateToken(resource, token, this.env);
   }
 }
+// MCP Resource Worker binds this exact named RPC entrypoint, not the default
+// HTTP entrypoint. Keep both exports explicit for hosted split-worker routing.
+export {DesktopControlAuthServer};
