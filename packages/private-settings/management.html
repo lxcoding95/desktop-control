@@ -7,6 +7,7 @@
 <title>Desktop Control · Verwaltung</title>
 <style>
 :root{color-scheme:light dark;font:15px/1.5 system-ui,sans-serif;background:var(--color-background-primary,#111820);color:var(--color-text-primary,#edf4ff)}*{box-sizing:border-box}body{margin:0;padding:clamp(16px,4vw,36px)}main{max-width:900px;margin:auto}header{display:flex;align-items:start;justify-content:space-between;gap:20px;margin-bottom:28px}h1{font-size:clamp(24px,5vw,34px);line-height:1.15;margin:0 0 7px}h2{font-size:19px;margin:0 0 12px}p{margin:8px 0;color:var(--color-text-secondary,#b9c9da)}.eyebrow{color:#68d9f4;letter-spacing:.08em;font-size:12px;font-weight:700;text-transform:uppercase}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.card,section{border:1px solid var(--color-border-primary,#344454);border-radius:16px;padding:20px;background:var(--color-background-secondary,#17222e)}.card h2{font-size:15px}.state{font-size:17px;font-weight:650;color:var(--color-text-primary,#edf4ff)}section{margin-top:16px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}button{font:inherit;font-weight:650;border:1px solid var(--color-border-primary,#53677b);border-radius:10px;padding:10px 15px;background:var(--color-background-tertiary,#26394c);color:inherit;cursor:pointer}button:hover:enabled{background:#33516c}button:focus-visible{outline:3px solid #68d9f4;outline-offset:3px}button:disabled{opacity:.5;cursor:not-allowed}.danger{background:#8d2337;border-color:#ee8d9d;color:#fff}.danger:hover:enabled{background:#aa2c44}dl{display:grid;grid-template-columns:minmax(140px,1fr) 2fr;gap:10px 20px;margin:0}dt{color:var(--color-text-secondary,#b9c9da)}dd{margin:0;overflow-wrap:anywhere}#notice{padding:12px 0;min-height:48px}.note{font-size:13px}.badge{border:1px solid #344f67;border-radius:100px;padding:5px 11px;white-space:nowrap;color:#94b8d8}footer{padding:20px 2px;font-size:12px;color:var(--color-text-tertiary,#91a7bd)}@media(max-width:560px){.cards{grid-template-columns:1fr}header{display:block}.badge{display:inline-block;margin-top:12px}dl{grid-template-columns:1fr;gap:3px}dd{margin-bottom:10px}.actions button{width:100%}}
+fieldset{border:1px solid #344454;border-radius:10px;margin:16px 0;padding:14px}fieldset label{display:block;margin:8px 0}select,textarea{display:block;width:100%;font:inherit;color:inherit;background:var(--color-background-secondary,#17222e);border:1px solid #53677b;border-radius:8px;padding:9px;margin:8px 0 16px}input{accent-color:#68d9f4}input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #68d9f4;outline-offset:3px}
 </style>
 </head>
 <body>
@@ -20,7 +21,23 @@
 <div id="notice" role="status" aria-live="polite">Die Oberfläche erteilt beim Öffnen keine Rechte.</div>
 <section aria-labelledby="controls-heading"><h2 id="controls-heading">Steuerung verwalten</h2><p>Stop beendet die laufende Browser- und Desktopsteuerung. Esc sendet in dieser Ansicht denselben Stop. Während Desktopsteuerung bleibt der globale Esc-Notstopp zusätzlich aktiv.</p><div class="actions"><button id="stop" class="danger" disabled>Steuerung stoppen · Esc</button><button id="refresh" disabled>Status aktualisieren</button><button id="local-confirmation" disabled>Lokale Freigaben öffnen</button></div><p class="note">Neue Rechte benötigen die vertrauenswürdige lokale Bestätigung. Die Ansicht speichert selbst keine Freigaben. Öffnen des Bestätigungsfensters pausiert die Automation.</p></section>
 <section aria-labelledby="version-heading"><h2 id="version-heading">Versionen &amp; Updates</h2><dl><dt>Plugin P</dt><dd id="package-version">Noch nicht gemeldet</dd><dt>Betriebssystem</dt><dd id="platform">Noch nicht gemeldet</dd><dt>Unabhängige Bridge B</dt><dd>Noch nicht unabhängig gemeldet</dd><dt>Automatischer Bridge-Updater</dt><dd>Nicht aktiv</dd></dl><p class="note">Ein hochgeladenes Plugin, die installierte Version und ein laufender Prozess sind getrennte Zustände. Hier werden keine Updates oder Zusatzrechte automatisch aktiviert.</p></section>
-<section aria-labelledby="future-heading"><h2 id="future-heading">Freigaben bis zum Widerruf</h2><p><strong>Noch nicht verfügbar in dieser Ansicht.</strong> Die bestehenden Laufzeiten gelten weiter. Neue dauerhafte Freigaben werden erst nach Integration und Prüfung einer expliziten lokalen Bestätigung angeboten; vorhandene Freigaben werden nicht stillschweigend verlängert.</p></section>
+<section aria-labelledby="permissions-heading"><h2 id="permissions-heading">Freigaben bis zum Widerruf</h2><p>Eine Gruppe auswählen. Bestätigen ersetzt nur deren Rechte; andere Gruppen bleiben unverändert. Jede neue Freigabe benötigt deine lokale Bestätigung. Bestehende Zeitfreigaben werden nicht automatisch verlängert.</p>
+<label for="permission-scope">Berechtigungsgruppe</label><select id="permission-scope" disabled><option value="controls">Browser, Desktop &amp; Terminal</option><option value="workspace">Dateien &amp; PDF im Workspace</option><option value="diagnostics">Diagnostik</option></select>
+<fieldset><legend>Gewünschte Rechte – zunächst alle aus</legend>
+<label><input type="checkbox" id="cap-browser.read" disabled> Browser lesen</label>
+<label><input type="checkbox" id="cap-browser.interact" disabled> Browser bedienen</label>
+<label><input type="checkbox" id="cap-desktop.read" disabled> Bildschirm lesen</label>
+<label><input type="checkbox" id="cap-desktop.input" disabled> Maus und Tastatur bedienen</label>
+<label><input type="checkbox" id="cap-terminal.exec" disabled> Isoliertes Terminal</label>
+<label><input type="checkbox" id="cap-files.read" disabled> Workspace lesen</label>
+<label><input type="checkbox" id="cap-files.write" disabled> Workspace erstellen und ändern</label>
+<label><input type="checkbox" id="cap-files.remove" disabled> Workspace entfernen</label>
+<label><input type="checkbox" id="cap-pdf.create" disabled> PDF erstellen</label>
+<label><input type="checkbox" id="cap-diagnostics.read" disabled> Minimalen Systemstatus lesen</label></fieldset>
+<label for="allowed-origins">Exakte Browser-Origins, eine pro Zeile; keine Wildcards</label><textarea id="allowed-origins" rows="3" disabled></textarea>
+<label><input type="checkbox" id="reenable-stopped" disabled> Wiederaufnahme nach Not-Aus ist ausschließlich über die lokale Rechteverwaltung möglich</label>
+<div class="actions"><button id="request-permission" disabled>Auswahl lokal bestätigen</button><button id="revoke-permission" class="danger" disabled>Diese Gruppe widerrufen</button></div>
+<p class="note">Ein Modellaufruf erteilt sich keine Rechte. Abbrechen, Esc oder fehlende native Bestätigung erteilen keine Freigabe. Auf Linux ist diese lokale Bestätigung noch nicht implementiert; dort wird die Anfrage verweigert.</p></section>
 <footer>Kein Administratorzugriff · Keine Zugangsdaten oder lokalen Pfade in dieser Ansicht · Fehlende Freigabe bedeutet Verweigerung</footer>
 </main>
 <script id="management-client">
@@ -28,7 +45,9 @@
   'use strict';
   const elements = id => document.getElementById(id);
   const pending = new Map();
-  const actions = new Set(['desktop_control.control_status', 'desktop_control.stop_control', 'desktop_control.open_settings']);
+  const actions = new Set(['desktop_control.control_status', 'desktop_control.stop_control', 'desktop_control.open_settings', 'desktop_control.permissions_request', 'desktop_control.permissions_revoke']);
+  const groups = { controls: ['browser.read', 'browser.interact', 'desktop.read', 'desktop.input', 'terminal.exec'], workspace: ['files.read', 'files.write', 'files.remove', 'pdf.create'], diagnostics: ['diagnostics.read'] };
+  const permissionFields = ['permission-scope', 'allowed-origins', 'reenable-stopped', 'request-permission', 'revoke-permission', ...Object.values(groups).flat().map(cap => 'cap-' + cap)];
   let nextId = 0, origin = null, ready = false, closed = false, stopping = false;
   const notify = text => { elements('notice').textContent = text; };
   const send = message => window.parent.postMessage(message, origin && origin !== 'null' ? origin : '*');
@@ -36,14 +55,14 @@
     if (closed || pending.size >= 8) return Promise.reject(Error('BRIDGE_UNAVAILABLE'));
     const id = ++nextId;
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => { pending.delete(id); reject(Error('BRIDGE_TIMEOUT')); }, 10000);
+      const timer = setTimeout(() => { pending.delete(id); reject(Error('BRIDGE_TIMEOUT')); }, params?.name === 'desktop_control.permissions_request' ? 70000 : 10000);
       pending.set(id, { resolve, reject, timer });
       send({ jsonrpc: '2.0', id, method, params });
     });
   }
-  async function tool(name) {
+  async function tool(name, args = {}) {
     if (!ready || !actions.has(name)) throw Error('ACTION_UNAVAILABLE');
-    const result = await request('tools/call', { name, arguments: {} });
+    const result = await request('tools/call', { name, arguments: args });
     if (!result || result.isError) throw Error('ACTION_DENIED');
     return result;
   }
@@ -70,7 +89,7 @@
     closed = true; ready = false;
     for (const item of pending.values()) { clearTimeout(item.timer); item.reject(Error('VIEW_CLOSED')); }
     pending.clear(); window.removeEventListener('message', receive);
-    for (const id of ['stop', 'refresh', 'local-confirmation']) elements(id).disabled = true;
+    for (const id of ['stop', 'refresh', 'local-confirmation', ...permissionFields]) elements(id).disabled = true;
   }
   function receive(event) {
     if (event.source !== window.parent || (origin !== null && event.origin !== origin)) return;
@@ -89,6 +108,36 @@
   }
   window.addEventListener('message', receive);
   elements('refresh').addEventListener('click', refresh);
+  function scopeChanged() {
+    const scope = elements('permission-scope').value;
+    for (const [group, caps] of Object.entries(groups)) for (const cap of caps) {
+      elements('cap-' + cap).disabled = !ready || group !== scope;
+      elements('cap-' + cap).checked = false;
+    }
+    elements('allowed-origins').disabled = !ready || scope !== 'controls'; elements('allowed-origins').value = '';
+    elements('reenable-stopped').disabled = true; elements('reenable-stopped').checked = false;
+  }
+  elements('permission-scope').addEventListener('change', scopeChanged);
+  elements('request-permission').addEventListener('click', async () => {
+    const scope = elements('permission-scope').value;
+    if (!ready || !Object.hasOwn(groups, scope)) return;
+    const capabilities = groups[scope].filter(cap => elements('cap-' + cap).checked);
+    if (!capabilities.length) { notify('Bitte mindestens ein Recht auswählen. Zum Entfernen Widerrufen verwenden.'); return; }
+    elements('request-permission').disabled = true;
+    try {
+      const result = await tool('desktop_control.permissions_request', { scope, capabilities,
+        allowedOrigins: scope === 'controls' ? elements('allowed-origins').value.split(/\r?\n/).map(value => value.trim()).filter(Boolean) : [],
+        reenableStopped: false });
+      await refresh(); notify(result?.structuredContent?.granted === true ? 'Auswahl wurde nach lokaler Bestätigung gespeichert – bis zum Widerruf.' : 'Keine neue Freigabe: lokale Bestätigung abgebrochen oder nicht verfügbar.');
+    } catch { notify('Freigabe nicht bestätigt. Es wird keine neue Berechtigung angenommen.'); }
+    finally { elements('request-permission').disabled = !ready || closed; }
+  });
+  elements('revoke-permission').addEventListener('click', async () => {
+    const scope = elements('permission-scope').value;
+    if (!ready || !Object.hasOwn(groups, scope)) return;
+    try { await tool('desktop_control.permissions_revoke', { scope }); await refresh(); notify('Die ausgewählte Gruppe wurde widerrufen.'); }
+    catch { notify('Widerruf nicht bestätigt. Bitte lokal stoppen und den Status prüfen.'); }
+  });
   elements('stop').addEventListener('click', stop);
   elements('local-confirmation').addEventListener('click', async () => {
     try { await tool('desktop_control.open_settings'); notify('Die lokale Bestätigung wurde geöffnet. Erst eine bewusste Auswahl dort kann Rechte erteilen.'); }
@@ -102,6 +151,8 @@
       if (!result?.hostCapabilities?.serverTools) { elements('connection').textContent = 'Nur Anzeige'; notify('Dieser Host unterstützt die lokale Werkzeugverbindung nicht. Die Freigaben bleiben unverändert.'); return; }
       ready = true; elements('connection').textContent = 'Host verbunden';
       for (const id of ['stop', 'refresh', 'local-confirmation']) elements(id).disabled = false;
+      for (const id of ['permission-scope', 'request-permission', 'revoke-permission']) elements(id).disabled = false;
+      scopeChanged();
       await refresh();
     }).catch(() => { elements('connection').textContent = 'Nicht verbunden'; notify('Die lokale Verbindung konnte nicht bestätigt werden. Keine Rechte wurden geändert.'); });
 })();

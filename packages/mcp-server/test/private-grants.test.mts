@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, rmSync, chmodSync, writeFileSync, unlinkSync, symlinkSync, readFileSync, linkSync, lstatSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmdirSync, rmSync, chmodSync, writeFileSync, unlinkSync, symlinkSync, readFileSync, linkSync, lstatSync } from 'node:fs';
 import { tmpdir, userInfo } from 'node:os';
 import path from 'node:path';
 import { createPrivateGrantTestHarness, privateAccessIsCurrent, privateAccessIntersection } from '../src/bridge/private-grants.mts';
@@ -8,6 +8,9 @@ import type { PrivateWorkspaceCapability } from '../src/bridge/private-grants.mt
 import { isAuthorized } from '../src/bridge/policy.mts';
 import { localPrincipal } from '../src/bridge/principal.mts';
 import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
+import { fileURLToPath } from 'node:url';
 
 const fixtureBase = () => process.platform === 'win32' ? userInfo().homedir : tmpdir();
 const createFixture = () => mkdtempSync(path.join(fixtureBase(), 'DesktopControl-private-test-'));
@@ -17,6 +20,126 @@ function removeFixture(directory: string): void {
   assert.match(path.basename(resolved), /^DesktopControl-private-test-[A-Za-z0-9]+$/);
   rmSync(resolved, { recursive: true, force: true });
 }
+
+test('POSIX read rejects a transaction begun after its initial barrier check', { skip: process.platform === 'win32' }, t => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    if (!localPrincipal()) return;
+    h.provisionGrant('grant');
+    const policyInode = lstatSync(path.join(directory, 'policy')).ino;
+    const original = fs.readSync;
+    let interleaved = false;
+    t.mock.method(fs, 'readSync', (...args: unknown[]) => {
+      const count = Reflect.apply(original, fs, args) as number;
+      if (!interleaved && typeof args[0] === 'number' && fs.fstatSync(args[0]).ino === policyInode) {
+        interleaved = true;
+        h.beginPermissionChange('diagnostics');
+        h.provisionGrant('grant');
+      }
+      return count;
+    });
+    syncBuiltinESMExports();
+    assert.deepEqual(h.store.getGrants(), []);
+    assert.equal(interleaved, true, 'replacement happened inside the bounded policy read');
+  } finally { t.mock.restoreAll(); syncBuiltinESMExports(); removeFixture(directory); }
+});
+
+test('native read rejects a transaction begun inside its decryption callback', { skip: process.platform !== 'win32' }, () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    if (!localPrincipal()) return;
+    h.provisionGrant('grant');
+    const binary = fileURLToPath(new URL('../../../dist/native/windows-private-policy.exe', import.meta.url));
+    const script = `$ErrorActionPreference='Stop'; $data=ConvertFrom-Json ([Console]::In.ReadToEnd()); $directory=[string]$data.directory; $assembly=[Reflection.Assembly]::LoadFile([string]$data.binary); $method=$assembly.GetType('WindowsPrivatePolicy').GetMethod('ReadUnblocked',[Reflection.BindingFlags]'NonPublic,Static'); $reader=[Func[byte[]]]{ [IO.File]::WriteAllText([IO.Path]::Combine($directory,'pending-diagnostics'),'pending'); return [Text.Encoding]::ASCII.GetBytes('synthetic-not-a-grant') }; try { $null=$method.Invoke($null,@($directory,'diagnostics',$reader)); exit 2 } catch { if($_.Exception.GetBaseException() -isnot [InvalidOperationException]) {exit 3}; [Console]::WriteLine('BLOCKED') }`;
+    const output = execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], {
+      input: JSON.stringify({ directory, binary }), encoding: 'utf8', windowsHide: true, timeout: 15000, stdio: ['pipe', 'pipe', 'pipe']
+    });
+    assert.equal(output.trim(), 'BLOCKED');
+    assert.deepEqual(h.store.getGrants(), []);
+  } finally { removeFixture(directory); }
+});
+
+test('POSIX read rejects an obsolete allow after a complete concurrent revoke', { skip: process.platform === 'win32' }, t => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    if (!localPrincipal()) return;
+    h.provisionGrant('grant');
+    const policyInode = lstatSync(path.join(directory, 'policy')).ino;
+    const original = fs.readSync;
+    let interleaved = false;
+    t.mock.method(fs, 'readSync', (...args: unknown[]) => {
+      const count = Reflect.apply(original, fs, args) as number;
+      if (!interleaved && typeof args[0] === 'number' && fs.fstatSync(args[0]).ino === policyInode) {
+        interleaved = true;
+        const transaction = h.beginPermissionChange('diagnostics');
+        h.provisionGrant('revoke');
+        h.commitPermissionChange('diagnostics', transaction);
+      }
+      return count;
+    });
+    syncBuiltinESMExports();
+    assert.deepEqual(h.store.getGrants(), []);
+    assert.equal(interleaved, true);
+  } finally { t.mock.restoreAll(); syncBuiltinESMExports(); removeFixture(directory); }
+});
+
+test('permission write-ahead markers deny fresh readers until the exact owned transaction commits', () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    if (!localPrincipal()) { assert.throws(() => h.beginPermissionChange('diagnostics')); return; }
+    h.provisionGrant('grant'); h.provisionWorkspace('grant', ['files.read']); h.provisionControl('grant', ['desktop.read']);
+    assert.throws(() => h.commitPermissionChange('workspace', undefined as unknown as string), /PRIVATE_POLICY_UNAVAILABLE/);
+    const transaction = h.beginPermissionChange('workspace'); assert.match(transaction, /^[a-f0-9]{32}$/);
+    assert.throws(() => h.beginPermissionChange('workspace'));
+    assert.equal(h.workspaceAuthority.authorize('files.read'), null);
+    assert.ok(h.store.getGrants().length); assert.ok(h.controlAuthority.authorize('desktop.read'));
+    const restarted = createPrivateGrantTestHarness(directory);
+    assert.equal(restarted.workspaceAuthority.authorize('files.read'), null);
+    const childSource = `import {createPrivateGrantTestHarness} from ${JSON.stringify(new URL('../src/bridge/private-grants.mts', import.meta.url).href)}; const h=createPrivateGrantTestHarness(process.argv[1]); console.log(JSON.stringify({denied:h.workspaceAuthority.authorize('files.read')===null}));`;
+    const childResult = execFileSync(process.execPath, ['--experimental-strip-types', '--input-type=module', '-e', childSource, directory], { encoding: 'utf8', windowsHide: true, timeout: 15000 });
+    assert.deepEqual(JSON.parse(childResult), { denied: true }, 'separate Node process must honor the disk barrier');
+    assert.throws(() => restarted.commitPermissionChange('workspace', '0'.repeat(32)));
+    assert.equal(restarted.workspaceAuthority.authorize('files.read'), null);
+    h.provisionWorkspace('grant', ['files.read', 'files.write']);
+    assert.equal(restarted.workspaceAuthority.authorize('files.write'), null, 'writes cannot bypass a pending barrier');
+    h.commitPermissionChange('workspace', transaction);
+    assert.ok(restarted.workspaceAuthority.authorize('files.write'));
+    assert.throws(() => h.commitPermissionChange('workspace', transaction), 'missing marker cannot be committed');
+    for (const scope of ['diagnostics', 'controls'] as const) {
+      const token = h.beginPermissionChange(scope), fresh = createPrivateGrantTestHarness(directory);
+      if (scope === 'diagnostics') assert.deepEqual(fresh.store.getGrants(), []);
+      else assert.equal(fresh.controlAuthority.authorize('desktop.read'), null);
+      h.commitPermissionChange(scope, token);
+    }
+  } finally { removeFixture(directory); }
+});
+
+test('malformed, directory, symlink and hardlink pending markers remain fail-closed and cannot commit', () => {
+  const directory = createFixture();
+  try {
+    const h = createPrivateGrantTestHarness(directory);
+    if (!localPrincipal()) return;
+    h.provisionGrant('grant');
+    const marker = path.join(directory, 'pending-diagnostics'), alias = path.join(directory, 'pending-alias');
+    const token = h.beginPermissionChange('diagnostics');
+    linkSync(marker, alias);
+    assert.throws(() => h.commitPermissionChange('diagnostics', token)); assert.deepEqual(h.store.getGrants(), []);
+    unlinkSync(alias); writeFileSync(marker, 'malformed');
+    assert.throws(() => h.commitPermissionChange('diagnostics', token)); assert.deepEqual(h.store.getGrants(), []);
+    unlinkSync(marker); mkdirSync(marker);
+    assert.throws(() => h.commitPermissionChange('diagnostics', token)); assert.deepEqual(h.store.getGrants(), []);
+    rmdirSync(marker); writeFileSync(alias, token, { mode: 0o600 });
+    const target = process.platform === 'win32' ? path.join(directory, 'pending-target') : alias;
+    if (process.platform === 'win32') mkdirSync(target);
+    symlinkSync(target, marker, process.platform === 'win32' ? 'junction' : 'file');
+    assert.throws(() => h.commitPermissionChange('diagnostics', token)); assert.deepEqual(h.store.getGrants(), []);
+    rmSync(marker);
+  } finally { removeFixture(directory); }
+});
 
 test('persistent v2 permissions survive fresh authorities and a distant clock, revoke freshly, and refuse unavailable native identity', t => {
   const directory = createFixture();

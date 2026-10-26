@@ -16,7 +16,7 @@ const privateState = deniedOnly ? undefined : process.argv[3];
 // This explicit contract is intentionally independent of server source parsing.
 // Additions require reviewed acceptance updates, not merely another registration.
 const privateTools = ['status', 'files_list', 'files_read', 'files_write', 'files_mkdir', 'files_remove', 'files_restore', 'pdf_create', 'terminal_run',
-  'control_status', 'open_settings', 'stop_control', 'settings_read', 'settings_update', 'management', 'browser_start', 'browser_navigate', 'browser_snapshot', 'browser_click', 'browser_fill', 'browser_key', 'browser_scroll', 'browser_screenshot', 'browser_tabs', 'browser_new_tab', 'browser_select_tab', 'browser_close_tab', 'browser_stop',
+  'control_status', 'open_settings', 'stop_control', 'settings_read', 'settings_update', 'management', 'permissions_request', 'permissions_revoke', 'browser_start', 'browser_navigate', 'browser_snapshot', 'browser_click', 'browser_fill', 'browser_key', 'browser_scroll', 'browser_screenshot', 'browser_tabs', 'browser_new_tab', 'browser_select_tab', 'browser_close_tab', 'browser_stop',
   'desktop_start', 'desktop_screenshot', 'desktop_move', 'desktop_click', 'desktop_key', 'desktop_type', 'desktop_stop'].map(name => 'desktop_control.' + name);
 if (privateState && !['active', 'denied'].includes(privateState)) throw Error('Expected private state active or denied');
 const modes = deniedOnly ? ['production-denied', 'production-restarted'] : ['production-denied', 'isolated-host-grant', 'production-restarted', ...(privateState ? ['private-profile'] : [])];

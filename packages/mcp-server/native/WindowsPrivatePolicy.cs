@@ -107,14 +107,46 @@ internal static class WindowsPrivatePolicy {
             if (stream.Read(content, 0, 7) != 7 || Encoding.ASCII.GetString(content) != "LOCK_V1") throw new InvalidOperationException();
         }
     }
+    static bool PendingExists(string directory, string scope) {
+        try { File.GetAttributes(Path.Combine(directory,"pending-"+scope)); return true; }
+        catch (FileNotFoundException) { return false; }
+        catch (DirectoryNotFoundException) { return false; }
+    }
+    static byte[] ReadUnblocked(string directory, string scope, Func<byte[]> read) {
+        byte[] plain=read();
+        if(PendingExists(directory,scope)) throw new InvalidOperationException();
+        return plain;
+    }
+    static void PermissionChange(string directory, string scope, bool begin) {
+        string marker=Path.Combine(directory,"pending-"+scope);
+        if(begin) {
+            string token=Guid.NewGuid().ToString("N"); byte[] bytes=Encoding.ASCII.GetBytes(token);
+            using(FileStream stream=new FileStream(marker,FileMode.CreateNew,FileSystemRights.Write,FileShare.None,4096,FileOptions.WriteThrough,FileAcl())) {stream.Write(bytes,0,bytes.Length);stream.Flush(true);}
+            Console.Write(token);return;
+        }
+        string expected=Input(); if(!System.Text.RegularExpressions.Regex.IsMatch(expected,"^[a-f0-9]{32}$")) throw new InvalidOperationException();
+        FileAttributes attributes=File.GetAttributes(marker);
+        if((attributes&(FileAttributes.Directory|FileAttributes.ReparsePoint))!=0) throw new InvalidOperationException();
+        CheckAcl(File.GetAccessControl(marker));
+        using(FileStream stream=new FileStream(marker,FileMode.Open,FileAccess.Read,FileShare.None)) {
+            FileInformation information; byte[] bytes=new byte[32];
+            if(!GetFileInformationByHandle(stream.SafeFileHandle.DangerousGetHandle(),out information) || information.Links!=1 || stream.Length!=32 ||
+                stream.Read(bytes,0,32)!=32 || Encoding.ASCII.GetString(bytes)!=expected) throw new InvalidOperationException();
+        }
+        File.Delete(marker);
+    }
     static int Main(string[] args) {
         try {
             if (args.Length == 1 && args[0] == "probe") { Console.WriteLine("PRIVATE_POLICY_V1"); return 0; }
             if (args.Length != 1 && args.Length != 3) throw new InvalidOperationException();
+            bool beginChange=args[0].StartsWith("begin-change-",StringComparison.Ordinal), commitChange=args[0].StartsWith("commit-change-",StringComparison.Ordinal);
+            string changeScope=(beginChange||commitChange)?args[0].Substring(beginChange?13:14):null;
+            bool change=changeScope=="diagnostics"||changeScope=="workspace"||changeScope=="controls";
+            if((beginChange||commitChange)&&!change) throw new InvalidOperationException();
             bool workspace = args[0] == "read-workspace" || args[0] == "write-workspace" || args[0] == "prepare-workspace";
             bool control = args[0] == "read-control" || args[0] == "write-control" || args[0] == "prepare-browser" || args[0] == "clear-desktop-stop" || args[0] == "clear-browser-stop" || args[0] == "stop-controls" || args[0] == "prepare-browser-runtime" || args[0] == "validate-browser-runtime";
-            bool writing = args[0] == "write" || args[0] == "write-workspace" || args[0] == "prepare-workspace" || args[0] == "write-control" || args[0] == "prepare-browser" || args[0] == "clear-desktop-stop" || args[0] == "prepare-browser-runtime";
-            if (!workspace && !control && args[0] != "read" && args[0] != "write") throw new InvalidOperationException();
+            bool writing = beginChange || args[0] == "write" || args[0] == "write-workspace" || args[0] == "prepare-workspace" || args[0] == "write-control" || args[0] == "prepare-browser" || args[0] == "clear-desktop-stop" || args[0] == "prepare-browser-runtime";
+            if (!change && !workspace && !control && args[0] != "read" && args[0] != "write") throw new InvalidOperationException();
             using (WindowsIdentity identity = WindowsIdentity.GetCurrent()) { UserSid = identity.User; }
             string profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             if (String.IsNullOrEmpty(profile)) throw new InvalidOperationException();
@@ -141,6 +173,7 @@ internal static class WindowsPrivatePolicy {
                 CheckPath(directory); Directory.SetAccessControl(directory, DirectoryAcl());
             }
             CheckPath(directory); CheckAcl(Directory.GetAccessControl(directory));
+            if(change) {PermissionChange(directory,changeScope,beginChange);return 0;}
             if (args[0] == "prepare-browser-runtime" || args[0] == "validate-browser-runtime") {
                 string runtime = Path.Combine(directory, "browser-runtime");
                 if (!Directory.Exists(runtime)) {
@@ -195,14 +228,20 @@ internal static class WindowsPrivatePolicy {
             string file = Path.Combine(directory, workspace ? "workspace-policy" : control ? "control-policy" : "policy");
             if (File.Exists(file)) { CheckPath(file); CheckAcl(File.GetAccessControl(file)); }
             if (!writing) {
+                if(PendingExists(directory,workspace?"workspace":control?"controls":"diagnostics")) throw new InvalidOperationException();
+                // Hold the non-delete-sharing handle until plaintext is emitted,
+                // so a complete revoke cannot replace this snapshot and clear its marker.
                 using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read)) {
+                  byte[] plaintext=ReadUnblocked(directory,workspace?"workspace":control?"controls":"diagnostics",()=> {
                     if (stream.Length <= 0 || stream.Length > 32768) throw new InvalidOperationException();
                     byte[] cipher = new byte[(int)stream.Length];
                     int offset = 0;
                     while (offset < cipher.Length) { int n = stream.Read(cipher, offset, cipher.Length - offset); if (n <= 0) throw new InvalidOperationException(); offset += n; }
                     byte[] plain = ProtectedData.Unprotect(cipher, entropy, DataProtectionScope.CurrentUser);
                     if (plain.Length > Limit) throw new InvalidOperationException();
-                    Console.Write(Encoding.UTF8.GetString(plain));
+                    return plain;
+                  });
+                  Console.Write(Encoding.UTF8.GetString(plaintext));
                 }
             } else {
                 byte[] cipher = ProtectedData.Protect(Encoding.UTF8.GetBytes(Input()), entropy, DataProtectionScope.CurrentUser);

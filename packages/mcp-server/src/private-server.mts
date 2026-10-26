@@ -6,6 +6,7 @@ import type { PrivateWorkspaceCapability } from './bridge/private-grants.mts';
 import { registerPrivateControls } from './private-controls.mts';
 import { registerPrivateSettings } from './private-settings.mts';
 import { registerManagementApp } from './management-app.mts';
+import { createPermissionQuarantine } from './permission-quarantine.mts';
 
 const relative = z.string().min(1).max(512);
 const sha = z.string().regex(/^[0-9a-f]{64}$/);
@@ -15,9 +16,10 @@ const written = { path: relative, bytes: z.number().int().min(0).max(1048576), s
 
 /** Private capabilities are independently host-authorized; the normal S02 factory is unchanged. */
 export function createPrivateServer() {
-  const server = createServer({ grants: createPrivateGrantStore() });
-  const workspaceAuthority = createPrivateWorkspaceAuthority();
-  const controls = createPrivateControlAuthority();
+  const quarantine = createPermissionQuarantine();
+  const server = createServer({ grants: quarantine.guardGrantStore(createPrivateGrantStore()) });
+  const workspaceAuthority = quarantine.guardAuthority('workspace', createPrivateWorkspaceAuthority());
+  const controls = quarantine.guardAuthority('controls', createPrivateControlAuthority());
   const execute = createWorkspaceExecutor(workspaceAuthority);
   const terminal = createWorkspaceExecutor({ authorize(capability) {
     const control = controls.authorize('terminal.exec');
@@ -57,7 +59,7 @@ export function createPrivateServer() {
   register('desktop_control.terminal_run', 'terminal', ['files.write'], {
     argv: z.tuple([z.enum(['node', 'npm', 'git', 'sh'])]).rest(z.string().max(32768)).refine(args => args.length <= 64)
   }, { exitCode: z.number().int(), stdout: z.string().max(65536), stderr: z.string().max(65536) }, false, terminal);
-  const stopControls = registerPrivateControls(server);
+  const stopControls = registerPrivateControls(server, { quarantine, authority: controls });
   registerPrivateSettings(server);
   registerManagementApp(server);
   const close = server.close.bind(server);

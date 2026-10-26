@@ -4,15 +4,21 @@ import type { ChildProcess } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
-import { createPrivateControlAuthority, provisionPrivateControl, provisionPrivateGrant, provisionPrivateWorkspace, stopPrivateControls, privateAccessIsCurrent } from './bridge/private-grants.mts';
+import { createPrivateControlAuthority, provisionPrivateControl, provisionPrivateGrant, provisionPrivateWorkspace, stopPrivateControls, privateAccessIsCurrent, beginPrivatePermissionChange, commitPrivatePermissionChange } from './bridge/private-grants.mts';
 import type { PrivateControlCapability } from './bridge/private-grants.mts';
 import { createControlSequencer } from './bridge/control-sequencer.mts';
+import { localPrincipal } from './bridge/principal.mts';
+import { createPermissionRequester, permissionRequestSchema } from './permission-request.mts';
+import type { PermissionProposal, PermissionRequest } from './permission-request.mts';
+import type { PrivateWorkspaceCapability } from './bridge/private-grants.mts';
+import type { PermissionQuarantine } from './permission-quarantine.mts';
+import { createJournaledPermissionRevoker } from './permission-quarantine.mts';
 
 type Args = Record<string, unknown>;
 type Controller = Record<string, (args?: Args) => Promise<unknown>>;
 interface BrowserModule { createBrowserController(options: { authorize(capability: PrivateControlCapability): Promise<unknown>; profileDirectory: string; onEmergencyStop(): Promise<void> }): Controller; }
 interface DesktopModule { createDesktopController(options: { authorize(capability: PrivateControlCapability): Promise<void>; onEmergencyStop(): Promise<void>; protectedProcessIds: number[]; requestTimeoutMs: number }): Controller; }
-interface SettingsModule { openPrivateSettings(): ChildProcess; confirmPrivateAction(action: { kind: 'desktop.input' | 'browser.interact'; summary: string; details: string }, signal?: AbortSignal): Promise<boolean>; }
+interface SettingsModule { openPrivateSettings(): ChildProcess; confirmPrivatePermissionProposal(proposal: PermissionProposal, signal: AbortSignal): Promise<boolean>; confirmPrivateAction(action: { kind: 'desktop.input' | 'browser.interact'; summary: string; details: string }, signal?: AbortSignal): Promise<boolean>; }
 const root = fileURLToPath(new URL(import.meta.url.endsWith('.mts') ? '../../../' : '../../../../', import.meta.url));
 const safeError = (code: string) => ({ isError: true as const, content: [{ type: 'text' as const, text: code }] });
 const png = z.strictObject({ mimeType: z.literal('image/png'), data: z.string().max(6 * 1024 * 1024) });
@@ -38,8 +44,10 @@ export function formatPrivateOutput(output: z.ZodType, result: unknown, image = 
 }
 
 /** Private host integration. Local consent never creates or extends a grant. */
-export function registerPrivateControls(server: McpServer): () => Promise<void> {
-  const authority = createPrivateControlAuthority();
+export function registerPrivateControls(server: McpServer, dependencies: {
+  quarantine: PermissionQuarantine; authority: ReturnType<typeof createPrivateControlAuthority>;
+}): () => Promise<void> {
+  const { quarantine, authority } = dependencies;
   const sequencer = createControlSequencer();
   let browser: Controller | undefined, desktop: Controller | undefined, settings: ChildProcess | undefined;
   let stopped = false;
@@ -55,8 +63,8 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
   async function emergencyStop() {
     // Invalidate queued work BEFORE any asynchronous browser/helper shutdown.
     sequencer.interrupt();
-    try { stopPrivateControls(); provisionPrivateControl('revoke'); }
-    catch { stopped = true; } // Unpersistable revocation blocks this entire connection.
+    try { revokePermission('controls'); }
+    catch { quarantine.quarantine('controls'); } // Every control/terminal adapter shares this latch.
     await stopAll();
   }
   const alive = (signal: AbortSignal) => { if (stopped || signal.aborted) throw Error('CANCELLED'); };
@@ -95,7 +103,7 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
     server.registerTool(name, { ...(titles[name] ? { title: titles[name] } : {}), description, inputSchema: input, outputSchema: output,
       annotations: { readOnlyHint: !confirmation && capability?.endsWith('.read') === true, destructiveHint: confirmation } }, async (args, ctx) => {
       const bound = Object.freeze({ ...args as Args });
-      const urgent = ['desktop_control.stop_control', 'desktop_control.desktop_stop', 'desktop_control.browser_stop', 'desktop_control.open_settings'].includes(name);
+      const urgent = ['desktop_control.stop_control', 'desktop_control.desktop_stop', 'desktop_control.browser_stop', 'desktop_control.open_settings', 'desktop_control.permissions_request', 'desktop_control.permissions_revoke'].includes(name);
       try { return await sequencer.run(ctx.mcpReq.signal, async signal => {
         alive(signal);
         if (capability) await authorize(capability);
@@ -119,7 +127,7 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
         return formatPrivateOutput(output, result, image);
       }, urgent);
       } catch (error) {
-        return safeError(error instanceof Error && ['CANCELLED', 'PERMISSION_DENIED', 'PLATFORM_UNAVAILABLE', 'DESKTOP_STOPPED', 'ELEVATION_REQUIRED', 'PROTECTED_WINDOW'].includes(error.message) ? error.message : 'CONTROL_UNAVAILABLE');
+        return safeError(error instanceof Error && ['CANCELLED', 'PERMISSION_DENIED', 'PERMISSION_RECOVERY_REQUIRED', 'PLATFORM_UNAVAILABLE', 'DESKTOP_STOPPED', 'ELEVATION_REQUIRED', 'PROTECTED_WINDOW'].includes(error.message) ? error.message : 'CONTROL_UNAVAILABLE');
       }
     });
   }
@@ -144,7 +152,9 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
     z.strictObject({ packageVersion: z.string().max(64), platform: z.string(), controls: z.enum(['active', 'denied', 'revoked']), diagnostics: z.enum(['active', 'denied', 'revoked']), workspace: z.enum(['active', 'denied', 'revoked']) }), null, () => {
       const manifest = JSON.parse(readFileSync(path.join(root, existsSync(path.join(root, 'plugin.json')) ? 'plugin.json' : 'plugin/plugin.json'), 'utf8')) as { version?: unknown };
       return Promise.resolve({ packageVersion: typeof manifest.version === 'string' ? manifest.version : 'unknown', platform: process.platform,
-        controls: provisionPrivateControl('status').state, diagnostics: provisionPrivateGrant('status').state, workspace: provisionPrivateWorkspace('status').state });
+        controls: quarantine.isQuarantined('controls') ? 'denied' : provisionPrivateControl('status').state,
+        diagnostics: quarantine.isQuarantined('diagnostics') ? 'denied' : provisionPrivateGrant('status').state,
+        workspace: quarantine.isQuarantined('workspace') ? 'denied' : provisionPrivateWorkspace('status').state });
     });
   register('desktop_control.open_settings', 'Open the visible local permission window. Stops automation; opening never grants access.', empty, yes('opened'), null, async () => {
     await stopAll();
@@ -156,8 +166,47 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
     return { opened: true };
   });
   register('desktop_control.stop_control', 'Stop browser/desktop automation and revoke all control grants. Always available.', empty, yes('stopped'), null, async () => {
-    await stopAll(); provisionPrivateControl('revoke'); return { stopped: true };
+    await stopAll(); revokePermission('controls'); return { stopped: true };
   });
+  function rawRevokePermission(scope: PermissionRequest['scope']) {
+    quarantine.revoke(scope, () => {
+      if (scope === 'controls') { stopPrivateControls(); provisionPrivateControl('revoke'); }
+      else if (scope === 'workspace') provisionPrivateWorkspace('revoke');
+      else provisionPrivateGrant('revoke');
+    });
+  }
+  const revokePermission = createJournaledPermissionRevoker(quarantine, {
+    begin: scope => {
+      // Another process may already own a permission transaction. Persist Esc
+      // before trying that journal, so lock contention never discards the stop.
+      if (scope === 'controls') stopPrivateControls();
+      return beginPrivatePermissionChange(scope);
+    }, revoke: rawRevokePermission, commit: commitPrivatePermissionChange
+  });
+  const requestPermission = createPermissionRequester({ principal: localPrincipal,
+    begin: beginPrivatePermissionChange, commit: commitPrivatePermissionChange,
+    confirm: async (proposal, signal) => {
+      await stopAll();
+      if (settings && settings.exitCode === null) return false;
+      const module = await load('private-settings') as SettingsModule;
+      return module.confirmPrivatePermissionProposal(proposal, signal);
+    },
+    apply: request => {
+      quarantine.assertGrantAllowed(request.scope);
+      if (request.scope === 'controls') provisionPrivateControl('grant', request.capabilities as PrivateControlCapability[], request.allowedOrigins, { reenableStopped: request.reenableStopped });
+      else if (request.scope === 'workspace') provisionPrivateWorkspace('grant', request.capabilities as PrivateWorkspaceCapability[]);
+      else provisionPrivateGrant('grant');
+    }, revoke: rawRevokePermission
+  });
+  register('desktop_control.permissions_request', 'Request replacement of one local permission group until revoked. Always requires actual human approval in the protected native dialog; a model cannot approve. Other groups remain unchanged.', permissionRequestSchema,
+    z.strictObject({ granted: z.boolean() }), null, async (args, signal) => {
+      quarantine.assertGrantAllowed((args as PermissionRequest).scope);
+      return requestPermission(args, signal);
+    });
+  register('desktop_control.permissions_revoke', 'Revoke one local permission group without granting any capability. Controls also set the durable emergency stop.',
+    z.strictObject({ scope: z.enum(['diagnostics', 'workspace', 'controls']) }), yes('revoked'), null, async args => {
+      await stopAll(); revokePermission(args.scope as PermissionRequest['scope']); return { revoked: true };
+    });
   register('desktop_control.browser_start', 'Start the separate visible private AI browser; requires local origin grant.', empty, yes('running'), 'browser.interact', callBrowser('start'));
   const tab = z.strictObject({ tabId: z.string().max(32), origin: z.string().max(4096) });
   register('desktop_control.browser_navigate', 'Navigate within an explicitly approved origin; local action confirmation required.', z.strictObject({ url: z.string().max(4096) }), tab, 'browser.interact', callBrowser('navigate'), true);
@@ -179,7 +228,7 @@ export function registerPrivateControls(server: McpServer): () => Promise<void> 
   register('desktop_control.desktop_key', 'Press a bounded Windows key after local confirmation.', z.strictObject({ key: key.exclude(['Escape', 'Space']) }), yes('pressed'), 'desktop.input', callDesktop('key'), true);
   register('desktop_control.desktop_type', 'Type bounded text after local confirmation; fresh grant checks between chunks.', z.strictObject({ text: z.string().max(8192) }), yes('typed'), 'desktop.input', callDesktop('typeText'), true);
   register('desktop_control.desktop_stop', 'Stop desktop control and revoke the control policy; no approval needed.', empty, yes('stopped'), null, async () => {
-    await stopDesktop(); provisionPrivateControl('revoke'); return { stopped: true };
+    await stopDesktop(); revokePermission('controls'); return { stopped: true };
   });
   return async () => { stopped = true; sequencer.interrupt(); await stopAll(); settings?.kill(); };
 }

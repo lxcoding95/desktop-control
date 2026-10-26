@@ -15,6 +15,7 @@ const helper = fileURLToPath(new URL('dist/native/windows-private-policy.exe', r
 // Deliberately independent of XDG/APPDATA and MCP/environment-supplied paths.
 const productionDirectory = () => path.join(userInfo().homedir, '.desktop-control-private');
 interface Storage { read(): string; write(value: string): void; }
+export type PrivatePermissionScope = 'diagnostics' | 'workspace' | 'controls';
 
 /** No sentinel deadlines: persistence is explicit at the trusted access boundary too. */
 type TimedLifetime = Extract<AccessLifetime, { kind: 'timed' }>;
@@ -58,7 +59,7 @@ function readLifetime(policy: Record<string, unknown>, baseKeys: readonly string
   return null;
 }
 
-function native(mode: 'read' | 'write' | 'read-workspace' | 'write-workspace' | 'prepare-workspace' | 'read-control' | 'write-control' | 'prepare-browser' | 'clear-desktop-stop' | 'clear-browser-stop' | 'stop-controls' | 'prepare-browser-runtime' | 'validate-browser-runtime', input?: string, testDirectory?: string): string {
+function native(mode: 'read' | 'write' | 'read-workspace' | 'write-workspace' | 'prepare-workspace' | 'read-control' | 'write-control' | 'prepare-browser' | 'clear-desktop-stop' | 'clear-browser-stop' | 'stop-controls' | 'prepare-browser-runtime' | 'validate-browser-runtime' | `begin-change-${PrivatePermissionScope}` | `commit-change-${PrivatePermissionScope}`, input?: string, testDirectory?: string): string {
   return execFileSync(helper, testDirectory ? [mode, '--test-directory', testDirectory] : [mode], {
     ...(input === undefined ? {} : { input }), encoding: 'utf8', timeout: 2_000,
     maxBuffer: 32_768, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe']
@@ -94,10 +95,15 @@ function storage(testDirectory?: string, kind: 'diagnostic' | 'workspace' | 'con
   };
   const directory = testDirectory ?? productionDirectory();
   const file = path.join(directory, kind === 'workspace' ? 'workspace-policy' : kind === 'control' ? 'control-policy' : 'policy');
+  const assertNoPending = () => {
+    try { lstatSync(path.join(directory, 'pending-' + (kind === 'diagnostic' ? 'diagnostics' : kind === 'control' ? 'controls' : 'workspace'))); throw Error('PRIVATE_POLICY_UNAVAILABLE'); }
+    catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+  };
   return {
     read() {
       assertParentTrust(directory);
       assertPosixDirectory(directory);
+      assertNoPending();
       const fd = openSync(file, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
       try {
         const stat = fstatSync(fd);
@@ -111,6 +117,14 @@ function storage(testDirectory?: string, kind: 'diagnostic' | 'workspace' | 'con
           length += count;
         }
         if (length > LIMIT) throw Error('PRIVATE_POLICY_UNAVAILABLE');
+        // A complete replacement can also remove its pending marker before
+        // this read finishes. Do not return an obsolete, formerly allowed inode.
+        const current = lstatSync(file);
+        if (current.dev !== stat.dev || current.ino !== stat.ino || current.isSymbolicLink())
+          throw Error('PRIVATE_POLICY_UNAVAILABLE');
+        // A concurrent process may have begun a replacement while this stable
+        // inode was read. Never return its snapshot without checking the barrier again.
+        assertNoPending();
         return buffer.subarray(0, length).toString('utf8');
       } finally { closeSync(fd); }
     },
@@ -127,6 +141,47 @@ function storage(testDirectory?: string, kind: 'diagnostic' | 'workspace' | 'con
       finally { try { unlinkSync(temporary); } catch { /* rename consumed it */ } }
     }
   };
+}
+
+function permissionChange(scope: PrivatePermissionScope, transaction?: string, testDirectory?: string): string {
+  if (!['diagnostics', 'workspace', 'controls'].includes(scope) || !localPrincipal() ||
+      (transaction !== undefined && !/^[a-f0-9]{32}$/.test(transaction))) throw Error('PRIVATE_POLICY_UNAVAILABLE');
+  if (process.platform === 'win32') return native(transaction === undefined ? `begin-change-${scope}` : `commit-change-${scope}`, transaction, testDirectory).trim();
+  const directory = testDirectory ?? productionDirectory();
+  assertParentTrust(directory);
+  if (transaction === undefined) {
+    try { mkdirSync(directory, { mode: 0o700 }); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
+  }
+  assertPosixDirectory(directory);
+  const marker = path.join(directory, 'pending-' + scope);
+  const syncDirectory = () => {
+    const fd = openSync(directory, constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
+    try { fsyncSync(fd); } finally { closeSync(fd); }
+  };
+  if (transaction === undefined) {
+    const token = randomUUID().replaceAll('-', '');
+    const fd = openSync(marker, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, 0o600);
+    try { writeFileSync(fd, token, 'ascii'); fsyncSync(fd); } finally { closeSync(fd); }
+    syncDirectory(); return token;
+  }
+  const fd = openSync(marker, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
+  try {
+    const stat = fstatSync(fd), bytes = Buffer.alloc(33);
+    if (!stat.isFile() || stat.nlink !== 1 || stat.uid !== process.geteuid?.() || (stat.mode & 0o077) !== 0 || stat.size !== 32 ||
+        readSync(fd, bytes, 0, 33, null) !== 32 || bytes.subarray(0, 32).toString('ascii') !== transaction) throw Error('PRIVATE_POLICY_UNAVAILABLE');
+  } finally { closeSync(fd); }
+  // Unlink is the commit point. Do not perform a fallible operation afterwards:
+  // a crash retaining the directory entry merely denies again (safe recovery).
+  unlinkSync(marker); return '';
+}
+/** Trusted write-ahead barrier: a fresh process denies this scope until its exact transaction commits.
+ * Tokens are host-private, never tool arguments. Interrupted markers are never auto-cleared;
+ * trusted local recovery must revoke/inspect stored policy before repairing a pending marker.
+ */
+export function beginPrivatePermissionChange(scope: PrivatePermissionScope): string { return permissionChange(scope); }
+export function commitPrivatePermissionChange(scope: PrivatePermissionScope, transaction: string): void {
+  if (typeof transaction !== 'string' || !/^[a-f0-9]{32}$/.test(transaction)) throw Error('PRIVATE_POLICY_UNAVAILABLE');
+  permissionChange(scope, transaction);
 }
 
 export type PrivateWorkspaceCapability = 'files.read' | 'files.write' | 'files.remove' | 'pdf.create';
@@ -448,6 +503,11 @@ export function createPrivateGrantTestHarness(directory: string) {
     writeControlPolicy: (value: unknown) => controlSource.write(JSON.stringify(value)),
     readControlPolicy: () => JSON.parse(controlSource.read()) as unknown,
     provisionControl: (action: 'grant' | 'revoke' | 'status', capabilities: readonly PrivateControlCapability[] = [], origins: readonly string[] = [], options: PrivateControlGrantOptions = {}) => provisionControl(controlSource, action, capabilities, origins, resolved, options),
-    stopControls: () => stopControls(resolved)
+    stopControls: () => stopControls(resolved),
+    beginPermissionChange: (scope: PrivatePermissionScope) => permissionChange(scope, undefined, resolved),
+    commitPermissionChange: (scope: PrivatePermissionScope, transaction: string) => {
+      if (typeof transaction !== 'string' || !/^[a-f0-9]{32}$/.test(transaction)) throw Error('PRIVATE_POLICY_UNAVAILABLE');
+      permissionChange(scope, transaction, resolved);
+    }
   };
 }

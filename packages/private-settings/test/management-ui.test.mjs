@@ -4,19 +4,19 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const html = readFileSync(new URL('../management.html', import.meta.url), 'utf8');
-test('management UI is self-contained, bounded and has no authority-bearing controls', () => {
+test('management UI is self-contained, bounded and never self-grants permissions', () => {
   assert.ok(html.length < 40_000);
   assert.match(html, /lang="de"/);
   assert.match(html, /role="status"/);
   assert.doesNotMatch(html, /<script[^>]+src=|<iframe|https?:\/\/|fetch\(|XMLHttpRequest|WebSocket|localStorage|sessionStorage|innerHTML/);
   assert.doesNotMatch(html, /control-grant|workspace-grant|expiresAt\s*=|requestState|authorization|Bearer /);
-  assert.match(html, /Noch nicht verfügbar/);
+  assert.match(html, /lokale Bestätigung/);
 });
 
 function harness() {
   const elements = new Map(), listeners = new Map(), calls = [];
   const element = id => {
-    if (!elements.has(id)) elements.set(id, { textContent: '', disabled: ['stop', 'refresh', 'local-confirmation'].includes(id), dataset: {}, addEventListener(name, fn) { this[name] = fn; }, setAttribute() {} });
+    if (!elements.has(id)) elements.set(id, { textContent: '', value: id === 'permission-scope' ? 'controls' : '', checked: false, disabled: ['stop', 'refresh', 'local-confirmation'].includes(id), dataset: {}, addEventListener(name, fn) { this[name] = fn; }, setAttribute() {} });
     return elements.get(id);
   };
   const parent = { postMessage(message) { calls.push(message); } };
@@ -81,4 +81,21 @@ test('unsupported UI protocol never enables action buttons', async () => {
   assert.equal(h.element('stop').disabled, true);
   assert.equal(h.calls.length, 1);
   h.listeners.get('message')({ source: h.parent, origin: 'https://host.test', data: { jsonrpc: '2.0', id: 83, method: 'ui/resource-teardown', params: {} } });
+});
+
+test('granular selection submits only after a button and cannot carry an approval flag', async () => {
+  const h = harness(); h.reply(h.calls[0], { protocolVersion: '2026-01-26', hostCapabilities: { serverTools: {} } }); await tick();
+  const status = { packageVersion: '0.0.1-preview.5', platform: 'win32', controls: 'denied', diagnostics: 'denied', workspace: 'denied' };
+  h.reply(h.calls[2], { structuredContent: status }); await tick();
+  assert.equal(h.calls.some(call => call.params?.name === 'desktop_control.permissions_request'), false);
+  h.element('permission-scope').value = 'workspace'; h.element('permission-scope').change();
+  h.element('cap-files.read').checked = true;
+  const clicked = h.element('request-permission').click(), proposal = h.calls.at(-1);
+  assert.equal(proposal.params.name, 'desktop_control.permissions_request');
+  assert.deepEqual(JSON.parse(JSON.stringify(proposal.params.arguments)), { scope: 'workspace', capabilities: ['files.read'], allowedOrigins: [], reenableStopped: false });
+  h.reply(proposal, { structuredContent: { granted: false } }); await tick();
+  h.reply(h.calls.at(-1), { structuredContent: status }); await clicked;
+  assert.match(h.element('notice').textContent, /Keine neue Freigabe/);
+  assert.equal(h.element('controls-state').textContent, 'Nicht freigegeben');
+  h.listeners.get('message')({ source: h.parent, origin: 'https://host.test', data: { jsonrpc: '2.0', id: 84, method: 'ui/resource-teardown', params: {} } });
 });

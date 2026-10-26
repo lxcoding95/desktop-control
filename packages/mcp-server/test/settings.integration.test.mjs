@@ -47,6 +47,14 @@ test('private host settings advertise safe actions and cannot provision grants',
       const response = await call('settings_update', args);
       assert.ok(response.error || response.result?.isError);
     }
+    for (const args of [
+      { scope: 'workspace', capabilities: ['files.read'], allowedOrigins: [], reenableStopped: false, approved: true },
+      { scope: 'workspace', capabilities: ['files.read', 'desktop.input'], allowedOrigins: [], reenableStopped: false },
+      { scope: 'controls', capabilities: ['browser.read'], allowedOrigins: ['https://example.com/'], reenableStopped: false }
+    ]) {
+      const response = await call('permissions_request', args);
+      assert.ok(response.error || response.result?.isError, 'forged proposals never reach a native prompt');
+    }
     const after = (await call('control_status', {})).result.structuredContent;
     assert.deepEqual(after, before);
     child.stdin.end();
