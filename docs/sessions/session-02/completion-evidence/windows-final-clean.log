@@ -5,7 +5,7 @@ Username: ALEXANDER-PC\aorfa
 RunAs User: ALEXANDER-PC\aorfa
 Configuration Name: 
 Machine: ALEXANDER-PC (Microsoft Windows NT 10.0.26300.0)
-Host Application: C:\Users\aorfa\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+Host Application: [LOCAL_HOME]\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
 & ./work/s02-final/final-windows.ps1
 Process ID: 10868
 PSVersion: 7.6.5
@@ -18,7 +18,7 @@ PSRemotingProtocolVersion: 2.4
 SerializationVersion: 1.1.0.1
 WSManStackVersion: 3.0
 **********************
-Transcript started, output file is C:\Users\aorfa\Documents\Codex\2026-10-22\setze-ausschlie-lich-desktop-control-session\outputs\s02-final\windows-final-clean.log
+Transcript started, output file is [LOCAL_HOME]\Documents\Codex\2026-10-22\setze-ausschlie-lich-desktop-control-session\outputs\s02-final\windows-final-clean.log
 COMMAND:git fetch origin
 START:2026-10-24T18:07:05.4846741+00:00
 
